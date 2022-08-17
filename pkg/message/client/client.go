@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 
+	constant "github.com/NpoolPlatform/account-gateway/pkg/message/const"
+	msg "github.com/NpoolPlatform/account-gateway/pkg/message/message"
 	msgcli "github.com/NpoolPlatform/go-service-framework/pkg/rabbitmq/client"
-	constant "github.com/NpoolPlatform/service-template/pkg/message/const"
-	msg "github.com/NpoolPlatform/service-template/pkg/message/message"
 
 	"github.com/streadway/amqp"
 )
