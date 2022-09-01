@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/NpoolPlatform/account-gateway/api"
+	"github.com/NpoolPlatform/account-manager/pkg/db"
 
 	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
@@ -27,6 +28,10 @@ var runCmd = &cli.Command{
 				logger.Sugar().Errorf("fail to run grpc server: %v", err)
 			}
 		}()
+
+		if err := db.Init(); err != nil {
+			return err
+		}
 
 		return grpc2.RunGRPCGateWay(rpcGatewayRegister)
 	},

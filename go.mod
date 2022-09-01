@@ -3,14 +3,17 @@ module github.com/NpoolPlatform/account-gateway
 go 1.17
 
 require (
+	github.com/NpoolPlatform/account-manager v0.0.0-20220901093224-af15c33ff8cb
 	github.com/NpoolPlatform/account-middleware v0.0.0-20220817115633-86d21f520890
 	github.com/NpoolPlatform/api-manager v0.0.0-20220826022307-d72866fe3ec0
+	github.com/NpoolPlatform/appuser-manager v0.0.0-20220814171621-90105949caf3
 	github.com/NpoolPlatform/appuser-middleware v0.0.0-20220817094940-639894643317
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20220818105452-9457611ae070
-	github.com/NpoolPlatform/libent-cruder v0.0.0-20220801075201-cab5db8b6290
-	github.com/NpoolPlatform/message v0.0.0-20220819134247-1dc75c85fe43
+	github.com/NpoolPlatform/libent-cruder v0.0.0-20220821121920-9559f5776d15
+	github.com/NpoolPlatform/message v0.0.0-20220901123549-a40e1d4294e9
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20220731103603-21004f4341dc
 	github.com/NpoolPlatform/sphinx-proxy v0.0.0-20220803040820-2b7bd4158e8b
+	github.com/NpoolPlatform/third-gateway v0.0.0-20220828062552-d83e418cc011
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.10.0
@@ -76,7 +79,6 @@ require (
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.33.0 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
-	github.com/rogpeppe/go-internal v1.8.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/spf13/afero v1.8.2 // indirect
 	github.com/spf13/cast v1.4.1 // indirect
