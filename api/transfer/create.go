@@ -42,14 +42,13 @@ func (s *Server) CreateTransfer(
 		logger.Sugar().Errorw("CreateTransfer", "UserID", in.GetUserID(), "error", err)
 		return &transfer.CreateTransferResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
-	if in.GetAccount() == "" {
-		logger.Sugar().Errorw("CreateTransfer", "Account empty", "Account", in.GetAccount())
-		return &transfer.CreateTransferResponse{}, status.Error(codes.InvalidArgument, "Account id empty")
-	}
 
 	switch in.GetAccountType() {
-	case signmethodpb.SignMethodType_Email:
-	case signmethodpb.SignMethodType_Mobile:
+	case signmethodpb.SignMethodType_Email, signmethodpb.SignMethodType_Mobile:
+		if in.GetAccount() == "" {
+			logger.Sugar().Errorw("CreateTransfer", "Account empty", "Account", in.GetAccount())
+			return &transfer.CreateTransferResponse{}, status.Error(codes.InvalidArgument, "Account id empty")
+		}
 	case signmethodpb.SignMethodType_Google:
 	default:
 		logger.Sugar().Errorw("CreateTransfer", "AccountType empty", "AccountType", in.GetAccountType())
