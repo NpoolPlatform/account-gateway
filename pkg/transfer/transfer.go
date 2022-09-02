@@ -58,7 +58,7 @@ func CreateTransfer(ctx context.Context,
 			ctx,
 			appID, userID,
 			accountType, account, verificationCode,
-			thirdgwconst.UsedForWithdraw,
+			thirdgwconst.UsedForSetTransferTargetUser,
 		); err != nil {
 			return nil, err
 		}
