@@ -3,6 +3,8 @@ package transfer
 import (
 	"context"
 	"fmt"
+	thirdgwcli "github.com/NpoolPlatform/third-gateway/pkg/client"
+	thirdgwconst "github.com/NpoolPlatform/third-gateway/pkg/const"
 
 	constant "github.com/NpoolPlatform/account-gateway/pkg/message/const"
 	commontracer "github.com/NpoolPlatform/account-gateway/pkg/tracer"
@@ -43,14 +45,14 @@ func CreateTransfer(ctx context.Context,
 
 	span = commontracer.TraceInvoker(span, "transfer", "third-gateway", "VerifyCode")
 
-	//if err := thirdgwcli.VerifyCode(
-	//	ctx,
-	//	appID, userID,
-	//	accountType, account, verificationCode,
-	//	thirdgwconst.UsedForWithdraw,
-	//); err != nil {
-	//	return nil, err
-	//}
+	if err := thirdgwcli.VerifyCode(
+		ctx,
+		appID, userID,
+		accountType, account, verificationCode,
+		thirdgwconst.UsedForWithdraw,
+	); err != nil {
+		return nil, err
+	}
 
 	conds := &appusermgpb.Conds{
 		PhoneNO:      nil,
