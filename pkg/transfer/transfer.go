@@ -127,15 +127,16 @@ func CreateTransfer(ctx context.Context,
 	}
 
 	return &transfer.Transfer{
-		ID:              info.ID,
-		AppID:           info.AppID,
-		UserID:          info.UserID,
-		TargetUserID:    info.TargetUserID,
-		TargetAccount:   targetAccount,
-		CreatedAt:       info.CreatedAt,
-		TargetUsername:  targetUserInfo.Username,
-		TargetFirstName: targetUserInfo.FirstName,
-		TargetLastName:  targetUserInfo.LastName,
+		ID:                 info.ID,
+		AppID:              info.AppID,
+		UserID:             info.UserID,
+		TargetUserID:       info.TargetUserID,
+		TargetEmailAddress: targetUserInfo.EmailAddress,
+		TargetPhoneNO:      targetUserInfo.PhoneNO,
+		CreatedAt:          info.CreatedAt,
+		TargetUsername:     targetUserInfo.Username,
+		TargetFirstName:    targetUserInfo.FirstName,
+		TargetLastName:     targetUserInfo.LastName,
 	}, nil
 }
 
@@ -166,21 +167,17 @@ func DeleteTransfer(ctx context.Context, id string) (*transfer.Transfer, error) 
 		return nil, err
 	}
 
-	targetAccount := targetUser.EmailAddress
-	if targetAccount == "" {
-		targetAccount = targetUser.PhoneNO
-	}
-
 	return &transfer.Transfer{
-		ID:              info.ID,
-		AppID:           info.AppID,
-		UserID:          info.UserID,
-		TargetUserID:    info.TargetUserID,
-		TargetAccount:   targetAccount,
-		CreatedAt:       info.CreatedAt,
-		TargetUsername:  targetUser.Username,
-		TargetFirstName: targetUser.FirstName,
-		TargetLastName:  targetUser.LastName,
+		ID:                 info.ID,
+		AppID:              info.AppID,
+		UserID:             info.UserID,
+		TargetUserID:       info.TargetUserID,
+		TargetEmailAddress: targetUser.EmailAddress,
+		TargetPhoneNO:      targetUser.PhoneNO,
+		CreatedAt:          info.CreatedAt,
+		TargetUsername:     targetUser.Username,
+		TargetFirstName:    targetUser.FirstName,
+		TargetLastName:     targetUser.LastName,
 	}, nil
 }
 
@@ -284,20 +281,17 @@ func ScanTargetAccount(ctx context.Context, infos []*mgrpb.Transfer) ([]*transfe
 	transferInfos := []*transfer.Transfer{}
 
 	for _, val := range infos {
-		targetAccount := targetUser[val.TargetUserID].EmailAddress
-		if targetAccount == "" {
-			targetAccount = targetUser[val.TargetUserID].PhoneNO
-		}
 		transferInfos = append(transferInfos, &transfer.Transfer{
-			ID:              val.ID,
-			AppID:           val.AppID,
-			UserID:          val.UserID,
-			TargetUserID:    val.TargetUserID,
-			TargetAccount:   targetAccount,
-			CreatedAt:       val.CreatedAt,
-			TargetUsername:  targetUser[val.TargetUserID].Username,
-			TargetFirstName: targetUser[val.TargetUserID].FirstName,
-			TargetLastName:  targetUser[val.TargetUserID].LastName,
+			ID:                 val.ID,
+			AppID:              val.AppID,
+			UserID:             val.UserID,
+			TargetUserID:       val.TargetUserID,
+			TargetEmailAddress: targetUser[val.TargetUserID].EmailAddress,
+			TargetPhoneNO:      targetUser[val.TargetUserID].PhoneNO,
+			CreatedAt:          val.CreatedAt,
+			TargetUsername:     targetUser[val.TargetUserID].Username,
+			TargetFirstName:    targetUser[val.TargetUserID].FirstName,
+			TargetLastName:     targetUser[val.TargetUserID].LastName,
 		})
 	}
 	return transferInfos, nil
