@@ -65,6 +65,26 @@ spec:
             backend:
               serviceName: account-gateway
               servicePort: 50480
+          - path: /api/account/v1/create/transfer
+            backend:
+              serviceName: account-gateway
+              servicePort: 50480
+          - path: /api/account/v1/delete/transfer
+            backend:
+              serviceName: account-gateway
+              servicePort: 50480
+          - path: /api/account/v1/get/transfers
+            backend:
+              serviceName: account-gateway
+              servicePort: 50480
+          - path: /api/account/v1/get/app/transfers
+            backend:
+              serviceName: account-gateway
+              servicePort: 50480
+          - path: /api/account/v1/get/napp/transfers
+            backend:
+              serviceName: account-gateway
+              servicePort: 50480
     - host: api.procyon.vip
       http: *http_rules
     - host: api.xpool.top
