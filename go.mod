@@ -10,7 +10,7 @@ require (
 	github.com/NpoolPlatform/appuser-middleware v0.0.0-20220817094940-639894643317
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20220818105452-9457611ae070
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20220821121920-9559f5776d15
-	github.com/NpoolPlatform/message v0.0.0-20220901123549-a40e1d4294e9
+	github.com/NpoolPlatform/message v0.0.0-20220902033920-774c9c1d7666
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20220731103603-21004f4341dc
 	github.com/NpoolPlatform/sphinx-proxy v0.0.0-20220803040820-2b7bd4158e8b
 	github.com/NpoolPlatform/third-gateway v0.0.0-20220828062552-d83e418cc011
@@ -80,6 +80,7 @@ require (
 	github.com/prometheus/common v0.33.0 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
+	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/spf13/afero v1.8.2 // indirect
 	github.com/spf13/cast v1.4.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect

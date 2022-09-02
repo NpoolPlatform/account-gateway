@@ -3,6 +3,7 @@ package transfer
 import (
 	"context"
 	"fmt"
+
 	thirdgwcli "github.com/NpoolPlatform/third-gateway/pkg/client"
 	thirdgwconst "github.com/NpoolPlatform/third-gateway/pkg/const"
 
@@ -19,10 +20,14 @@ import (
 	appusermgrcli "github.com/NpoolPlatform/appuser-manager/pkg/client/appuser"
 	appusermgpb "github.com/NpoolPlatform/message/npool/appuser/mgr/v2/appuser"
 
+	appusermwcli "github.com/NpoolPlatform/appuser-middleware/pkg/client/user"
+	appusermwpb "github.com/NpoolPlatform/message/npool/appuser/mw/v1/user"
+
 	mgrcli "github.com/NpoolPlatform/account-manager/pkg/client/transfer"
 	mgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/transfer"
 )
 
+// nolint:funlen
 func CreateTransfer(ctx context.Context,
 	appID,
 	userID,
@@ -116,13 +121,22 @@ func CreateTransfer(ctx context.Context,
 		return nil, err
 	}
 
+	targetUserInfo, err := appusermwcli.GetUser(ctx, appID, targetUser.ID)
+	if err != nil {
+		return nil, err
+	}
+
 	return &transfer.Transfer{
-		ID:            info.ID,
-		AppID:         info.AppID,
-		UserID:        info.UserID,
-		TargetUserID:  info.TargetUserID,
-		TargetAccount: targetAccount,
-		CreatedAt:     info.CreatedAt,
+		ID:              info.ID,
+		AppID:           info.AppID,
+		UserID:          info.UserID,
+		TargetUserID:    info.TargetUserID,
+		TargetAccount:   targetAccount,
+		CreatedAt:       info.CreatedAt,
+		TargetUsername:  targetUserInfo.Username,
+		TargetFirstName: targetUserInfo.FirstName,
+		TargetLastName:  targetUserInfo.LastName,
+		TargetIDNumber:  targetUserInfo.IDNumber,
 	}, nil
 }
 
@@ -148,7 +162,7 @@ func DeleteTransfer(ctx context.Context, id string) (*transfer.Transfer, error) 
 
 	span = commontracer.TraceInvoker(span, "transfer", "appuser-manager", "GetAppUser")
 
-	targetUser, err := appusermgrcli.GetAppUser(ctx, info.TargetUserID)
+	targetUser, err := appusermwcli.GetUser(ctx, info.AppID, info.TargetUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -159,12 +173,16 @@ func DeleteTransfer(ctx context.Context, id string) (*transfer.Transfer, error) 
 	}
 
 	return &transfer.Transfer{
-		ID:            info.ID,
-		AppID:         info.AppID,
-		UserID:        info.UserID,
-		TargetUserID:  info.TargetUserID,
-		TargetAccount: targetAccount,
-		CreatedAt:     info.CreatedAt,
+		ID:              info.ID,
+		AppID:           info.AppID,
+		UserID:          info.UserID,
+		TargetUserID:    info.TargetUserID,
+		TargetAccount:   targetAccount,
+		CreatedAt:       info.CreatedAt,
+		TargetUsername:  targetUser.Username,
+		TargetFirstName: targetUser.FirstName,
+		TargetLastName:  targetUser.LastName,
+		TargetIDNumber:  targetUser.IDNumber,
 	}, nil
 }
 
@@ -255,16 +273,11 @@ func ScanTargetAccount(ctx context.Context, infos []*mgrpb.Transfer) ([]*transfe
 	}
 	span = commontracer.TraceInvoker(span, "transfer", "appuser-manager", "GetAppUsers")
 
-	users, _, err := appusermgrcli.GetAppUsers(ctx, &appusermgpb.Conds{
-		IDs: &npool.StringSliceVal{
-			Op:    cruder.IN,
-			Value: targetUserIDs,
-		},
-	}, 0, int32(len(targetUserIDs)))
+	users, _, err := appusermwcli.GetManyUsers(ctx, targetUserIDs)
 	if err != nil {
 		return nil, err
 	}
-	targetUser := map[string]*appusermgpb.AppUser{}
+	targetUser := map[string]*appusermwpb.User{}
 
 	for _, val := range users {
 		targetUser[val.ID] = val
@@ -278,12 +291,16 @@ func ScanTargetAccount(ctx context.Context, infos []*mgrpb.Transfer) ([]*transfe
 			targetAccount = targetUser[val.TargetUserID].PhoneNO
 		}
 		transferInfos = append(transferInfos, &transfer.Transfer{
-			ID:            val.ID,
-			AppID:         val.AppID,
-			UserID:        val.UserID,
-			TargetUserID:  val.TargetUserID,
-			TargetAccount: targetAccount,
-			CreatedAt:     val.CreatedAt,
+			ID:              val.ID,
+			AppID:           val.AppID,
+			UserID:          val.UserID,
+			TargetUserID:    val.TargetUserID,
+			TargetAccount:   targetAccount,
+			CreatedAt:       val.CreatedAt,
+			TargetUsername:  targetUser[val.TargetUserID].Username,
+			TargetFirstName: targetUser[val.TargetUserID].FirstName,
+			TargetLastName:  targetUser[val.TargetUserID].LastName,
+			TargetIDNumber:  targetUser[val.TargetUserID].IDNumber,
 		})
 	}
 	return transferInfos, nil
