@@ -136,7 +136,6 @@ func CreateTransfer(ctx context.Context,
 		TargetUsername:  targetUserInfo.Username,
 		TargetFirstName: targetUserInfo.FirstName,
 		TargetLastName:  targetUserInfo.LastName,
-		TargetIDNumber:  targetUserInfo.IDNumber,
 	}, nil
 }
 
@@ -182,7 +181,6 @@ func DeleteTransfer(ctx context.Context, id string) (*transfer.Transfer, error) 
 		TargetUsername:  targetUser.Username,
 		TargetFirstName: targetUser.FirstName,
 		TargetLastName:  targetUser.LastName,
-		TargetIDNumber:  targetUser.IDNumber,
 	}, nil
 }
 
@@ -300,7 +298,6 @@ func ScanTargetAccount(ctx context.Context, infos []*mgrpb.Transfer) ([]*transfe
 			TargetUsername:  targetUser[val.TargetUserID].Username,
 			TargetFirstName: targetUser[val.TargetUserID].FirstName,
 			TargetLastName:  targetUser[val.TargetUserID].LastName,
-			TargetIDNumber:  targetUser[val.TargetUserID].IDNumber,
 		})
 	}
 	return transferInfos, nil
