@@ -37,7 +37,10 @@ func CreateTransfer(ctx context.Context,
 	accountType signmethodpb.SignMethodType,
 	verificationCode,
 	targetAccount string,
-	targetAccountType signmethodpb.SignMethodType) (*transfer.Transfer, error) {
+	targetAccountType signmethodpb.SignMethodType,
+) (
+	*transfer.Transfer, error,
+) {
 	var err error
 
 	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetTransfers")
