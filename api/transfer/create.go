@@ -3,6 +3,9 @@ package transfer
 import (
 	"context"
 
+	signmethodpb "github.com/NpoolPlatform/message/npool/appuser/mgr/v2/signmethod"
+	"github.com/google/uuid"
+
 	constant "github.com/NpoolPlatform/account-gateway/pkg/message/const"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	"github.com/NpoolPlatform/message/npool/account/gw/v1/transfer"
@@ -31,9 +34,43 @@ func (s *Server) CreateTransfer(
 		}
 	}()
 
-	err = validate(in)
-	if err != nil {
-		return nil, err
+	if _, err := uuid.Parse(in.GetAppID()); err != nil {
+		logger.Sugar().Errorw("CreateTransfer", "AppID", in.GetAppID(), "error", err)
+		return &transfer.CreateTransferResponse{}, status.Error(codes.InvalidArgument, err.Error())
+	}
+	if _, err := uuid.Parse(in.GetUserID()); err != nil {
+		logger.Sugar().Errorw("CreateTransfer", "UserID", in.GetUserID(), "error", err)
+		return &transfer.CreateTransferResponse{}, status.Error(codes.InvalidArgument, err.Error())
+	}
+	if in.GetAccount() == "" {
+		logger.Sugar().Errorw("CreateTransfer", "Account empty", "Account", in.GetAccount())
+		return &transfer.CreateTransferResponse{}, status.Error(codes.InvalidArgument, "Account id empty")
+	}
+
+	switch in.GetAccountType() {
+	case signmethodpb.SignMethodType_Email:
+	case signmethodpb.SignMethodType_Mobile:
+	case signmethodpb.SignMethodType_Google:
+	default:
+		logger.Sugar().Errorw("CreateTransfer", "AccountType empty", "AccountType", in.GetAccountType())
+		return &transfer.CreateTransferResponse{}, status.Error(codes.InvalidArgument, "AccountType id invalid")
+	}
+
+	if in.GetVerificationCode() == "" {
+		logger.Sugar().Errorw("CreateTransfer", "VerificationCode empty", "VerificationCode", in.GetVerificationCode())
+		return &transfer.CreateTransferResponse{}, status.Error(codes.InvalidArgument, "VerificationCode id empty")
+	}
+	if in.GetTargetAccount() == "" {
+		logger.Sugar().Errorw("CreateTransfer", "TargetAccount empty", "TargetAccount", in.GetTargetAccount())
+		return &transfer.CreateTransferResponse{}, status.Error(codes.InvalidArgument, "TargetAccount id empty")
+	}
+
+	switch in.GetTargetAccountType() {
+	case signmethodpb.SignMethodType_Email:
+	case signmethodpb.SignMethodType_Mobile:
+	default:
+		logger.Sugar().Errorw("CreateTransfer", "TargetAccountType empty", "TargetAccountType", in.GetTargetAccountType())
+		return &transfer.CreateTransferResponse{}, status.Error(codes.InvalidArgument, "TargetAccountType id invalid")
 	}
 
 	info, err := mtransfer.CreateTransfer(

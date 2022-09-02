@@ -25,6 +25,8 @@ import (
 
 	mgrcli "github.com/NpoolPlatform/account-manager/pkg/client/transfer"
 	mgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/transfer"
+
+	appusergw "github.com/NpoolPlatform/appuser-gateway/pkg/ga"
 )
 
 // nolint:funlen
@@ -50,13 +52,21 @@ func CreateTransfer(ctx context.Context,
 
 	span = commontracer.TraceInvoker(span, "transfer", "third-gateway", "VerifyCode")
 
-	if err := thirdgwcli.VerifyCode(
-		ctx,
-		appID, userID,
-		accountType, account, verificationCode,
-		thirdgwconst.UsedForWithdraw,
-	); err != nil {
-		return nil, err
+	switch accountType {
+	case signmethodpb.SignMethodType_Mobile, signmethodpb.SignMethodType_Email:
+		if err := thirdgwcli.VerifyCode(
+			ctx,
+			appID, userID,
+			accountType, account, verificationCode,
+			thirdgwconst.UsedForWithdraw,
+		); err != nil {
+			return nil, err
+		}
+	case signmethodpb.SignMethodType_Google:
+		_, err = appusergw.VerifyGoogleAuth(ctx, appID, userID, verificationCode)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	conds := &appusermgpb.Conds{
@@ -140,7 +150,7 @@ func CreateTransfer(ctx context.Context,
 	}, nil
 }
 
-func DeleteTransfer(ctx context.Context, id string) (*transfer.Transfer, error) {
+func DeleteTransfer(ctx context.Context, id, appID, userID string) (*transfer.Transfer, error) {
 	var err error
 
 	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetTransfers")
@@ -155,6 +165,27 @@ func DeleteTransfer(ctx context.Context, id string) (*transfer.Transfer, error) 
 
 	span = commontracer.TraceInvoker(span, "transfer", "manager", "DeleteTransfer")
 
+	exist, err := mgrcli.ExistTransferConds(ctx, &mgrpb.Conds{
+		ID: &npool.StringVal{
+			Op:    cruder.EQ,
+			Value: id,
+		},
+		AppID: &npool.StringVal{
+			Op:    cruder.EQ,
+			Value: appID,
+		},
+		UserID: &npool.StringVal{
+			Op:    cruder.EQ,
+			Value: userID,
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+	if !exist {
+		return nil, fmt.Errorf("transfer not exist")
+	}
+
 	info, err := mgrcli.DeleteTransfer(ctx, id)
 	if err != nil {
 		return nil, err
@@ -167,6 +198,9 @@ func DeleteTransfer(ctx context.Context, id string) (*transfer.Transfer, error) 
 		return nil, err
 	}
 
+	if targetUser == nil {
+		targetUser = &appusermwpb.User{}
+	}
 	return &transfer.Transfer{
 		ID:                 info.ID,
 		AppID:              info.AppID,
@@ -281,17 +315,23 @@ func ScanTargetAccount(ctx context.Context, infos []*mgrpb.Transfer) ([]*transfe
 	transferInfos := []*transfer.Transfer{}
 
 	for _, val := range infos {
+		userInfo := &appusermwpb.User{}
+
+		if _, ok := targetUser[val.TargetUserID]; ok {
+			userInfo = targetUser[val.TargetUserID]
+		}
+
 		transferInfos = append(transferInfos, &transfer.Transfer{
 			ID:                 val.ID,
 			AppID:              val.AppID,
 			UserID:             val.UserID,
 			TargetUserID:       val.TargetUserID,
-			TargetEmailAddress: targetUser[val.TargetUserID].EmailAddress,
-			TargetPhoneNO:      targetUser[val.TargetUserID].PhoneNO,
+			TargetEmailAddress: userInfo.EmailAddress,
+			TargetPhoneNO:      userInfo.PhoneNO,
 			CreatedAt:          val.CreatedAt,
-			TargetUsername:     targetUser[val.TargetUserID].Username,
-			TargetFirstName:    targetUser[val.TargetUserID].FirstName,
-			TargetLastName:     targetUser[val.TargetUserID].LastName,
+			TargetUsername:     userInfo.Username,
+			TargetFirstName:    userInfo.FirstName,
+			TargetLastName:     userInfo.LastName,
 		})
 	}
 	return transferInfos, nil
