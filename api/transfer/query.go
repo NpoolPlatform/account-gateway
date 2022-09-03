@@ -32,6 +32,10 @@ func (s *Server) GetTransfers(ctx context.Context, in *transfer.GetTransfersRequ
 		logger.Sugar().Errorw("GetTransfers", "AppID", in.GetAppID(), "error", err)
 		return &transfer.GetTransfersResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
+	if _, err := uuid.Parse(in.GetUserID()); err != nil {
+		logger.Sugar().Errorw("GetTransfers", "UserID", in.GetUserID(), "error", err)
+		return &transfer.GetTransfersResponse{}, status.Error(codes.InvalidArgument, err.Error())
+	}
 
 	span = commontracer.TraceInvoker(span, "transfer", "transfer", "GetTransfers")
 
