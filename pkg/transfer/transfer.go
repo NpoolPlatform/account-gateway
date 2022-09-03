@@ -40,7 +40,7 @@ func CreateTransfer(ctx context.Context,
 	targetAccountType signmethodpb.SignMethodType) (*transfer.Transfer, error) {
 	var err error
 
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetTransfers")
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "CreateTransfer")
 	defer span.End()
 
 	defer func() {
@@ -94,6 +94,10 @@ func CreateTransfer(ctx context.Context,
 	}
 	if targetUser == nil {
 		return nil, fmt.Errorf("target user not found")
+	}
+
+	if userID == targetUser.ID {
+		return nil, fmt.Errorf("cannot set yourself as the payee")
 	}
 
 	span = commontracer.TraceInvoker(span, "transfer", "manager", "ExistTransferConds")
