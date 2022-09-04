@@ -73,8 +73,10 @@ func CreateTransfer(ctx context.Context,
 	}
 
 	conds := &appusermgpb.Conds{
-		PhoneNO:      nil,
-		EmailAddress: nil,
+		AppID: &npool.StringVal{
+			Op:    cruder.EQ,
+			Value: appID,
+		},
 	}
 	switch targetAccountType {
 	case signmethodpb.SignMethodType_Email:
