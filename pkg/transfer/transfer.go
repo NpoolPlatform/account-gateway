@@ -252,8 +252,11 @@ func GetTransfers(ctx context.Context, appID, userID string, offset, limit int32
 	if err != nil {
 		return nil, 0, err
 	}
+	if len(infos) == 0 {
+		return []*transfer.Transfer{}, 0, nil
+	}
 
-	transferInfos, err := ScanTargetAccount(ctx, infos)
+	transferInfos, err := expand(ctx, infos)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -284,15 +287,18 @@ func GetAppTransfers(ctx context.Context, appID string, offset, limit int32) ([]
 	if err != nil {
 		return nil, 0, err
 	}
+	if len(infos) == 0 {
+		return []*transfer.Transfer{}, 0, nil
+	}
 
-	transferInfos, err := ScanTargetAccount(ctx, infos)
+	transferInfos, err := expand(ctx, infos)
 	if err != nil {
 		return nil, 0, err
 	}
 	return transferInfos, total, nil
 }
 
-func ScanTargetAccount(ctx context.Context, infos []*mgrpb.Transfer) ([]*transfer.Transfer, error) {
+func expand(ctx context.Context, infos []*mgrpb.Transfer) ([]*transfer.Transfer, error) {
 	var err error
 	targetUserIDs := []string{}
 
