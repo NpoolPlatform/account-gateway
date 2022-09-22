@@ -13,7 +13,7 @@ require (
 	github.com/NpoolPlatform/message v0.0.0-20220928085422-7409d1e2c015
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20220731103603-21004f4341dc
 	github.com/NpoolPlatform/sphinx-proxy v0.0.0-20220803040820-2b7bd4158e8b
-	github.com/NpoolPlatform/third-middleware v0.0.0-20220921072301-c568c2a1eef2
+	github.com/NpoolPlatform/third-middleware v0.0.0-20220922074105-2b375882f476
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.11.3

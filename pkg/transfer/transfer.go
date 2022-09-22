@@ -53,16 +53,19 @@ func CreateTransfer(ctx context.Context,
 
 	span = commontracer.TraceInvoker(span, "transfer", "third-gateway", "VerifyCode")
 
-	var accountN *string
+	userInfo, err := appusermwcli.GetUser(ctx, appID, userID)
+	if err != nil {
+		return nil, err
+	}
 
-	if accountType != signmethodpb.SignMethodType_Google {
-		accountN = &account
+	if accountType == signmethodpb.SignMethodType_Google {
+		account = userInfo.GoogleSecret
 	}
 
 	if err := thirdmwcli.VerifyCode(
 		ctx,
 		appID,
-		accountN,
+		account,
 		verificationCode,
 		accountType,
 		usedfor.UsedFor_SetTransferTargetUser,
