@@ -10,10 +10,10 @@ require (
 	github.com/NpoolPlatform/appuser-middleware v0.0.0-20220829153642-da84c07abb79
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20220908115503-7dd1d00f71fa
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20220821121920-9559f5776d15
-	github.com/NpoolPlatform/message v0.0.0-20220920014540-86e6c9a93cb3
+	github.com/NpoolPlatform/message v0.0.0-20220922072549-e30711ea955c
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20220731103603-21004f4341dc
 	github.com/NpoolPlatform/sphinx-proxy v0.0.0-20220803040820-2b7bd4158e8b
-	github.com/NpoolPlatform/third-middleware v0.0.0-20220921072301-c568c2a1eef2
+	github.com/NpoolPlatform/third-middleware v0.0.0-20220922074105-2b375882f476
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.11.3
