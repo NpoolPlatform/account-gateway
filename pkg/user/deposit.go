@@ -13,6 +13,8 @@ import (
 	coininfocli "github.com/NpoolPlatform/sphinx-coininfo/pkg/client"
 	sphinxproxycli "github.com/NpoolPlatform/sphinx-proxy/pkg/client"
 
+	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
+
 	sphinxproxypb "github.com/NpoolPlatform/message/npool/sphinxproxy"
 
 	commonpb "github.com/NpoolPlatform/message/npool"
@@ -143,4 +145,51 @@ func GetDepositAccount(ctx context.Context, appID, userID, coinTypeID string) (*
 		UsedFor:    acc.UsedFor,
 		CreatedAt:  acc.CreatedAt,
 	}, nil
+}
+
+func GetAppDepositAccounts(ctx context.Context, appID string, offset, limit int32) ([]*npool.Account, uint32, error) {
+	accs, err := depositcli.GetAccounts(ctx, &depositpb.Conds{
+		AppID: &commonpb.StringVal{
+			Op:    cruder.EQ,
+			Value: appID,
+		},
+	}, offset, limit)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	total := uint32(len(accs))
+
+	coins, err := coininfocli.GetCoinInfos(ctx, cruder.NewFilterConds())
+	if err != nil {
+		return nil, 0, err
+	}
+
+	coinMap := map[string]*coininfopb.CoinInfo{}
+	for _, coin := range coins {
+		coinMap[coin.ID] = coin
+	}
+
+	infos := []*npool.Account{}
+	for _, acc := range accs {
+		coin, ok := coinMap[acc.CoinTypeID]
+		if !ok {
+			return nil, 0, fmt.Errorf("invalid coin")
+		}
+		infos = append(infos, &npool.Account{
+			ID:         acc.ID,
+			AppID:      acc.AppID,
+			UserID:     acc.UserID,
+			CoinTypeID: acc.CoinTypeID,
+			CoinName:   coin.Name,
+			CoinUnit:   coin.Unit,
+			CoinEnv:    coin.ENV,
+			CoinLogo:   coin.Logo,
+			AccountID:  acc.AccountID,
+			Address:    acc.Address,
+			UsedFor:    acc.UsedFor,
+			CreatedAt:  acc.CreatedAt,
+		})
+	}
+	return infos, total, nil
 }
