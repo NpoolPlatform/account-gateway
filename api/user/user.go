@@ -59,3 +59,35 @@ func (s *Server) GetDepositAccount(ctx context.Context, in *npool.GetDepositAcco
 		Info: info,
 	}, nil
 }
+
+func (s *Server) GetAppDepositAccounts(ctx context.Context, in *npool.GetAppDepositAccountsRequest) (*npool.GetAppDepositAccountsResponse, error) {
+	var err error
+
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetAppDepositAccounts")
+	defer span.End()
+
+	defer func() {
+		if err != nil {
+			span.SetStatus(scodes.Error, err.Error())
+			span.RecordError(err)
+		}
+	}()
+
+	if _, err := uuid.Parse(in.GetTargetAppID()); err != nil {
+		logger.Sugar().Errorw("GetAppDepositAccounts", "TargetAppID", in.GetTargetAppID(), "error", err)
+		return &npool.GetAppDepositAccountsResponse{}, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	span = commontracer.TraceInvoker(span, "user", "user", "GetAppDepositAccounts")
+
+	infos, n, err := user1.GetAppDepositAccounts(ctx, in.GetTargetAppID(), in.GetOffset(), in.GetLimit())
+	if err != nil {
+		logger.Sugar().Errorw("GetAppDepositAccounts", "error", err)
+		return &npool.GetAppDepositAccountsResponse{}, status.Error(codes.Internal, err.Error())
+	}
+
+	return &npool.GetAppDepositAccountsResponse{
+		Infos: infos,
+		Total: n,
+	}, nil
+}
