@@ -62,7 +62,6 @@ func (s *Server) GetDepositAccount(ctx context.Context, in *npool.GetDepositAcco
 
 func (s *Server) GetAppDepositAccounts(ctx context.Context, in *npool.GetAppDepositAccountsRequest) (*npool.GetAppDepositAccountsResponse, error) {
 	var err error
-
 	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetAppDepositAccounts")
 	defer span.End()
 
