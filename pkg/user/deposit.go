@@ -161,7 +161,7 @@ func GetAppDepositAccounts(ctx context.Context, appID string, offset, limit int3
 		return nil, 0, err
 	}
 
-	if 0 == len(accs) {
+	if len(accs) == 0 {
 		return nil, 0, nil
 	}
 	total := uint32(len(accs))
