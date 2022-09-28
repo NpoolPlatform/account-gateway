@@ -10,6 +10,7 @@ import (
 	depositpb "github.com/NpoolPlatform/message/npool/account/mw/v1/deposit"
 
 	usercli "github.com/NpoolPlatform/appuser-middleware/pkg/client/user"
+
 	coininfocli "github.com/NpoolPlatform/sphinx-coininfo/pkg/client"
 	sphinxproxycli "github.com/NpoolPlatform/sphinx-proxy/pkg/client"
 
@@ -20,6 +21,8 @@ import (
 	commonpb "github.com/NpoolPlatform/message/npool"
 
 	cruder "github.com/NpoolPlatform/libent-cruder/pkg/cruder"
+
+	appusermwpb "github.com/NpoolPlatform/message/npool/appuser/mw/v1/user"
 )
 
 func GetDepositAccount(ctx context.Context, appID, userID, coinTypeID string) (*npool.Account, error) { //nolint
@@ -158,7 +161,25 @@ func GetAppDepositAccounts(ctx context.Context, appID string, offset, limit int3
 		return nil, 0, err
 	}
 
+	if len(accs) == 0 {
+		return nil, 0, nil
+	}
 	total := uint32(len(accs))
+
+	userIDs := []string{}
+	for _, info := range accs {
+		userIDs = append(userIDs, info.UserID)
+	}
+
+	users, _, err := usercli.GetManyUsers(ctx, userIDs)
+	if err != nil {
+		return nil, 0, fmt.Errorf("fail get users: %v", err)
+	}
+
+	userMap := map[string]*appusermwpb.User{}
+	for _, user := range users {
+		userMap[user.ID] = user
+	}
 
 	coins, err := coininfocli.GetCoinInfos(ctx, cruder.NewFilterConds())
 	if err != nil {
@@ -174,21 +195,27 @@ func GetAppDepositAccounts(ctx context.Context, appID string, offset, limit int3
 	for _, acc := range accs {
 		coin, ok := coinMap[acc.CoinTypeID]
 		if !ok {
-			return nil, 0, fmt.Errorf("invalid coin")
+			continue
+		}
+		user, ok := userMap[acc.UserID]
+		if !ok {
+			continue
 		}
 		infos = append(infos, &npool.Account{
-			ID:         acc.ID,
-			AppID:      acc.AppID,
-			UserID:     acc.UserID,
-			CoinTypeID: acc.CoinTypeID,
-			CoinName:   coin.Name,
-			CoinUnit:   coin.Unit,
-			CoinEnv:    coin.ENV,
-			CoinLogo:   coin.Logo,
-			AccountID:  acc.AccountID,
-			Address:    acc.Address,
-			UsedFor:    acc.UsedFor,
-			CreatedAt:  acc.CreatedAt,
+			ID:           acc.ID,
+			AppID:        acc.AppID,
+			UserID:       acc.UserID,
+			CoinTypeID:   acc.CoinTypeID,
+			CoinName:     coin.Name,
+			CoinUnit:     coin.Unit,
+			CoinEnv:      coin.ENV,
+			CoinLogo:     coin.Logo,
+			AccountID:    acc.AccountID,
+			Address:      acc.Address,
+			UsedFor:      acc.UsedFor,
+			CreatedAt:    acc.CreatedAt,
+			PhoneNO:      user.PhoneNO,
+			EmailAddress: user.EmailAddress,
 		})
 	}
 	return infos, total, nil

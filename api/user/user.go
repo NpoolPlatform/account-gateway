@@ -60,9 +60,8 @@ func (s *Server) GetDepositAccount(ctx context.Context, in *npool.GetDepositAcco
 	}, nil
 }
 
-func (s *Server) GetAppDepositAccounts(ctx context.Context, in *npool.GetAppDepositAccountsRequest) (*npool.GetAppDepositAccountsResponse, error) {
+func (s *Server) GetAppDepositAccounts(ctx context.Context, in *npool.GetAppDepositAccountsRequest) (*npool.GetAppDepositAccountsResponse, error) { //nolint
 	var err error
-
 	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetAppDepositAccounts")
 	defer span.End()
 
