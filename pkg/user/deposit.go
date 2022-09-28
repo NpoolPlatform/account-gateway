@@ -10,7 +10,6 @@ import (
 	depositpb "github.com/NpoolPlatform/message/npool/account/mw/v1/deposit"
 
 	usercli "github.com/NpoolPlatform/appuser-middleware/pkg/client/user"
-	usermwcli "github.com/NpoolPlatform/appuser-middleware/pkg/client/user"
 
 	coininfocli "github.com/NpoolPlatform/sphinx-coininfo/pkg/client"
 	sphinxproxycli "github.com/NpoolPlatform/sphinx-proxy/pkg/client"
@@ -169,7 +168,7 @@ func GetAppDepositAccounts(ctx context.Context, appID string, offset, limit int3
 		userIDs = append(userIDs, info.UserID)
 	}
 
-	users, _, err := usermwcli.GetManyUsers(ctx, userIDs)
+	users, _, err := usercli.GetManyUsers(ctx, userIDs)
 	if err != nil {
 		return nil, 0, fmt.Errorf("fail get users: %v", err)
 	}
@@ -178,7 +177,7 @@ func GetAppDepositAccounts(ctx context.Context, appID string, offset, limit int3
 	for _, user := range users {
 		userMap[user.ID] = user
 	}
-	
+
 	coins, err := coininfocli.GetCoinInfos(ctx, cruder.NewFilterConds())
 	if err != nil {
 		return nil, 0, err
