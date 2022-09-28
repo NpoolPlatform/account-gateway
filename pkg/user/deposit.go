@@ -211,7 +211,7 @@ func GetAppDepositAccounts(ctx context.Context, appID string, offset, limit int3
 			Address:      acc.Address,
 			UsedFor:      acc.UsedFor,
 			CreatedAt:    acc.CreatedAt,
-			PhoneNo:      user.PhoneNO,
+			PhoneNO:      user.PhoneNO,
 			EmailAddress: user.EmailAddress,
 		})
 	}
