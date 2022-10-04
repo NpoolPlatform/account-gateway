@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	thirdgwcli "github.com/NpoolPlatform/third-gateway/pkg/client"
-	thirdgwconst "github.com/NpoolPlatform/third-gateway/pkg/const"
+	"github.com/NpoolPlatform/message/npool/third/mgr/v1/usedfor"
+	thirdmwcli "github.com/NpoolPlatform/third-middleware/pkg/client/verify"
 
 	constant "github.com/NpoolPlatform/account-gateway/pkg/message/const"
 	commontracer "github.com/NpoolPlatform/account-gateway/pkg/tracer"
@@ -25,8 +25,6 @@ import (
 
 	mgrcli "github.com/NpoolPlatform/account-manager/pkg/client/transfer"
 	mgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/transfer"
-
-	appusergw "github.com/NpoolPlatform/appuser-gateway/pkg/ga"
 )
 
 // nolint:funlen
@@ -55,21 +53,24 @@ func CreateTransfer(ctx context.Context,
 
 	span = commontracer.TraceInvoker(span, "transfer", "third-gateway", "VerifyCode")
 
-	switch accountType {
-	case signmethodpb.SignMethodType_Mobile, signmethodpb.SignMethodType_Email:
-		if err := thirdgwcli.VerifyCode(
-			ctx,
-			appID, userID,
-			accountType, account, verificationCode,
-			thirdgwconst.UsedForSetTransferTargetUser,
-		); err != nil {
-			return nil, err
-		}
-	case signmethodpb.SignMethodType_Google:
-		_, err = appusergw.VerifyGoogleAuth(ctx, appID, userID, verificationCode)
-		if err != nil {
-			return nil, err
-		}
+	userInfo, err := appusermwcli.GetUser(ctx, appID, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	if accountType == signmethodpb.SignMethodType_Google {
+		account = userInfo.GoogleSecret
+	}
+
+	if err := thirdmwcli.VerifyCode(
+		ctx,
+		appID,
+		account,
+		verificationCode,
+		accountType,
+		usedfor.UsedFor_SetTransferTargetUser,
+	); err != nil {
+		return nil, err
 	}
 
 	conds := &appusermgpb.Conds{
