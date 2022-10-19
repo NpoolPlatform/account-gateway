@@ -24,10 +24,16 @@ func CreateAccount(ctx context.Context, goodID string) (*npool.Account, error) {
 	if err != nil {
 		return nil, err
 	}
+	if good == nil {
+		return nil, fmt.Errorf("invalid good")
+	}
 
 	coin, err := coininfocli.GetCoinInfo(ctx, good.CoinTypeID)
 	if err != nil {
 		return nil, err
+	}
+	if coin == nil {
+		return nil, fmt.Errorf("invalid coin")
 	}
 
 	backup := false
@@ -54,6 +60,9 @@ func CreateAccount(ctx context.Context, goodID string) (*npool.Account, error) {
 	if err != nil {
 		return nil, err
 	}
+	if sacc == nil {
+		return nil, fmt.Errorf("fail create address")
+	}
 
 	bal, err := sphinxproxycli.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
 		Name:    coin.Name,
@@ -74,6 +83,9 @@ func CreateAccount(ctx context.Context, goodID string) (*npool.Account, error) {
 	})
 	if err != nil {
 		return nil, err
+	}
+	if acc == nil {
+		return nil, fmt.Errorf("fail create account")
 	}
 
 	return GetAccount(ctx, acc.ID)
