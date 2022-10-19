@@ -4,11 +4,12 @@ go 1.17
 
 require (
 	github.com/NpoolPlatform/account-manager v0.0.0-20220901093224-af15c33ff8cb
-	github.com/NpoolPlatform/account-middleware v0.0.0-20220817115633-86d21f520890
+	github.com/NpoolPlatform/account-middleware v0.0.0-20220827134355-000a5a97beec
 	github.com/NpoolPlatform/api-manager v0.0.0-20220826022307-d72866fe3ec0
 	github.com/NpoolPlatform/appuser-manager v0.0.0-20220829153511-c579ddb3686d
 	github.com/NpoolPlatform/appuser-middleware v0.0.0-20220829153642-da84c07abb79
-	github.com/NpoolPlatform/go-service-framework v0.0.0-20220908115503-7dd1d00f71fa
+	github.com/NpoolPlatform/go-service-framework v0.0.0-20221015040432-cd676d323379
+	github.com/NpoolPlatform/good-middleware v0.0.0-20221018100429-fb5a429423c3
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20220821121920-9559f5776d15
 	github.com/NpoolPlatform/message v0.0.0-20221019052620-c8edc43efbc0
 	github.com/NpoolPlatform/sphinx-coininfo v0.0.0-20220731103603-21004f4341dc
@@ -27,8 +28,8 @@ require (
 )
 
 require (
-	ariga.io/atlas v0.5.1-0.20220717122844-8593d7eb1a8e // indirect
-	entgo.io/ent v0.11.2 // indirect
+	ariga.io/atlas v0.7.2-0.20220927111110-867ee0cca56a // indirect
+	entgo.io/ent v0.11.3 // indirect
 	github.com/Shonminh/apollo-client v0.4.0 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/andres-erbsen/clock v0.0.0-20160526145045-9e14626cd129 // indirect
@@ -69,7 +70,7 @@ require (
 	github.com/hashicorp/go-uuid v1.0.2 // indirect
 	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
-	github.com/hashicorp/hcl/v2 v2.10.0 // indirect
+	github.com/hashicorp/hcl/v2 v2.13.0 // indirect
 	github.com/hashicorp/serf v0.9.7 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
@@ -110,6 +111,7 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f // indirect
 	google.golang.org/genproto v0.0.0-20220822174746-9e6da59bd2fc // indirect
+	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.66.4 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
@@ -117,3 +119,7 @@ require (
 )
 
 replace google.golang.org/grpc => github.com/grpc/grpc-go v1.41.0
+
+replace entgo.io/ent => entgo.io/ent v0.11.2
+
+replace ariga.io/atlas => ariga.io/atlas v0.5.1-0.20220717122844-8593d7eb1a8e
