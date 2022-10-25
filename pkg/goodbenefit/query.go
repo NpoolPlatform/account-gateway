@@ -42,6 +42,7 @@ func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 		CoinLogo:   coin.Logo,
 		AccountID:  info.AccountID,
 		Backup:     info.Backup,
+		Address:    info.Address,
 		Active:     info.Active,
 		Locked:     info.Locked,
 		LockedBy:   info.LockedBy,
