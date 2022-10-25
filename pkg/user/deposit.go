@@ -45,7 +45,7 @@ func GetDepositAccount(ctx context.Context, appID, userID, coinTypeID string) (*
 		return nil, fmt.Errorf("invalid coin")
 	}
 
-	accs, err := depositcli.GetAccounts(ctx, &depositpb.Conds{
+	accs, _, err := depositcli.GetAccounts(ctx, &depositpb.Conds{
 		AppID: &commonpb.StringVal{
 			Op:    cruder.EQ,
 			Value: appID,
@@ -149,7 +149,7 @@ func GetDepositAccount(ctx context.Context, appID, userID, coinTypeID string) (*
 }
 
 func GetAppDepositAccounts(ctx context.Context, appID string, offset, limit int32) ([]*npool.Account, uint32, error) {
-	accs, err := depositcli.GetAccounts(ctx, &depositpb.Conds{
+	accs, total, err := depositcli.GetAccounts(ctx, &depositpb.Conds{
 		AppID: &commonpb.StringVal{
 			Op:    cruder.EQ,
 			Value: appID,
@@ -162,7 +162,6 @@ func GetAppDepositAccounts(ctx context.Context, appID string, offset, limit int3
 	if len(accs) == 0 {
 		return nil, 0, nil
 	}
-	total := uint32(len(accs))
 
 	userIDs := []string{}
 	for _, info := range accs {

@@ -58,7 +58,7 @@ func CreateAccount(ctx context.Context, goodID string) (*npool.Account, error) {
 	backup := false
 	const accountNumber = 100
 
-	accounts, err := gbmwcli.GetAccounts(ctx, &gbmwpb.Conds{
+	accounts, _, err := gbmwcli.GetAccounts(ctx, &gbmwpb.Conds{
 		GoodID: &commonpb.StringVal{
 			Op:    cruder.EQ,
 			Value: goodID,
