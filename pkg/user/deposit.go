@@ -100,7 +100,6 @@ func GetDepositAccount(ctx context.Context, appID, userID, coinTypeID string) (*
 			CoinLogo:   coin.Logo,
 			AccountID:  acc.AccountID,
 			Address:    acc.Address,
-			UsedFor:    acc.UsedFor,
 			CreatedAt:  acc.CreatedAt,
 		}, nil
 	}
@@ -145,7 +144,6 @@ func GetDepositAccount(ctx context.Context, appID, userID, coinTypeID string) (*
 		CoinLogo:   coin.Logo,
 		AccountID:  acc.AccountID,
 		Address:    acc.Address,
-		UsedFor:    acc.UsedFor,
 		CreatedAt:  acc.CreatedAt,
 	}, nil
 }
@@ -212,7 +210,6 @@ func GetAppDepositAccounts(ctx context.Context, appID string, offset, limit int3
 			CoinLogo:     coin.Logo,
 			AccountID:    acc.AccountID,
 			Address:      acc.Address,
-			UsedFor:      acc.UsedFor,
 			CreatedAt:    acc.CreatedAt,
 			PhoneNO:      user.PhoneNO,
 			EmailAddress: user.EmailAddress,
