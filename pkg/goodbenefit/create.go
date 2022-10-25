@@ -37,25 +37,6 @@ func CreateAccount(ctx context.Context, goodID string) (*npool.Account, error) {
 		return nil, fmt.Errorf("invalid coin")
 	}
 
-	sacc, err := sphinxproxycli.CreateAddress(ctx, coin.Name)
-	if err != nil {
-		return nil, err
-	}
-	if sacc == nil {
-		return nil, fmt.Errorf("fail create address")
-	}
-
-	bal, err := sphinxproxycli.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
-		Name:    coin.Name,
-		Address: sacc.Address,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("get %v | %v balance: %v", coin.Name, sacc.Address, err)
-	}
-	if bal == nil {
-		return nil, fmt.Errorf("invalid address")
-	}
-
 	backup := false
 	const accountNumber = 100
 
@@ -74,6 +55,25 @@ func CreateAccount(ctx context.Context, goodID string) (*npool.Account, error) {
 			backup = true
 			break
 		}
+	}
+
+	sacc, err := sphinxproxycli.CreateAddress(ctx, coin.Name)
+	if err != nil {
+		return nil, err
+	}
+	if sacc == nil {
+		return nil, fmt.Errorf("fail create address")
+	}
+
+	bal, err := sphinxproxycli.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
+		Name:    coin.Name,
+		Address: sacc.Address,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("get %v | %v balance: %v", coin.Name, sacc.Address, err)
+	}
+	if bal == nil {
+		return nil, fmt.Errorf("invalid address")
 	}
 
 	acc, err := gbmwcli.CreateAccount(ctx, &gbmwpb.AccountReq{
