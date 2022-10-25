@@ -5,6 +5,7 @@ import (
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
+	constant1 "github.com/NpoolPlatform/account-gateway/pkg/const"
 	constant "github.com/NpoolPlatform/account-gateway/pkg/message/const"
 
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/goodbenefit"
@@ -29,7 +30,7 @@ func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) 
 		}
 	}()
 
-	limit := int32(100)
+	limit := int32(constant1.DefaultLimit)
 	if in.GetLimit() > 0 {
 		limit = in.GetLimit()
 	}

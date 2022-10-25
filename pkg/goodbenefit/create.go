@@ -19,6 +19,7 @@ import (
 	cruder "github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 )
 
+//nolint
 func CreateAccount(ctx context.Context, goodID string) (*npool.Account, error) {
 	good, err := goodmwcli.GetGood(ctx, goodID)
 	if err != nil {
