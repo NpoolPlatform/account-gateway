@@ -3,6 +3,8 @@ package goodbenefit
 import (
 	"context"
 
+	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/goodbenefit"
 
 	constant "github.com/NpoolPlatform/account-gateway/pkg/message/const"
@@ -31,11 +33,17 @@ func (s *Server) UpdateAccount(ctx context.Context, in *npool.UpdateAccountReque
 	}()
 
 	if _, err := uuid.Parse(in.GetID()); err != nil {
+		logger.Sugar().Errorw("UpdateAccount", "ID", in.GetID(), "error", err)
 		return &npool.UpdateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
+	if in.GetLocked() {
+		logger.Sugar().Errorw("UpdateAccount", "Locked", in.GetLocked(), "error", "cannot lock account")
+		return &npool.UpdateAccountResponse{}, status.Error(codes.InvalidArgument, "cannot lock account")
+	}
 
-	info, err := gb.UpdateAccount(ctx, in.GetID(), in.GetBackup())
+	info, err := gb.UpdateAccount(ctx, in.GetID(), in.Backup, in.Active, in.Blocked, in.Locked)
 	if err != nil {
+		logger.Sugar().Errorw("UpdateAccount", "Locked", in.GetLocked(), "error", err)
 		return &npool.UpdateAccountResponse{}, status.Error(codes.Internal, err.Error())
 	}
 
