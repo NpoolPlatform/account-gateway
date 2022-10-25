@@ -10,7 +10,7 @@ import (
 
 	constant "github.com/NpoolPlatform/account-gateway/pkg/message/const"
 
-	platform "github.com/NpoolPlatform/account-gateway/pkg/platform"
+	platform1 "github.com/NpoolPlatform/account-gateway/pkg/platform"
 
 	"go.opentelemetry.io/otel"
 	scodes "go.opentelemetry.io/otel/codes"
@@ -60,7 +60,7 @@ func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountReque
 		}
 	}
 
-	info, err := platform.CreateAccount(ctx, in.GetCoinTypeID(), in.Address, in.GetUsedFor())
+	info, err := platform1.CreateAccount(ctx, in.GetCoinTypeID(), in.Address, in.GetUsedFor())
 	if err != nil {
 		logger.Sugar().Errorw("CreateAddress", "error", err)
 		return &npool.CreateAccountResponse{}, status.Error(codes.Internal, err.Error())
