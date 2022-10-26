@@ -63,8 +63,26 @@ func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 	return acc, nil
 }
 
-func GetAccounts(ctx context.Context, appID string, offset, limit int32) ([]*npool.Account, uint32, error) {
-	infos, total, err := useraccmwcli.GetAccounts(
+func GetAccounts(ctx context.Context, appID, userID string, offset, limit int32) ([]*npool.Account, uint32, error) {
+	return getAccounts(
+		ctx,
+		&useraccmwpb.Conds{
+			AppID: &commonpb.StringVal{
+				Op:    cruder.EQ,
+				Value: appID,
+			},
+			UserID: &commonpb.StringVal{
+				Op:    cruder.EQ,
+				Value: userID,
+			},
+		},
+		offset,
+		limit,
+	)
+}
+
+func GetAppAccounts(ctx context.Context, appID string, offset, limit int32) ([]*npool.Account, uint32, error) {
+	return getAccounts(
 		ctx,
 		&useraccmwpb.Conds{
 			AppID: &commonpb.StringVal{
@@ -75,6 +93,10 @@ func GetAccounts(ctx context.Context, appID string, offset, limit int32) ([]*npo
 		offset,
 		limit,
 	)
+}
+
+func getAccounts(ctx context.Context, conds *useraccmwpb.Conds, offset, limit int32) ([]*npool.Account, uint32, error) {
+	infos, total, err := useraccmwcli.GetAccounts(ctx, conds, offset, limit)
 	if err != nil {
 		return nil, 0, err
 	}
