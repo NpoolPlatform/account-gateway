@@ -19,9 +19,11 @@ import (
 	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 )
 
-func CreateWithdrawAccount(
+func CreateAccount(
 	ctx context.Context,
-	appID, userID, coinTypeID, address string,
+	appID, userID, coinTypeID string,
+	usedFor accountmgrpb.AccountUsedFor,
+	address string,
 	labels []string,
 ) (
 	*npool.Account, error,
@@ -60,8 +62,6 @@ func CreateWithdrawAccount(
 	if bal == nil {
 		return nil, fmt.Errorf("invalid address")
 	}
-
-	usedFor := accountmgrpb.AccountUsedFor_UserWithdraw
 
 	info, err := useraccmwcli.CreateAccount(ctx, &useraccmwpb.AccountReq{
 		AppID:      &appID,
