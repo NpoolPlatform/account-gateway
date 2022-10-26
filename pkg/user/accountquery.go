@@ -58,6 +58,9 @@ func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 		CreatedAt:    info.CreatedAt,
 		PhoneNO:      u.PhoneNO,
 		EmailAddress: u.EmailAddress,
+		Active:       info.Active,
+		Blocked:      info.Blocked,
+		Labels:       info.Labels,
 	}
 
 	return acc, nil
@@ -156,6 +159,9 @@ func getAccounts(ctx context.Context, conds *useraccmwpb.Conds, offset, limit in
 			CreatedAt:    info.CreatedAt,
 			PhoneNO:      u.PhoneNO,
 			EmailAddress: u.EmailAddress,
+			Active:       info.Active,
+			Blocked:      info.Blocked,
+			Labels:       info.Labels,
 		})
 	}
 
