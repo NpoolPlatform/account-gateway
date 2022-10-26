@@ -23,7 +23,7 @@ import (
 func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountRequest) (*npool.CreateAccountResponse, error) {
 	var err error
 
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "CreateAccountAccount")
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "CreateAccount")
 	defer span.End()
 
 	defer func() {
@@ -46,7 +46,7 @@ func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountReque
 		fallthrough // nolint
 	case accountmgrpb.AccountUsedFor_GasProvider:
 		if in.Address != nil {
-			logger.Sugar().Errorw("CreateAddress", "Address", in.GetAddress())
+			logger.Sugar().Errorw("CreateAccount", "Address", in.GetAddress())
 			return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, "invalid account")
 		}
 	case accountmgrpb.AccountUsedFor_PaymentCollector:
@@ -55,14 +55,14 @@ func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountReque
 		fallthrough // nolint
 	case accountmgrpb.AccountUsedFor_PlatformBenefitCold:
 		if in.Address == nil {
-			logger.Sugar().Errorw("CreateAddress", "Address", in.GetAddress())
+			logger.Sugar().Errorw("CreateAccount", "Address", in.GetAddress())
 			return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, "invalid account")
 		}
 	}
 
 	info, err := platform1.CreateAccount(ctx, in.GetCoinTypeID(), in.Address, in.GetUsedFor())
 	if err != nil {
-		logger.Sugar().Errorw("CreateAddress", "error", err)
+		logger.Sugar().Errorw("CreateAccount", "error", err)
 		return &npool.CreateAccountResponse{}, status.Error(codes.Internal, err.Error())
 	}
 
