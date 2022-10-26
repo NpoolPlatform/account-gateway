@@ -75,5 +75,5 @@ func CreateWithdrawAccount(
 		return nil, err
 	}
 
-	return GetWithdrawAccount(ctx, info.ID)
+	return GetAccount(ctx, info.ID)
 }

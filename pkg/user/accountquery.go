@@ -11,7 +11,7 @@ import (
 	coininfocli "github.com/NpoolPlatform/sphinx-coininfo/pkg/client"
 )
 
-func GetWithdrawAccount(ctx context.Context, id string) (*npool.Account, error) {
+func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 	info, err := useraccmwcli.GetAccount(ctx, id)
 	if err != nil {
 		return nil, err
