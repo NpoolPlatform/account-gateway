@@ -5,8 +5,8 @@ import (
 
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/platform"
 
-	gbmwcli "github.com/NpoolPlatform/account-middleware/pkg/client/platform"
-	gbmwpb "github.com/NpoolPlatform/message/npool/account/mw/v1/platform"
+	pltfmwcli "github.com/NpoolPlatform/account-middleware/pkg/client/platform"
+	pltfmwpb "github.com/NpoolPlatform/message/npool/account/mw/v1/platform"
 )
 
 func UpdateAccount(
@@ -16,7 +16,7 @@ func UpdateAccount(
 ) (
 	*npool.Account, error,
 ) {
-	acc, err := gbmwcli.UpdateAccount(ctx, &gbmwpb.AccountReq{
+	acc, err := pltfmwcli.UpdateAccount(ctx, &pltfmwpb.AccountReq{
 		ID:      &id,
 		Backup:  backup,
 		Active:  active,
