@@ -25,7 +25,6 @@ func CreateAccount(
 	coinTypeID string,
 	address *string,
 	usedFor accountmgrpb.AccountUsedFor,
-	goodID *string,
 ) (
 	*npool.Account, error,
 ) {
@@ -49,12 +48,6 @@ func CreateAccount(
 			Op:    cruder.EQ,
 			Value: int32(usedFor),
 		},
-	}
-	if goodID != nil {
-		conds.GoodID = &commonpb.StringVal{
-			Op:    cruder.EQ,
-			Value: *goodID,
-		}
 	}
 
 	accounts, _, err := gbmwcli.GetAccounts(ctx, conds, 0, accountNumber)
@@ -106,7 +99,6 @@ func CreateAccount(
 		UsedFor:    &usedFor,
 		Address:    &targetAddress,
 		Backup:     &backup,
-		GoodID:     goodID,
 	})
 	if err != nil {
 		return nil, err

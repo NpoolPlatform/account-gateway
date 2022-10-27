@@ -79,6 +79,7 @@ var goodPayments []*billingent.GoodPayment
 var userWithdraws []*billingent.UserWithdraw
 var coinSettings []*billingent.CoinSetting
 
+//nolint
 func accountUsedFor(ctx context.Context, id string, cli *billingent.Client) (accountmgrpb.AccountUsedFor, error) {
 	var err error
 
@@ -220,6 +221,22 @@ func migrateAccount(ctx context.Context, conn *sql.DB) error {
 	return nil
 }
 
+func migrateGoodBenefit(ctx context.Context, conn *sql.DB) error {
+	return nil
+}
+
+func migrateGoodPayment(ctx context.Context, conn *sql.DB) error {
+	return nil
+}
+
+func migrateUserWithdraw(ctx context.Context, conn *sql.DB) error {
+	return nil
+}
+
+func migrateCoinSetting(ctx context.Context, conn *sql.DB) error {
+	return nil
+}
+
 func Migrate(ctx context.Context) error {
 	if err := db.Init(); err != nil {
 		logger.Sugar().Errorw("migrateAccount", "error", err)
@@ -234,6 +251,18 @@ func Migrate(ctx context.Context) error {
 	defer billingConn.Close()
 
 	if err := migrateAccount(ctx, billingConn); err != nil {
+		return err
+	}
+	if err := migrateGoodBenefit(ctx, billingConn); err != nil {
+		return err
+	}
+	if err := migrateGoodPayment(ctx, billingConn); err != nil {
+		return err
+	}
+	if err := migrateUserWithdraw(ctx, billingConn); err != nil {
+		return err
+	}
+	if err := migrateCoinSetting(ctx, billingConn); err != nil {
 		return err
 	}
 
