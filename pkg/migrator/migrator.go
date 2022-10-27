@@ -78,6 +78,7 @@ var goodBenefits []*billingent.GoodBenefit
 var goodPayments []*billingent.GoodPayment
 var userWithdraws []*billingent.UserWithdraw
 var coinSettings []*billingent.CoinSetting
+var accounts []*billingent.CoinAccountInfo
 
 //nolint
 func accountUsedFor(ctx context.Context, id string, cli *billingent.Client) (accountmgrpb.AccountUsedFor, error) {
@@ -177,7 +178,7 @@ func migrateAccount(ctx context.Context, conn *sql.DB) error {
 	}
 
 	cli1 := billingent.NewClient(billingent.Driver(entsql.OpenDB(dialect.MySQL, conn)))
-	infos, err := cli1.
+	accounts, err = cli1.
 		CoinAccountInfo.
 		Query().
 		Where(
@@ -190,7 +191,7 @@ func migrateAccount(ctx context.Context, conn *sql.DB) error {
 	}
 
 	err = db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
-		for _, info := range infos {
+		for _, info := range accounts {
 			usedFor, err := accountUsedFor(ctx, info.ID.String(), cli1)
 			if err != nil {
 				return err
