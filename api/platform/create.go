@@ -60,7 +60,7 @@ func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountReque
 		}
 	}
 
-	info, err := platform1.CreateAccount(ctx, in.GetCoinTypeID(), in.Address, in.GetUsedFor())
+	info, err := platform1.CreateAccount(ctx, in.GetCoinTypeID(), in.Address, in.GetUsedFor(), in.GoodID)
 	if err != nil {
 		logger.Sugar().Errorw("CreateAccount", "error", err)
 		return &npool.CreateAccountResponse{}, status.Error(codes.Internal, err.Error())
