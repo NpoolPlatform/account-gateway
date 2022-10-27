@@ -21,6 +21,8 @@ import (
 
 	"github.com/NpoolPlatform/account-manager/pkg/db"
 	"github.com/NpoolPlatform/account-manager/pkg/db/ent"
+
+	uuid1 "github.com/NpoolPlatform/go-service-framework/pkg/const/uuid"
 )
 
 const (
@@ -160,6 +162,19 @@ func accountUsedFor(ctx context.Context, id string, cli *billingent.Client) (acc
 }
 
 func migrateAccount(ctx context.Context, conn *sql.DB) error {
+	cli1 := billingent.NewClient(billingent.Driver(entsql.OpenDB(dialect.MySQL, conn)))
+	accounts, err := cli1.
+		CoinAccountInfo.
+		Query().
+		Where(
+			coinaccountinfoent.DeleteAt(0),
+		).
+		All(ctx)
+	if err != nil {
+		logger.Sugar().Errorw("migrateAccount", "error", err)
+		return err
+	}
+
 	cli, err := db.Client()
 	if err != nil {
 		return err
@@ -175,19 +190,6 @@ func migrateAccount(ctx context.Context, conn *sql.DB) error {
 	}
 	if len(accs) > 0 {
 		return nil
-	}
-
-	cli1 := billingent.NewClient(billingent.Driver(entsql.OpenDB(dialect.MySQL, conn)))
-	accounts, err = cli1.
-		CoinAccountInfo.
-		Query().
-		Where(
-			coinaccountinfoent.DeleteAt(0),
-		).
-		All(ctx)
-	if err != nil {
-		logger.Sugar().Errorw("migrateAccount", "error", err)
-		return err
 	}
 
 	err = db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
@@ -223,19 +225,282 @@ func migrateAccount(ctx context.Context, conn *sql.DB) error {
 }
 
 func migrateGoodBenefit(ctx context.Context, conn *sql.DB) error {
-	return nil
+	cli, err := db.Client()
+	if err != nil {
+		return err
+	}
+
+	accs, err := cli.
+		GoodBenefit.
+		Query().
+		Limit(1).
+		All(ctx)
+	if err != nil {
+		return err
+	}
+	if len(accs) > 0 {
+		return nil
+	}
+
+	cli1 := billingent.NewClient(billingent.Driver(entsql.OpenDB(dialect.MySQL, conn)))
+	_, _ = accountUsedFor(ctx, uuid1.InvalidUUIDStr, cli1)
+
+	return db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
+		for _, info := range goodBenefits {
+			found := false
+			for _, acc := range accounts {
+				if acc.ID == info.BenefitAccountID {
+					found = true
+					break
+				}
+			}
+			if !found {
+				logger.Sugar().Warnw("migrateGoodBenefit", "AccountID", info.BenefitAccountID, "found", found)
+				continue
+			}
+
+			_, err = tx.
+				GoodBenefit.
+				Create().
+				SetGoodID(info.GoodID).
+				SetAccountID(info.BenefitAccountID).
+				Save(_ctx)
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
 }
 
 func migrateGoodPayment(ctx context.Context, conn *sql.DB) error {
-	return nil
+	cli, err := db.Client()
+	if err != nil {
+		return err
+	}
+
+	accs, err := cli.
+		Payment.
+		Query().
+		Limit(1).
+		All(ctx)
+	if err != nil {
+		return err
+	}
+	if len(accs) > 0 {
+		return nil
+	}
+
+	cli1 := billingent.NewClient(billingent.Driver(entsql.OpenDB(dialect.MySQL, conn)))
+	_, _ = accountUsedFor(ctx, uuid1.InvalidUUIDStr, cli1)
+
+	return db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
+		for _, info := range goodPayments {
+			found := false
+			for _, acc := range accounts {
+				if acc.ID == info.AccountID {
+					found = true
+					break
+				}
+			}
+			if !found {
+				logger.Sugar().Warnw("migrateGoodBenefit", "AccountID", info.AccountID, "found", found)
+				continue
+			}
+
+			_, err = tx.
+				Payment.
+				Create().
+				SetAccountID(info.AccountID).
+				Save(_ctx)
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
 }
 
 func migrateUserWithdraw(ctx context.Context, conn *sql.DB) error {
-	return nil
+	cli, err := db.Client()
+	if err != nil {
+		return err
+	}
+
+	accs, err := cli.
+		User.
+		Query().
+		Limit(1).
+		All(ctx)
+	if err != nil {
+		return err
+	}
+	if len(accs) > 0 {
+		return nil
+	}
+
+	cli1 := billingent.NewClient(billingent.Driver(entsql.OpenDB(dialect.MySQL, conn)))
+	_, _ = accountUsedFor(ctx, uuid1.InvalidUUIDStr, cli1)
+
+	return db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
+		for _, info := range userWithdraws {
+			found := false
+			for _, acc := range accounts {
+				if acc.ID == info.AccountID {
+					found = true
+					break
+				}
+			}
+			if !found {
+				logger.Sugar().Warnw("migrateGoodBenefit", "AccountID", info.AccountID, "found", found)
+				continue
+			}
+
+			_, err = tx.
+				User.
+				Create().
+				SetAppID(info.AppID).
+				SetUserID(info.UserID).
+				SetCoinTypeID(info.CoinTypeID).
+				SetAccountID(info.AccountID).
+				SetUsedFor(accountmgrpb.AccountUsedFor_UserWithdraw.String()).
+				SetLabels(info.Labels).
+				SetCreatedAt(info.CreateAt).
+				SetUpdatedAt(info.UpdateAt).
+				Save(_ctx)
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
 }
 
+//nolint
 func migrateCoinSetting(ctx context.Context, conn *sql.DB) error {
-	return nil
+	cli, err := db.Client()
+	if err != nil {
+		return err
+	}
+
+	accs, err := cli.
+		Platform.
+		Query().
+		Limit(1).
+		All(ctx)
+	if err != nil {
+		return err
+	}
+	if len(accs) > 0 {
+		return nil
+	}
+
+	cli1 := billingent.NewClient(billingent.Driver(entsql.OpenDB(dialect.MySQL, conn)))
+	_, _ = accountUsedFor(ctx, uuid1.InvalidUUIDStr, cli1)
+
+	return db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
+		for _, info := range coinSettings {
+			found := false
+			for _, acc := range accounts {
+				if acc.ID == info.PlatformOfflineAccountID {
+					found = true
+					break
+				}
+			}
+			if found {
+				_, err = tx.
+					Platform.
+					Create().
+					SetAccountID(info.PlatformOfflineAccountID).
+					SetUsedFor(accountmgrpb.AccountUsedFor_PlatformBenefitCold.String()).
+					Save(_ctx)
+				if err != nil {
+					return err
+				}
+			}
+
+			found = false
+			for _, acc := range accounts {
+				if acc.ID == info.UserOfflineAccountID {
+					found = true
+					break
+				}
+			}
+			if found {
+				_, err = tx.
+					Platform.
+					Create().
+					SetAccountID(info.UserOfflineAccountID).
+					SetUsedFor(accountmgrpb.AccountUsedFor_UserBenefitCold.String()).
+					Save(_ctx)
+				if err != nil {
+					return err
+				}
+			}
+
+			found = false
+			for _, acc := range accounts {
+				if acc.ID == info.UserOnlineAccountID {
+					found = true
+					break
+				}
+			}
+			if found {
+				_, err = tx.
+					Platform.
+					Create().
+					SetAccountID(info.UserOnlineAccountID).
+					SetUsedFor(accountmgrpb.AccountUsedFor_UserBenefitHot.String()).
+					Save(_ctx)
+				if err != nil {
+					return err
+				}
+			}
+
+			found = false
+			for _, acc := range accounts {
+				if acc.ID == info.GoodIncomingAccountID {
+					found = true
+					break
+				}
+			}
+			if found {
+				_, err = tx.
+					Platform.
+					Create().
+					SetAccountID(info.GoodIncomingAccountID).
+					SetUsedFor(accountmgrpb.AccountUsedFor_PaymentCollector.String()).
+					Save(_ctx)
+				if err != nil {
+					return err
+				}
+			}
+
+			found = false
+			for _, acc := range accounts {
+				if acc.ID == info.GasProviderAccountID {
+					found = true
+					break
+				}
+			}
+			if found {
+				_, err = tx.
+					Platform.
+					Create().
+					SetAccountID(info.GasProviderAccountID).
+					SetUsedFor(accountmgrpb.AccountUsedFor_GasProvider.String()).
+					Save(_ctx)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		return nil
+	})
 }
 
 func Migrate(ctx context.Context) error {
