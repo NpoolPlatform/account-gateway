@@ -65,31 +65,7 @@ spec:
     - host: api.npool.top
       http: &http_rules
         paths:
-          - path: /api/account/v1/create
-            backend:
-              serviceName: account-gateway
-              servicePort: 50480
-          - path: /api/account/v1/get
-            backend:
-              serviceName: account-gateway
-              servicePort: 50480
-          - path: /api/account/v1/create/transfer
-            backend:
-              serviceName: account-gateway
-              servicePort: 50480
-          - path: /api/account/v1/delete/transfer
-            backend:
-              serviceName: account-gateway
-              servicePort: 50480
-          - path: /api/account/v1/get/transfers
-            backend:
-              serviceName: account-gateway
-              servicePort: 50480
-          - path: /api/account/v1/get/app/transfers
-            backend:
-              serviceName: account-gateway
-              servicePort: 50480
-          - path: /api/account/v1/get/napp/transfers
+          - path: /api/account/v1
             backend:
               serviceName: account-gateway
               servicePort: 50480
