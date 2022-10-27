@@ -119,6 +119,10 @@ func migrateAccount(ctx context.Context, conn *sql.DB) error {
 
 		return nil
 	})
+	if err != nil {
+		return err
+	}
+
 	for _, info := range infos {
 		logger.Sugar().Infow("migrateAccount", "info", info)
 	}

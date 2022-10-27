@@ -2,6 +2,7 @@ package platform
 
 import (
 	"context"
+	"fmt"
 
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/platform"
 
@@ -11,6 +12,10 @@ import (
 	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
 	coininfocli "github.com/NpoolPlatform/sphinx-coininfo/pkg/client"
 
+	goodmwcli "github.com/NpoolPlatform/good-middleware/pkg/client/good"
+	goodmwpb "github.com/NpoolPlatform/message/npool/good/mw/v1/good"
+
+	uuid1 "github.com/NpoolPlatform/go-service-framework/pkg/const/uuid"
 	cruder "github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 )
 
@@ -23,6 +28,19 @@ func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 	coin, err := coininfocli.GetCoinInfo(ctx, info.CoinTypeID)
 	if err != nil {
 		return nil, err
+	}
+
+	goodName := ""
+	if info.GoodID != uuid1.InvalidUUIDStr {
+		good, err := goodmwcli.GetGood(ctx, info.GoodID)
+		if err != nil {
+			return nil, err
+		}
+		if good == nil {
+			return nil, fmt.Errorf("invalid good")
+		}
+
+		goodName = good.Title
 	}
 
 	account := &npool.Account{
@@ -41,6 +59,8 @@ func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 		LockedBy:   info.LockedBy,
 		Blocked:    info.Blocked,
 		CreatedAt:  info.CreatedAt,
+		GoodID:     info.GoodID,
+		GoodName:   goodName,
 	}
 
 	return account, nil
@@ -65,12 +85,38 @@ func GetAccounts(ctx context.Context, offset, limit int32) ([]*npool.Account, ui
 		coinMap[coin.ID] = coin
 	}
 
+	goodIDs := []string{}
+	for _, info := range infos {
+		if info.GoodID != uuid1.InvalidUUIDStr {
+			goodIDs = append(goodIDs, info.GoodID)
+		}
+	}
+	goods, _, err := goodmwcli.GetManyGoods(ctx, goodIDs, 0, int32(len(goodIDs)))
+	if err != nil {
+		return nil, 0, err
+	}
+
+	goodMap := map[string]*goodmwpb.Good{}
+	for _, good := range goods {
+		goodMap[good.ID] = good
+	}
+
 	accs := []*npool.Account{}
 
 	for _, info := range infos {
 		coin, ok := coinMap[info.CoinTypeID]
 		if !ok {
 			continue
+		}
+
+		goodName := ""
+		if info.GoodID != uuid1.InvalidUUIDStr {
+			good, ok := goodMap[info.GoodID]
+			if !ok {
+				continue
+			}
+
+			goodName = good.Title
 		}
 
 		accs = append(accs, &npool.Account{
@@ -89,6 +135,8 @@ func GetAccounts(ctx context.Context, offset, limit int32) ([]*npool.Account, ui
 			LockedBy:   info.LockedBy,
 			Blocked:    info.Blocked,
 			CreatedAt:  info.CreatedAt,
+			GoodID:     info.GoodID,
+			GoodName:   goodName,
 		})
 	}
 
