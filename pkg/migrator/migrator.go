@@ -17,6 +17,8 @@ import (
 	coinaccountinfoent "github.com/NpoolPlatform/cloud-hashing-billing/pkg/db/ent/coinaccountinfo"
 	billingconst "github.com/NpoolPlatform/cloud-hashing-billing/pkg/message/const"
 
+	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
+
 	"github.com/NpoolPlatform/account-manager/pkg/db"
 	"github.com/NpoolPlatform/account-manager/pkg/db/ent"
 )
@@ -72,6 +74,89 @@ func open(hostname string) (conn *sql.DB, err error) {
 	return conn, nil
 }
 
+var goodBenefits []*billingent.GoodBenefit
+var goodPayments []*billingent.GoodPayment
+var userWithdraws []*billingent.UserWithdraw
+var coinSettings []*billingent.CoinSetting
+
+func accountUsedFor(ctx context.Context, id string, cli *billingent.Client) (accountmgrpb.AccountUsedFor, error) {
+	var err error
+
+	if len(goodBenefits) == 0 {
+		goodBenefits, err = cli.
+			GoodBenefit.
+			Query().
+			All(ctx)
+		if err != nil {
+			return accountmgrpb.AccountUsedFor_DefaultAccountUsedFor, err
+		}
+	}
+	for _, b := range goodBenefits {
+		if b.BenefitAccountID.String() == id {
+			return accountmgrpb.AccountUsedFor_GoodBenefit, nil
+		}
+	}
+
+	if len(goodPayments) == 0 {
+		goodPayments, err = cli.
+			GoodPayment.
+			Query().
+			All(ctx)
+		if err != nil {
+			return accountmgrpb.AccountUsedFor_DefaultAccountUsedFor, err
+		}
+	}
+	for _, b := range goodPayments {
+		if b.AccountID.String() == id {
+			return accountmgrpb.AccountUsedFor_GoodPayment, nil
+		}
+	}
+
+	if len(userWithdraws) == 0 {
+		userWithdraws, err = cli.
+			UserWithdraw.
+			Query().
+			All(ctx)
+		if err != nil {
+			return accountmgrpb.AccountUsedFor_DefaultAccountUsedFor, err
+		}
+	}
+	for _, b := range userWithdraws {
+		if b.AccountID.String() == id {
+			return accountmgrpb.AccountUsedFor_UserWithdraw, nil
+		}
+	}
+
+	if len(coinSettings) == 0 {
+		coinSettings, err = cli.
+			CoinSetting.
+			Query().
+			All(ctx)
+		if err != nil {
+			return accountmgrpb.AccountUsedFor_DefaultAccountUsedFor, err
+		}
+	}
+	for _, b := range coinSettings {
+		if b.PlatformOfflineAccountID.String() == id {
+			return accountmgrpb.AccountUsedFor_PlatformBenefitCold, nil
+		}
+		if b.UserOfflineAccountID.String() == id {
+			return accountmgrpb.AccountUsedFor_UserBenefitCold, nil
+		}
+		if b.UserOnlineAccountID.String() == id {
+			return accountmgrpb.AccountUsedFor_UserBenefitHot, nil
+		}
+		if b.GoodIncomingAccountID.String() == id {
+			return accountmgrpb.AccountUsedFor_PaymentCollector, nil
+		}
+		if b.GasProviderAccountID.String() == id {
+			return accountmgrpb.AccountUsedFor_GasProvider, nil
+		}
+	}
+
+	return accountmgrpb.AccountUsedFor_DefaultAccountUsedFor, nil
+}
+
 func migrateAccount(ctx context.Context, conn *sql.DB) error {
 	cli, err := db.Client()
 	if err != nil {
@@ -105,12 +190,21 @@ func migrateAccount(ctx context.Context, conn *sql.DB) error {
 
 	err = db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
 		for _, info := range infos {
-			_, err := tx.
+			usedFor, err := accountUsedFor(ctx, info.ID.String(), cli1)
+			if err != nil {
+				return err
+			}
+			if usedFor == accountmgrpb.AccountUsedFor_DefaultAccountUsedFor {
+				continue
+			}
+
+			_, err = tx.
 				Account.
 				Create().
 				SetID(info.ID).
 				SetCoinTypeID(info.CoinTypeID).
 				SetPlatformHoldPrivateKey(info.PlatformHoldPrivateKey).
+				SetUsedFor(usedFor.String()).
 				Save(_ctx)
 			if err != nil {
 				return err
@@ -121,10 +215,6 @@ func migrateAccount(ctx context.Context, conn *sql.DB) error {
 	})
 	if err != nil {
 		return err
-	}
-
-	for _, info := range infos {
-		logger.Sugar().Infow("migrateAccount", "info", info)
 	}
 
 	return nil
