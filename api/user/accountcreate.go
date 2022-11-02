@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	signmethodpb "github.com/NpoolPlatform/message/npool/appuser/mgr/v2/signmethod"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
@@ -47,6 +48,24 @@ func (s *Server) CreateAccount(
 		logger.Sugar().Errorw("CreateAccount", "UserID", in.GetUserID(), "error", err)
 		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
+
+	switch in.GetAccountType() {
+	case signmethodpb.SignMethodType_Email, signmethodpb.SignMethodType_Mobile:
+		if in.GetAccount() == "" {
+			logger.Sugar().Errorw("CreateAccount", "Account empty", "Account", in.GetAccount())
+			return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, "Account id empty")
+		}
+	case signmethodpb.SignMethodType_Google:
+	default:
+		logger.Sugar().Errorw("CreateAccount", "AccountType empty", "AccountType", in.GetAccountType())
+		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, "AccountType id invalid")
+	}
+
+	if in.GetVerificationCode() == "" {
+		logger.Sugar().Errorw("CreateAccount", "VerificationCode empty", "VerificationCode", in.GetVerificationCode())
+		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, "VerificationCode id empty")
+	}
+
 	if _, err := uuid.Parse(in.GetCoinTypeID()); err != nil {
 		logger.Sugar().Errorw("CreateAccount", "CoinTypeID", in.GetCoinTypeID(), "error", err)
 		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
@@ -71,6 +90,9 @@ func (s *Server) CreateAccount(
 		in.GetUsedFor(),
 		in.GetAddress(),
 		in.GetLabels(),
+		in.GetAccount(),
+		in.GetAccountType(),
+		in.GetVerificationCode(),
 	)
 	if err != nil {
 		logger.Sugar().Errorw("CreateAccount", "error", err)
