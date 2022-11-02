@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"fmt"
+	"github.com/NpoolPlatform/message/npool/appuser/mgr/v2/signmethod"
 
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/user"
 
@@ -17,6 +18,9 @@ import (
 	useraccmwpb "github.com/NpoolPlatform/message/npool/account/mw/v1/user"
 
 	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
+
+	"github.com/NpoolPlatform/message/npool/third/mgr/v1/usedfor"
+	thirdmwcli "github.com/NpoolPlatform/third-middleware/pkg/client/verify"
 )
 
 func CreateAccount(
@@ -25,6 +29,9 @@ func CreateAccount(
 	usedFor accountmgrpb.AccountUsedFor,
 	address string,
 	labels []string,
+	account string,
+	accountType signmethod.SignMethodType,
+	verificationCode string,
 ) (
 	*npool.Account, error,
 ) {
@@ -42,6 +49,21 @@ func CreateAccount(
 	}
 	if u == nil {
 		return nil, fmt.Errorf("invalid user")
+	}
+
+	if accountType == signmethod.SignMethodType_Google {
+		account = u.GoogleSecret
+	}
+
+	if err := thirdmwcli.VerifyCode(
+		ctx,
+		appID,
+		account,
+		verificationCode,
+		accountType,
+		usedfor.UsedFor_SetWithdrawAddress,
+	); err != nil {
+		return nil, err
 	}
 
 	coin, err := coininfocli.GetCoinInfo(ctx, coinTypeID)
