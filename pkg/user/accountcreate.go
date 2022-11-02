@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"fmt"
+
 	"github.com/NpoolPlatform/message/npool/appuser/mgr/v2/signmethod"
 
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/user"
