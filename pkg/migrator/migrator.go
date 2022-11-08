@@ -86,6 +86,20 @@ var accounts []*billingent.CoinAccountInfo
 func accountUsedFor(ctx context.Context, id string, cli *billingent.Client) (accountmgrpb.AccountUsedFor, error) {
 	var err error
 
+	if len(accounts) == 0 {
+		accounts, err = cli.
+			CoinAccountInfo.
+			Query().
+			Where(
+				coinaccountinfoent.DeleteAt(0),
+			).
+			All(ctx)
+		if err != nil {
+			logger.Sugar().Errorw("getCoinAccountInfos", "error", err)
+			return accountmgrpb.AccountUsedFor_DefaultAccountUsedFor, err
+		}
+	}
+
 	if len(goodBenefits) == 0 {
 		goodBenefits, err = cli.
 			GoodBenefit.
