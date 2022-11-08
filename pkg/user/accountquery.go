@@ -43,7 +43,6 @@ func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 		return nil, fmt.Errorf("invalid coin")
 	}
 
-	fmt.Println("info: ", info)
 	acc := &npool.Account{
 		ID:           info.ID,
 		AppID:        info.AppID,
@@ -105,11 +104,6 @@ func getAccounts(ctx context.Context, conds *useraccmwpb.Conds, offset, limit in
 	}
 	if len(infos) == 0 {
 		return nil, total, nil
-	}
-
-
-	for _, info := range infos {
-		fmt.Println("CreatedAt: ", info.CreatedAt, "ID", info.ID)
 	}
 
 	ids := []string{}
