@@ -3,6 +3,7 @@ package user
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
@@ -58,6 +59,9 @@ func (s *Server) GetAccounts(
 	if err != nil {
 		logger.Sugar().Errorw("GetAccounts", "error", err)
 		return &npool.GetAccountsResponse{}, status.Error(codes.Internal, err.Error())
+	}
+	for _, info := range infos {
+		fmt.Println("CreatedAt: ", info.CreatedAt)
 	}
 
 	return &npool.GetAccountsResponse{
