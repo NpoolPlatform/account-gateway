@@ -107,6 +107,11 @@ func getAccounts(ctx context.Context, conds *useraccmwpb.Conds, offset, limit in
 		return nil, total, nil
 	}
 
+
+	for _, info := range infos {
+		fmt.Println("CreatedAt: ", info.CreatedAt)
+	}
+
 	ids := []string{}
 	for _, info := range infos {
 		ids = append(ids, info.UserID)
