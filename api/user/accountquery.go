@@ -1,9 +1,9 @@
 //nolint:dupl
 package user
 
+//nolint
 import (
 	"context"
-
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/user"

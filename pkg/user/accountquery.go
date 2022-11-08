@@ -62,7 +62,6 @@ func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 		Blocked:      info.Blocked,
 		Labels:       info.Labels,
 	}
-
 	return acc, nil
 }
 
