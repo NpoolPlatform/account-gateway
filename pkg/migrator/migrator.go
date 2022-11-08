@@ -207,8 +207,11 @@ func migrateAccount(ctx context.Context, conn *sql.DB) error {
 				Create().
 				SetID(info.ID).
 				SetCoinTypeID(info.CoinTypeID).
+				SetAddress(info.Address).
 				SetPlatformHoldPrivateKey(info.PlatformHoldPrivateKey).
 				SetUsedFor(usedFor.String()).
+				SetCreatedAt(info.CreateAt).
+				SetUpdatedAt(info.UpdateAt).
 				Save(_ctx)
 			if err != nil {
 				return err
@@ -264,6 +267,9 @@ func migrateGoodBenefit(ctx context.Context, conn *sql.DB) error {
 				Create().
 				SetGoodID(info.GoodID).
 				SetAccountID(info.BenefitAccountID).
+				SetIntervalHours(info.BenefitIntervalHours).
+				SetCreatedAt(info.CreateAt).
+				SetUpdatedAt(info.UpdateAt).
 				Save(_ctx)
 			if err != nil {
 				return err
@@ -313,6 +319,10 @@ func migrateGoodPayment(ctx context.Context, conn *sql.DB) error {
 				Payment.
 				Create().
 				SetAccountID(info.AccountID).
+				SetCollectingTid(info.CollectingTid).
+				SetAvailableAt(info.AvailableAt).
+				SetCreatedAt(info.CreateAt).
+				SetUpdatedAt(info.UpdateAt).
 				Save(_ctx)
 			if err != nil {
 				return err
@@ -416,6 +426,8 @@ func migrateCoinSetting(ctx context.Context, conn *sql.DB) error {
 					Create().
 					SetAccountID(info.PlatformOfflineAccountID).
 					SetUsedFor(accountmgrpb.AccountUsedFor_PlatformBenefitCold.String()).
+					SetCreatedAt(info.CreateAt).
+					SetUpdatedAt(info.UpdateAt).
 					Save(_ctx)
 				if err != nil {
 					return err
@@ -435,6 +447,8 @@ func migrateCoinSetting(ctx context.Context, conn *sql.DB) error {
 					Create().
 					SetAccountID(info.UserOfflineAccountID).
 					SetUsedFor(accountmgrpb.AccountUsedFor_UserBenefitCold.String()).
+					SetCreatedAt(info.CreateAt).
+					SetUpdatedAt(info.UpdateAt).
 					Save(_ctx)
 				if err != nil {
 					return err
@@ -454,6 +468,8 @@ func migrateCoinSetting(ctx context.Context, conn *sql.DB) error {
 					Create().
 					SetAccountID(info.UserOnlineAccountID).
 					SetUsedFor(accountmgrpb.AccountUsedFor_UserBenefitHot.String()).
+					SetCreatedAt(info.CreateAt).
+					SetUpdatedAt(info.UpdateAt).
 					Save(_ctx)
 				if err != nil {
 					return err
@@ -473,6 +489,8 @@ func migrateCoinSetting(ctx context.Context, conn *sql.DB) error {
 					Create().
 					SetAccountID(info.GoodIncomingAccountID).
 					SetUsedFor(accountmgrpb.AccountUsedFor_PaymentCollector.String()).
+					SetCreatedAt(info.CreateAt).
+					SetUpdatedAt(info.UpdateAt).
 					Save(_ctx)
 				if err != nil {
 					return err
@@ -492,6 +510,8 @@ func migrateCoinSetting(ctx context.Context, conn *sql.DB) error {
 					Create().
 					SetAccountID(info.GasProviderAccountID).
 					SetUsedFor(accountmgrpb.AccountUsedFor_GasProvider.String()).
+					SetCreatedAt(info.CreateAt).
+					SetUpdatedAt(info.UpdateAt).
 					Save(_ctx)
 				if err != nil {
 					return err

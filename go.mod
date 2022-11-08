@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	entgo.io/ent v0.11.3
-	github.com/NpoolPlatform/account-manager v0.0.0-20221027142358-f29bf5cbaddf
+	github.com/NpoolPlatform/account-manager v0.0.0-20221108031501-050c41239422
 	github.com/NpoolPlatform/account-middleware v0.0.0-20221027142705-5e6d6807cf4d
 	github.com/NpoolPlatform/api-manager v0.0.0-20220826022307-d72866fe3ec0
 	github.com/NpoolPlatform/appuser-manager v0.0.0-20220829153511-c579ddb3686d
