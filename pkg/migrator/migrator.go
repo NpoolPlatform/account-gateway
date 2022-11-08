@@ -241,6 +241,7 @@ func migrateAccount(ctx context.Context, conn *sql.DB) error {
 	return nil
 }
 
+// nolint
 func migrateGoodBenefit(ctx context.Context, conn *sql.DB) error {
 	cli, err := db.Client()
 	if err != nil {
@@ -294,6 +295,7 @@ func migrateGoodBenefit(ctx context.Context, conn *sql.DB) error {
 	})
 }
 
+// nolint
 func migrateGoodPayment(ctx context.Context, conn *sql.DB) error {
 	cli, err := db.Client()
 	if err != nil {
@@ -325,7 +327,7 @@ func migrateGoodPayment(ctx context.Context, conn *sql.DB) error {
 				}
 			}
 			if !found {
-				logger.Sugar().Warnw("migrateGoodBenefit", "AccountID", info.AccountID, "found", found)
+				logger.Sugar().Warnw("migrateGoodPayment", "AccountID", info.AccountID, "found", found)
 				continue
 			}
 
@@ -378,7 +380,7 @@ func migrateUserWithdraw(ctx context.Context, conn *sql.DB) error {
 				}
 			}
 			if !found {
-				logger.Sugar().Warnw("migrateGoodBenefit", "AccountID", info.AccountID, "found", found)
+				logger.Sugar().Warnw("migrateUserWithdraw", "AccountID", info.AccountID, "found", found)
 				continue
 			}
 
