@@ -43,6 +43,7 @@ func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 		return nil, fmt.Errorf("invalid coin")
 	}
 
+	fmt.Println("info: ", info)
 	acc := &npool.Account{
 		ID:           info.ID,
 		AppID:        info.AppID,
@@ -62,7 +63,6 @@ func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 		Blocked:      info.Blocked,
 		Labels:       info.Labels,
 	}
-
 	return acc, nil
 }
 
