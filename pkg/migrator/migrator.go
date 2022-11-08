@@ -262,7 +262,6 @@ func migrateGoodBenefit(ctx context.Context, conn *sql.DB) error {
 	cli1 := billingent.NewClient(billingent.Driver(entsql.OpenDB(dialect.MySQL, conn)))
 	_, _ = accountUsedFor(ctx, uuid1.InvalidUUIDStr, cli1)
 
-	fmt.Println("accounts: ", len(accounts))
 	return db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
 		for _, info := range goodBenefits {
 			found := false
