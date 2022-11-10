@@ -6,6 +6,8 @@ import (
 
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/user"
 
+	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
+
 	useraccmwcli "github.com/NpoolPlatform/account-middleware/pkg/client/user"
 	usermwcli "github.com/NpoolPlatform/appuser-middleware/pkg/client/user"
 	coininfocli "github.com/NpoolPlatform/sphinx-coininfo/pkg/client"
@@ -65,7 +67,7 @@ func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 	return acc, nil
 }
 
-func GetAccounts(ctx context.Context, appID, userID string, offset, limit int32) ([]*npool.Account, uint32, error) {
+func GetAccounts(ctx context.Context, appID, userID string, usedFor accountmgrpb.AccountUsedFor, offset, limit int32) ([]*npool.Account, uint32, error) { // nolint
 	return getAccounts(
 		ctx,
 		&useraccmwpb.Conds{
@@ -76,6 +78,10 @@ func GetAccounts(ctx context.Context, appID, userID string, offset, limit int32)
 			UserID: &commonpb.StringVal{
 				Op:    cruder.EQ,
 				Value: userID,
+			},
+			UsedFor: &commonpb.Int32Val{
+				Op:    cruder.EQ,
+				Value: int32(usedFor),
 			},
 		},
 		offset,
