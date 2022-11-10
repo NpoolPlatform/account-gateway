@@ -4,6 +4,7 @@ package user
 //nolint
 import (
 	"context"
+
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/user"
@@ -12,6 +13,8 @@ import (
 	constant "github.com/NpoolPlatform/account-gateway/pkg/message/const"
 
 	user1 "github.com/NpoolPlatform/account-gateway/pkg/user"
+
+	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 
 	"go.opentelemetry.io/otel"
 	scodes "go.opentelemetry.io/otel/codes"
@@ -48,13 +51,19 @@ func (s *Server) GetAccounts(
 		logger.Sugar().Errorw("GetAccounts", "UserID", in.GetUserID(), "error", err)
 		return &npool.GetAccountsResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
+	switch in.GetUsedFor() {
+	case accountmgrpb.AccountUsedFor_UserWithdraw, accountmgrpb.AccountUsedFor_UserDirectBenefit:
+	default:
+		logger.Sugar().Errorw("GetAccounts", "UsedFor", in.GetUsedFor())
+		return &npool.GetAccountsResponse{}, status.Error(codes.InvalidArgument, "invalid usedFor")
+	}
 
 	limit := int32(constant1.DefaultLimit)
 	if in.GetLimit() > 0 {
 		limit = in.GetLimit()
 	}
 
-	infos, total, err := user1.GetAccounts(ctx, in.GetAppID(), in.GetUserID(), in.GetOffset(), limit)
+	infos, total, err := user1.GetAccounts(ctx, in.GetAppID(), in.GetUserID(), in.GetUsedFor(), in.GetOffset(), limit)
 	if err != nil {
 		logger.Sugar().Errorw("GetAccounts", "error", err)
 		return &npool.GetAccountsResponse{}, status.Error(codes.Internal, err.Error())
