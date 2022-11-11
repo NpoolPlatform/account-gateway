@@ -148,6 +148,77 @@ func GetDepositAccount(ctx context.Context, appID, userID, coinTypeID string) (*
 	}, nil
 }
 
+//nolint
+func GetDepositAccounts(ctx context.Context, appID string, offset, limit int32) ([]*npool.Account, uint32, error) {
+	accs, total, err := depositcli.GetAccounts(ctx, &depositpb.Conds{
+		AppID: &commonpb.StringVal{
+			Op:    cruder.EQ,
+			Value: appID,
+		},
+	}, offset, limit)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	if len(accs) == 0 {
+		return nil, 0, nil
+	}
+
+	userIDs := []string{}
+	for _, info := range accs {
+		userIDs = append(userIDs, info.UserID)
+	}
+
+	users, _, err := usercli.GetManyUsers(ctx, userIDs)
+	if err != nil {
+		return nil, 0, fmt.Errorf("fail get users: %v", err)
+	}
+
+	userMap := map[string]*appusermwpb.User{}
+	for _, user := range users {
+		userMap[user.ID] = user
+	}
+
+	coins, err := coininfocli.GetCoinInfos(ctx, cruder.NewFilterConds())
+	if err != nil {
+		return nil, 0, err
+	}
+
+	coinMap := map[string]*coininfopb.CoinInfo{}
+	for _, coin := range coins {
+		coinMap[coin.ID] = coin
+	}
+
+	infos := []*npool.Account{}
+	for _, acc := range accs {
+		coin, ok := coinMap[acc.CoinTypeID]
+		if !ok {
+			continue
+		}
+		user, ok := userMap[acc.UserID]
+		if !ok {
+			continue
+		}
+		infos = append(infos, &npool.Account{
+			ID:           acc.ID,
+			AppID:        acc.AppID,
+			UserID:       acc.UserID,
+			CoinTypeID:   acc.CoinTypeID,
+			CoinName:     coin.Name,
+			CoinUnit:     coin.Unit,
+			CoinEnv:      coin.ENV,
+			CoinLogo:     coin.Logo,
+			AccountID:    acc.AccountID,
+			Address:      acc.Address,
+			CreatedAt:    acc.CreatedAt,
+			PhoneNO:      user.PhoneNO,
+			EmailAddress: user.EmailAddress,
+		})
+	}
+	return infos, total, nil
+}
+
+//nolint
 func GetAppDepositAccounts(ctx context.Context, appID string, offset, limit int32) ([]*npool.Account, uint32, error) {
 	accs, total, err := depositcli.GetAccounts(ctx, &depositpb.Conds{
 		AppID: &commonpb.StringVal{
