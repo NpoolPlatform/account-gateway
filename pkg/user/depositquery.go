@@ -148,6 +148,7 @@ func GetDepositAccount(ctx context.Context, appID, userID, coinTypeID string) (*
 	}, nil
 }
 
+//nolint
 func GetDepositAccounts(ctx context.Context, appID string, offset, limit int32) ([]*npool.Account, uint32, error) {
 	accs, total, err := depositcli.GetAccounts(ctx, &depositpb.Conds{
 		AppID: &commonpb.StringVal{
@@ -217,6 +218,7 @@ func GetDepositAccounts(ctx context.Context, appID string, offset, limit int32) 
 	return infos, total, nil
 }
 
+//nolint
 func GetAppDepositAccounts(ctx context.Context, appID string, offset, limit int32) ([]*npool.Account, uint32, error) {
 	accs, total, err := depositcli.GetAccounts(ctx, &depositpb.Conds{
 		AppID: &commonpb.StringVal{
