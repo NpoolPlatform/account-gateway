@@ -58,6 +58,10 @@ func CreateTransfer(ctx context.Context,
 		return nil, err
 	}
 
+	if userInfo == nil {
+		return nil, fmt.Errorf("user not found")
+	}
+
 	if accountType == signmethodpb.SignMethodType_Google {
 		account = userInfo.GoogleSecret
 	}
