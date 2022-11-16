@@ -8,6 +8,7 @@ import (
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/user"
 
 	constant "github.com/NpoolPlatform/account-gateway/pkg/message/const"
+	useraccmwcli "github.com/NpoolPlatform/account-middleware/pkg/client/user"
 
 	user1 "github.com/NpoolPlatform/account-gateway/pkg/user"
 
@@ -51,7 +52,19 @@ func (s *Server) UpdateAccount(
 		return &npool.UpdateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	// TODO: query id belong to AppID / UserID
+	account, err := useraccmwcli.GetAccount(ctx, in.GetID())
+	if err != nil {
+		logger.Sugar().Errorw("UpdateAccount", "ID", in.GetID(), "error", err)
+		return nil, err
+	}
+	if account.AppID != in.GetAppID() {
+		logger.Sugar().Errorw("UpdateAccount", "AppID", in.GetAppID(), "error", "Wrong AppID")
+		return &npool.UpdateAccountResponse{}, status.Error(codes.InvalidArgument, "Wrong AppID")
+	}
+	if account.UserID != in.GetUserID() {
+		logger.Sugar().Errorw("UpdateAccount", "UserID", in.GetUserID(), "error", "Wrong UserID")
+		return &npool.UpdateAccountResponse{}, status.Error(codes.InvalidArgument, "Wrong UserID")
+	}
 
 	info, err := user1.UpdateAccount(ctx, in.GetID(), nil, nil, in.Labels)
 	if err != nil {
