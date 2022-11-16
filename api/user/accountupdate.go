@@ -54,6 +54,7 @@ func (s *Server) UpdateAccount(
 
 	account, err := useraccmwcli.GetAccount(ctx, in.GetID())
 	if err != nil {
+		logger.Sugar().Errorw("UpdateAccount", "ID", in.GetID(), "error", err)
 		return nil, err
 	}
 	if account.AppID != in.GetAppID() {
