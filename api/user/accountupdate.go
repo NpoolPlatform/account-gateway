@@ -61,7 +61,7 @@ func (s *Server) UpdateAccount(
 		logger.Sugar().Errorw("UpdateAccount", "AppID", in.GetAppID(), "error", "Wrong AppID")
 		return &npool.UpdateAccountResponse{}, status.Error(codes.InvalidArgument, "Wrong AppID")
 	}
-	if account.AppID != in.GetUserID() {
+	if account.UserID != in.GetUserID() {
 		logger.Sugar().Errorw("UpdateAccount", "UserID", in.GetUserID(), "error", "Wrong UserID")
 		return &npool.UpdateAccountResponse{}, status.Error(codes.InvalidArgument, "Wrong UserID")
 	}
