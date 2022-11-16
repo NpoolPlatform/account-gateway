@@ -41,6 +41,14 @@ func (s *Server) UpdateAccount(ctx context.Context, in *npool.UpdateAccountReque
 		return &npool.UpdateAccountResponse{}, status.Error(codes.InvalidArgument, "cannot lock account")
 	}
 
+	flag := false
+	if in.GetBlocked() {
+		in.Active = &flag
+	}
+	if in.GetActive() {
+		in.Blocked = &flag
+	}
+
 	info, err := payment.UpdateAccount(ctx, in.GetID(), in.Active, in.Blocked, in.Locked)
 	if err != nil {
 		logger.Sugar().Errorw("UpdateAccount", "error", err)
