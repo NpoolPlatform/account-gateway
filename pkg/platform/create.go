@@ -56,8 +56,11 @@ func CreateAccount(
 	}
 	if address != nil {
 		for _, acc := range accounts {
-			if acc.Address == *address {
+			if acc.Address == *address && acc.UsedFor == usedFor { // 同种用途地址,直接返回
 				return GetAccount(ctx, acc.ID)
+			}
+			if acc.Address == *address && acc.UsedFor != usedFor { // 不同用途途地址, 报错
+				return nil, fmt.Errorf("address have been used for: %s", acc.UsedFor)
 			}
 		}
 	}
