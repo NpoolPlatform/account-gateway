@@ -109,6 +109,20 @@ func (s *Server) UpdateAppUserAccount(
 		return &npool.UpdateAppUserAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
 
+	account, err := useraccmwcli.GetAccount(ctx, in.GetID())
+	if err != nil {
+		logger.Sugar().Errorw("UpdateAccount", "ID", in.GetID(), "error", err)
+		return nil, err
+	}
+	if account.AppID != in.GetTargetAppID() {
+		logger.Sugar().Errorw("UpdateAppUserAccount", "TargetAppID", in.GetTargetAppID(), "error", "Wrong TargetAppID")
+		return &npool.UpdateAppUserAccountResponse{}, status.Error(codes.InvalidArgument, "Wrong TargetAppID")
+	}
+	if account.UserID != in.GetTargetUserID() {
+		logger.Sugar().Errorw("UpdateAppUserAccount", "TargetUserID", in.GetTargetUserID(), "error", "Wrong TargetUserID")
+		return &npool.UpdateAppUserAccountResponse{}, status.Error(codes.InvalidArgument, "Wrong TargetUserID")
+	}
+
 	info, err := user1.UpdateAccount(ctx, in.GetID(), in.Active, in.Blocked, nil)
 	if err != nil {
 		logger.Sugar().Errorw("UpdateAppUserAccount", "error", err)
