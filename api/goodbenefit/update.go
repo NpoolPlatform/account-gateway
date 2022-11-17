@@ -44,6 +44,9 @@ func (s *Server) UpdateAccount(ctx context.Context, in *npool.UpdateAccountReque
 	flag := false
 	if in.GetBlocked() {
 		in.Active = &flag
+
+		trueFlag := true // blocked为true,backup为true,active为false
+		in.Backup = &trueFlag
 	}
 	if in.GetActive() {
 		in.Blocked = &flag

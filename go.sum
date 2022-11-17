@@ -66,8 +66,8 @@ github.com/Masterminds/sprig v2.15.0+incompatible/go.mod h1:y6hNFY5UBTIWBxnzTeuN
 github.com/Masterminds/sprig v2.22.0+incompatible/go.mod h1:y6hNFY5UBTIWBxnzTeuNhlNS5hqE0NB0E6fgfo2Br3o=
 github.com/NpoolPlatform/account-manager v0.0.0-20221116091437-c152a1167b14 h1:WWgCZ3V7ImvH/m7pJDzLpM2tvRQRYaZi3svQOQDzkRw=
 github.com/NpoolPlatform/account-manager v0.0.0-20221116091437-c152a1167b14/go.mod h1:LnV8kSILY+S7/DgJiUPmfhedG3W+wK28YG6IqzqDHuo=
-github.com/NpoolPlatform/account-middleware v0.0.0-20221116100926-69c5bbefa1c6 h1:REUHj8b4Qwdt5nRqno7Q1qRaDdqHuPtjYdTeRFo+rd4=
-github.com/NpoolPlatform/account-middleware v0.0.0-20221116100926-69c5bbefa1c6/go.mod h1:Lyg/sWsU9pMWgYrR+bY8E9dMkKwhNVClbAr3TGswJx8=
+github.com/NpoolPlatform/account-middleware v0.0.0-20221117071947-11016a795e7a h1:nXN6CPFVkuZxBjRnTrGq93ePiWgXqdErW1GvbsgzP3s=
+github.com/NpoolPlatform/account-middleware v0.0.0-20221117071947-11016a795e7a/go.mod h1:Lyg/sWsU9pMWgYrR+bY8E9dMkKwhNVClbAr3TGswJx8=
 github.com/NpoolPlatform/api-manager v0.0.0-20220826022307-d72866fe3ec0 h1:yIEwS7NTQhBBmfpf6yigvPCbxffMOrtBK/yUPM5ukbo=
 github.com/NpoolPlatform/api-manager v0.0.0-20220826022307-d72866fe3ec0/go.mod h1:+Xj8fVgWZWGakBtqZbFn/zY0qd47AywCjLPOGdTqJDU=
 github.com/NpoolPlatform/appuser-manager v0.0.0-20220829153511-c579ddb3686d h1:Ee5L0BIxB5/xOtWFWq/gr/5fNU22W8dRN+TAcnRMO/U=
