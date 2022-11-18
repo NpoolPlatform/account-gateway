@@ -129,7 +129,7 @@ func (s *Server) UpdateAppUserAccount(
 			logger.Sugar().Errorw("UpdateAppUserAccount", "error", err)
 			return &npool.UpdateAppUserAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
 		}
-		return &npool.UpdateAppUserAccountResponse {
+		return &npool.UpdateAppUserAccountResponse{
 			Info: info,
 		}, nil
 	}
