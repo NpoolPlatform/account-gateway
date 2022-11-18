@@ -11,6 +11,8 @@ import (
 
 	gb "github.com/NpoolPlatform/account-gateway/pkg/goodbenefit"
 
+	pltfmwcli "github.com/NpoolPlatform/account-middleware/pkg/client/platform"
+
 	"go.opentelemetry.io/otel"
 	scodes "go.opentelemetry.io/otel/codes"
 	"google.golang.org/grpc/codes"
@@ -41,15 +43,15 @@ func (s *Server) UpdateAccount(ctx context.Context, in *npool.UpdateAccountReque
 		return &npool.UpdateAccountResponse{}, status.Error(codes.InvalidArgument, "cannot lock account")
 	}
 
-	flag := false
-	if in.GetBlocked() {
-		in.Active = &flag
-
-		trueFlag := true // blocked为true,backup为true,active为false
-		in.Backup = &trueFlag
+	account, err := pltfmwcli.GetAccount(ctx, in.GetID())
+	if err != nil {
+		return nil, err
 	}
-	if in.GetActive() {
-		in.Blocked = &flag
+
+	flag := false
+	if account.Blocked && in.Blocked != &flag {
+		logger.Sugar().Errorw("UpdateAccount", "Blocked", in.GetBlocked(), "error", "can not make change when account is blocked")
+		return &npool.UpdateAccountResponse{}, status.Error(codes.InvalidArgument, "can not make change when account is blocked")
 	}
 
 	info, err := gb.UpdateAccount(ctx, in.GetID(), in.Backup, in.Active, in.Blocked, in.Locked)
