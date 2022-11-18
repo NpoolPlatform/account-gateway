@@ -46,13 +46,12 @@ func (s *Server) UpdateAccount(ctx context.Context, in *npool.UpdateAccountReque
 	if err != nil {
 		return nil, err
 	}
-
-	flag := false
-	if account.Blocked && in.Blocked != &flag {
+	if account.Blocked && (in.Blocked == nil || in.GetBlocked()) {
 		logger.Sugar().Errorw("UpdateAccount", "Blocked", in.GetBlocked(), "error", "can not make change when account is blocked")
 		return &npool.UpdateAccountResponse{}, status.Error(codes.InvalidArgument, "can not make change when account is blocked")
 	}
 
+	flag := false
 	if in.GetBlocked() {
 		in.Active = &flag
 
