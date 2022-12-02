@@ -6,12 +6,10 @@ import (
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/goodbenefit"
 
 	gbmwcli "github.com/NpoolPlatform/account-middleware/pkg/client/goodbenefit"
-	// gbmwpb "github.com/NpoolPlatform/message/npool/account/mw/v1/goodbenefit"
 
 	goodmwcli "github.com/NpoolPlatform/good-middleware/pkg/client/good"
-	// goodmwpb "github.com/NpoolPlatform/message/npool/good/mw/v1/good"
 
-	coininfocli "github.com/NpoolPlatform/sphinx-coininfo/pkg/client"
+	coininfocli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
 )
 
 func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
@@ -25,7 +23,7 @@ func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 		return nil, err
 	}
 
-	coin, err := coininfocli.GetCoinInfo(ctx, info.CoinTypeID)
+	coin, err := coininfocli.GetCoin(ctx, info.CoinTypeID)
 	if err != nil {
 		return nil, err
 	}
