@@ -91,9 +91,6 @@ func accountUsedFor(ctx context.Context, id string, cli *billingent.Client) (acc
 		accounts, err = cli.
 			CoinAccountInfo.
 			Query().
-			Where(
-				coinaccountinfoent.DeleteAt(0),
-			).
 			All(ctx)
 		if err != nil {
 			logger.Sugar().Errorw("getCoinAccountInfos", "error", err)
@@ -220,9 +217,6 @@ func migrateAccount(ctx context.Context, conn *sql.DB) error {
 			if err != nil {
 				return err
 			}
-			if usedFor == accountmgrpb.AccountUsedFor_DefaultAccountUsedFor {
-				continue
-			}
 
 			_, err = tx.
 				Account.
@@ -234,6 +228,7 @@ func migrateAccount(ctx context.Context, conn *sql.DB) error {
 				SetUsedFor(usedFor.String()).
 				SetCreatedAt(info.CreateAt).
 				SetUpdatedAt(info.UpdateAt).
+				SetDeletedAt(info.DeleteAt).
 				Save(_ctx)
 			if err != nil {
 				return err
