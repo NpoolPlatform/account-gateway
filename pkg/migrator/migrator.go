@@ -202,6 +202,7 @@ func migrateAccount(ctx context.Context, conn *sql.DB) error {
 				Query().
 				Where(
 					entaccount.Address(info.Address),
+					entaccount.CoinTypeID(info.CoinTypeID),
 					entaccount.DeletedAt(0),
 				).
 				Only(_ctx)
