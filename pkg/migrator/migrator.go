@@ -21,6 +21,7 @@ import (
 
 	"github.com/NpoolPlatform/account-manager/pkg/db"
 	"github.com/NpoolPlatform/account-manager/pkg/db/ent"
+	entaccount "github.com/NpoolPlatform/account-manager/pkg/db/ent/account"
 
 	uuid1 "github.com/NpoolPlatform/go-service-framework/pkg/const/uuid"
 )
@@ -194,20 +195,24 @@ func migrateAccount(ctx context.Context, conn *sql.DB) error {
 		return err
 	}
 
-	accs, err := cli.
-		Account.
-		Query().
-		Limit(1).
-		All(ctx)
-	if err != nil {
-		return err
-	}
-	if len(accs) > 0 {
-		return nil
-	}
-
 	err = db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
 		for _, info := range accounts {
+			acc, err := cli.
+				Account.
+				Query().
+				Where(
+					entaccount.Address(info.Address),
+					entaccount.DeletedAt(0),
+				).
+				Only(_ctx)
+			if err != nil {
+				logger.Sugar().Errorw("migrateAccount", "Address", info.Address, "error", err)
+				return err
+			}
+			if acc != nil {
+				continue
+			}
+
 			usedFor, err := accountUsedFor(ctx, info.ID.String(), cli1)
 			if err != nil {
 				return err
