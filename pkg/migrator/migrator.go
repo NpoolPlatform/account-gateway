@@ -206,8 +206,10 @@ func migrateAccount(ctx context.Context, conn *sql.DB) error {
 				).
 				Only(_ctx)
 			if err != nil {
-				logger.Sugar().Errorw("migrateAccount", "Address", info.Address, "error", err)
-				return err
+				if !ent.IsNotFound(err) {
+					logger.Sugar().Errorw("migrateAccount", "Address", info.Address, "error", err)
+					return err
+				}
 			}
 			if acc != nil {
 				continue
