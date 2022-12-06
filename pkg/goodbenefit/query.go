@@ -7,15 +7,15 @@ import (
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/goodbenefit"
 
 	gbmwcli "github.com/NpoolPlatform/account-middleware/pkg/client/goodbenefit"
+
 	gbmwpb "github.com/NpoolPlatform/message/npool/account/mw/v1/goodbenefit"
 
 	goodmwcli "github.com/NpoolPlatform/good-middleware/pkg/client/good"
 	goodmwpb "github.com/NpoolPlatform/message/npool/good/mw/v1/good"
 
-	coininfopb "github.com/NpoolPlatform/message/npool/coininfo"
-	coininfocli "github.com/NpoolPlatform/sphinx-coininfo/pkg/client"
+	coininfopb "github.com/NpoolPlatform/message/npool/chain/mw/v1/coin"
 
-	cruder "github.com/NpoolPlatform/libent-cruder/pkg/cruder"
+	coininfocli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
 )
 
 func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
@@ -29,7 +29,7 @@ func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 		return nil, err
 	}
 
-	coin, err := coininfocli.GetCoinInfo(ctx, info.CoinTypeID)
+	coin, err := coininfocli.GetCoin(ctx, info.CoinTypeID)
 	if err != nil {
 		return nil, err
 	}
@@ -82,13 +82,22 @@ func GetAccounts(ctx context.Context, offset, limit int32) ([]*npool.Account, ui
 	for _, good := range goods {
 		goodMap[good.ID] = good
 	}
-
-	coins, err := coininfocli.GetCoinInfos(ctx, cruder.NewFilterConds())
-	if err != nil {
-		return nil, 0, err
+	ofs := 0
+	lim := 1000
+	coins := []*coininfopb.Coin{}
+	for {
+		coinInfos, _, err := coininfocli.GetCoins(ctx, nil, int32(ofs), int32(lim))
+		if err != nil {
+			return nil, 0, err
+		}
+		if len(coinInfos) == 0 {
+			break
+		}
+		coins = append(coins, coinInfos...)
+		ofs += lim
 	}
 
-	coinMap := map[string]*coininfopb.CoinInfo{}
+	coinMap := map[string]*coininfopb.Coin{}
 	for _, coin := range coins {
 		coinMap[coin.ID] = coin
 	}

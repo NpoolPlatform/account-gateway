@@ -12,8 +12,8 @@ import (
 
 	goodmwcli "github.com/NpoolPlatform/good-middleware/pkg/client/good"
 
+	coininfocli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
 	sphinxproxypb "github.com/NpoolPlatform/message/npool/sphinxproxy"
-	coininfocli "github.com/NpoolPlatform/sphinx-coininfo/pkg/client"
 	sphinxproxycli "github.com/NpoolPlatform/sphinx-proxy/pkg/client"
 
 	cruder "github.com/NpoolPlatform/libent-cruder/pkg/cruder"
@@ -29,7 +29,7 @@ func CreateAccount(ctx context.Context, goodID string) (*npool.Account, error) {
 		return nil, fmt.Errorf("invalid good")
 	}
 
-	coin, err := coininfocli.GetCoinInfo(ctx, good.CoinTypeID)
+	coin, err := coininfocli.GetCoin(ctx, good.CoinTypeID)
 	if err != nil {
 		return nil, err
 	}

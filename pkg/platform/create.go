@@ -13,7 +13,8 @@ import (
 	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 
 	sphinxproxypb "github.com/NpoolPlatform/message/npool/sphinxproxy"
-	coininfocli "github.com/NpoolPlatform/sphinx-coininfo/pkg/client"
+
+	coininfocli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
 	sphinxproxycli "github.com/NpoolPlatform/sphinx-proxy/pkg/client"
 
 	cruder "github.com/NpoolPlatform/libent-cruder/pkg/cruder"
@@ -28,7 +29,7 @@ func CreateAccount(
 ) (
 	*npool.Account, error,
 ) {
-	coin, err := coininfocli.GetCoinInfo(ctx, coinTypeID)
+	coin, err := coininfocli.GetCoin(ctx, coinTypeID)
 	if err != nil {
 		return nil, err
 	}
