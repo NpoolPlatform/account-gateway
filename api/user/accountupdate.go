@@ -123,6 +123,11 @@ func (s *Server) UpdateAppUserAccount(
 		return &npool.UpdateAppUserAccountResponse{}, status.Error(codes.InvalidArgument, "Wrong TargetUserID")
 	}
 
+	if account.Blocked && in.GetActive() {
+		logger.Sugar().Errorw("UpdateAppUserAccount", "Active", in.GetActive(), "error", "Account is blocked")
+		return &npool.UpdateAppUserAccountResponse{}, status.Error(codes.InvalidArgument, "Account is blocked")
+	}
+
 	if account.Blocked && (in.Blocked == nil || in.GetBlocked()) {
 		info, err := user1.GetAccount(ctx, in.GetID())
 		if err != nil {
