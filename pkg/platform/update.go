@@ -16,16 +16,13 @@ func UpdateAccount(
 ) (
 	*npool.Account, error,
 ) {
-	req := &pltfmwpb.AccountReq{
+	acc, err := pltfmwcli.UpdateAccount(ctx, &pltfmwpb.AccountReq{
 		ID:      &id,
 		Active:  active,
 		Blocked: blocked,
 		Locked:  locked,
-	}
-	if backup != nil {
-		req.Backup = backup
-	}
-	acc, err := pltfmwcli.UpdateAccount(ctx, req)
+		Backup:  backup,
+	})
 	if err != nil {
 		return nil, err
 	}
