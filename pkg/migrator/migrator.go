@@ -187,14 +187,9 @@ func migrateAccount(ctx context.Context, conn *sql.DB) error {
 		return err
 	}
 
-	cli, err := db.Client()
-	if err != nil {
-		return err
-	}
-
 	err = db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
 		for _, info := range accounts {
-			acc, err := cli.
+			acc, err := tx.
 				Account.
 				Query().
 				Where(
@@ -246,27 +241,22 @@ func migrateAccount(ctx context.Context, conn *sql.DB) error {
 
 // nolint
 func migrateGoodBenefit(ctx context.Context, conn *sql.DB) error {
-	cli, err := db.Client()
-	if err != nil {
-		return err
-	}
-
-	accs, err := cli.
-		GoodBenefit.
-		Query().
-		Limit(1).
-		All(ctx)
-	if err != nil {
-		return err
-	}
-	if len(accs) > 0 {
-		return nil
-	}
-
 	cli1 := billingent.NewClient(billingent.Driver(entsql.OpenDB(dialect.MySQL, conn)))
 	_, _ = accountUsedFor(ctx, uuid1.InvalidUUIDStr, cli1)
 
 	return db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
+		accs, err := tx.
+			GoodBenefit.
+			Query().
+			Limit(1).
+			All(ctx)
+		if err != nil {
+			return err
+		}
+		if len(accs) > 0 {
+			return nil
+		}
+
 		for _, info := range goodBenefits {
 			found := false
 			for _, acc := range accounts {
@@ -300,27 +290,22 @@ func migrateGoodBenefit(ctx context.Context, conn *sql.DB) error {
 
 // nolint
 func migrateGoodPayment(ctx context.Context, conn *sql.DB) error {
-	cli, err := db.Client()
-	if err != nil {
-		return err
-	}
-
-	accs, err := cli.
-		Payment.
-		Query().
-		Limit(1).
-		All(ctx)
-	if err != nil {
-		return err
-	}
-	if len(accs) > 0 {
-		return nil
-	}
-
 	cli1 := billingent.NewClient(billingent.Driver(entsql.OpenDB(dialect.MySQL, conn)))
 	_, _ = accountUsedFor(ctx, uuid1.InvalidUUIDStr, cli1)
 
 	return db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
+		accs, err := tx.
+			Payment.
+			Query().
+			Limit(1).
+			All(ctx)
+		if err != nil {
+			return err
+		}
+		if len(accs) > 0 {
+			return nil
+		}
+
 		for _, info := range goodPayments {
 			found := false
 			for _, acc := range accounts {
@@ -353,27 +338,22 @@ func migrateGoodPayment(ctx context.Context, conn *sql.DB) error {
 }
 
 func migrateUserWithdraw(ctx context.Context, conn *sql.DB) error {
-	cli, err := db.Client()
-	if err != nil {
-		return err
-	}
-
-	accs, err := cli.
-		User.
-		Query().
-		Limit(1).
-		All(ctx)
-	if err != nil {
-		return err
-	}
-	if len(accs) > 0 {
-		return nil
-	}
-
 	cli1 := billingent.NewClient(billingent.Driver(entsql.OpenDB(dialect.MySQL, conn)))
 	_, _ = accountUsedFor(ctx, uuid1.InvalidUUIDStr, cli1)
 
 	return db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
+		accs, err := tx.
+			User.
+			Query().
+			Limit(1).
+			All(ctx)
+		if err != nil {
+			return err
+		}
+		if len(accs) > 0 {
+			return nil
+		}
+
 		for _, info := range userWithdraws {
 			found := false
 			for _, acc := range accounts {
@@ -410,27 +390,22 @@ func migrateUserWithdraw(ctx context.Context, conn *sql.DB) error {
 
 //nolint
 func migrateCoinSetting(ctx context.Context, conn *sql.DB) error {
-	cli, err := db.Client()
-	if err != nil {
-		return err
-	}
-
-	accs, err := cli.
-		Platform.
-		Query().
-		Limit(1).
-		All(ctx)
-	if err != nil {
-		return err
-	}
-	if len(accs) > 0 {
-		return nil
-	}
-
 	cli1 := billingent.NewClient(billingent.Driver(entsql.OpenDB(dialect.MySQL, conn)))
 	_, _ = accountUsedFor(ctx, uuid1.InvalidUUIDStr, cli1)
 
 	return db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
+		accs, err := tx.
+			Platform.
+			Query().
+			Limit(1).
+			All(ctx)
+		if err != nil {
+			return err
+		}
+		if len(accs) > 0 {
+			return nil
+		}
+
 		for _, info := range coinSettings {
 			found := false
 			for _, acc := range accounts {
