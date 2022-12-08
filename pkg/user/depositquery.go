@@ -274,7 +274,7 @@ func GetAppDepositAccounts(ctx context.Context, appID string, offset, limit int3
 			Value: appID,
 		},
 		CoinTypeIDs: &commonpb.StringSliceVal{
-			Op:    cruder.EQ,
+			Op:    cruder.IN,
 			Value: coinTypeIDs,
 		},
 	}, 0, int32(len(coinTypeIDs)))
@@ -284,7 +284,7 @@ func GetAppDepositAccounts(ctx context.Context, appID string, offset, limit int3
 
 	coinMap := map[string]*appcoinpb.Coin{}
 	for _, coin := range coins {
-		coinMap[coin.ID] = coin
+		coinMap[coin.CoinTypeID] = coin
 	}
 
 	infos := []*npool.Account{}

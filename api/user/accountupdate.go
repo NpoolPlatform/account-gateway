@@ -77,6 +77,7 @@ func (s *Server) UpdateAccount(
 	}, nil
 }
 
+//nolint
 func (s *Server) UpdateAppUserAccount(
 	ctx context.Context,
 	in *npool.UpdateAppUserAccountRequest,
