@@ -150,7 +150,7 @@ func getAccounts(ctx context.Context, conds *useraccmwpb.Conds, offset, limit in
 
 	coinMap := map[string]*appcoinpb.Coin{}
 	for _, coin := range coins {
-		coinMap[coin.ID] = coin
+		coinMap[coin.CoinTypeID] = coin
 	}
 
 	accs := []*npool.Account{}
