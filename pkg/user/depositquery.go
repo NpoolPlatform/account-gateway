@@ -190,7 +190,7 @@ func GetDepositAccounts(ctx context.Context, appID string, offset, limit int32) 
 			Value: appID,
 		},
 		CoinTypeIDs: &commonpb.StringSliceVal{
-			Op:    cruder.EQ,
+			Op:    cruder.IN,
 			Value: coinTypeIDs,
 		},
 	}, 0, int32(len(coinTypeIDs)))
