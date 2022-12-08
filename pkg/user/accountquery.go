@@ -140,7 +140,7 @@ func getAccounts(ctx context.Context, conds *useraccmwpb.Conds, offset, limit in
 			Value: conds.GetAppID().GetValue(),
 		},
 		CoinTypeIDs: &commonpb.StringSliceVal{
-			Op:    cruder.EQ,
+			Op:    cruder.IN,
 			Value: coinTypeIDs,
 		},
 	}, 0, int32(len(coinTypeIDs)))
