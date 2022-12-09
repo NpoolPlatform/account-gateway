@@ -200,7 +200,7 @@ func GetDepositAccounts(ctx context.Context, appID string, offset, limit int32) 
 
 	coinMap := map[string]*appcoinpb.Coin{}
 	for _, coin := range coins {
-		coinMap[coin.ID] = coin
+		coinMap[coin.CoinTypeID] = coin
 	}
 
 	infos := []*npool.Account{}
