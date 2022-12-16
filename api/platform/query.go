@@ -1,4 +1,4 @@
-package goodbenefit
+package platform
 
 import (
 	"context"
@@ -8,9 +8,9 @@ import (
 	constant1 "github.com/NpoolPlatform/account-gateway/pkg/const"
 	constant "github.com/NpoolPlatform/account-gateway/pkg/message/const"
 
-	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/goodbenefit"
+	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/platform"
 
-	gb "github.com/NpoolPlatform/account-gateway/pkg/goodbenefit"
+	platform1 "github.com/NpoolPlatform/account-gateway/pkg/platform"
 
 	"go.opentelemetry.io/otel"
 	scodes "go.opentelemetry.io/otel/codes"
@@ -35,7 +35,7 @@ func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) 
 		limit = in.GetLimit()
 	}
 
-	infos, total, err := gb.GetAccounts(ctx, in.GetOffset(), limit)
+	infos, total, err := platform1.GetAccounts(ctx, in.GetOffset(), limit)
 	if err != nil {
 		logger.Sugar().Errorw("GetAccounts", "Offset", in.GetOffset(), "Limit", limit, "error", err)
 		return &npool.GetAccountsResponse{}, status.Error(codes.Internal, err.Error())

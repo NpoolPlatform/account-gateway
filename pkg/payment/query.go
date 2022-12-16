@@ -1,17 +1,12 @@
-//nolint:dupl
-package goodbenefit
+package payment
 
 import (
 	"context"
 
-	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/goodbenefit"
+	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/payment"
 
-	gbmwcli "github.com/NpoolPlatform/account-middleware/pkg/client/goodbenefit"
-
-	gbmwpb "github.com/NpoolPlatform/message/npool/account/mw/v1/goodbenefit"
-
-	goodmwcli "github.com/NpoolPlatform/good-middleware/pkg/client/good"
-	goodmwpb "github.com/NpoolPlatform/message/npool/good/mw/v1/good"
+	paymentmwcli "github.com/NpoolPlatform/account-middleware/pkg/client/payment"
+	paymentmwpb "github.com/NpoolPlatform/message/npool/account/mw/v1/payment"
 
 	coininfopb "github.com/NpoolPlatform/message/npool/chain/mw/v1/coin"
 
@@ -19,12 +14,7 @@ import (
 )
 
 func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
-	info, err := gbmwcli.GetAccount(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-
-	good, err := goodmwcli.GetGood(ctx, info.GoodID)
+	info, err := paymentmwcli.GetAccount(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -36,23 +26,20 @@ func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 
 	account := &npool.Account{
 		ID:            info.ID,
-		GoodID:        info.GoodID,
-		GoodName:      good.Title,
-		GoodUnit:      good.Unit,
 		CoinTypeID:    info.CoinTypeID,
 		CoinName:      coin.Name,
 		CoinUnit:      coin.Unit,
 		CoinEnv:       coin.ENV,
 		CoinLogo:      coin.Logo,
 		AccountID:     info.AccountID,
-		Backup:        info.Backup,
 		Address:       info.Address,
+		CollectingTID: info.CollectingTID,
 		Active:        info.Active,
 		Locked:        info.Locked,
 		LockedBy:      info.LockedBy,
 		Blocked:       info.Blocked,
-		IntervalHours: info.IntervalHours,
 		CreatedAt:     info.CreatedAt,
+		AvailableAt:   info.AvailableAt,
 		UpdatedAt:     info.UpdatedAt,
 	}
 
@@ -60,7 +47,7 @@ func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 }
 
 func GetAccounts(ctx context.Context, offset, limit int32) ([]*npool.Account, uint32, error) {
-	infos, total, err := gbmwcli.GetAccounts(ctx, &gbmwpb.Conds{}, offset, limit)
+	infos, total, err := paymentmwcli.GetAccounts(ctx, &paymentmwpb.Conds{}, offset, limit)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -68,20 +55,6 @@ func GetAccounts(ctx context.Context, offset, limit int32) ([]*npool.Account, ui
 		return nil, total, nil
 	}
 
-	ids := []string{}
-	for _, info := range infos {
-		ids = append(ids, info.GoodID)
-	}
-
-	goods, _, err := goodmwcli.GetManyGoods(ctx, ids, 0, int32(len(ids)))
-	if err != nil {
-		return nil, 0, err
-	}
-
-	goodMap := map[string]*goodmwpb.Good{}
-	for _, good := range goods {
-		goodMap[good.ID] = good
-	}
 	ofs := 0
 	lim := 1000
 	coins := []*coininfopb.Coin{}
@@ -105,11 +78,6 @@ func GetAccounts(ctx context.Context, offset, limit int32) ([]*npool.Account, ui
 	accs := []*npool.Account{}
 
 	for _, info := range infos {
-		good, ok := goodMap[info.GoodID]
-		if !ok {
-			continue
-		}
-
 		coin, ok := coinMap[info.CoinTypeID]
 		if !ok {
 			continue
@@ -117,23 +85,20 @@ func GetAccounts(ctx context.Context, offset, limit int32) ([]*npool.Account, ui
 
 		accs = append(accs, &npool.Account{
 			ID:            info.ID,
-			GoodID:        info.GoodID,
-			GoodName:      good.Title,
-			GoodUnit:      good.Unit,
 			CoinTypeID:    info.CoinTypeID,
 			CoinName:      coin.Name,
 			CoinUnit:      coin.Unit,
 			CoinEnv:       coin.ENV,
 			CoinLogo:      coin.Logo,
 			AccountID:     info.AccountID,
-			Backup:        info.Backup,
 			Address:       info.Address,
+			CollectingTID: info.CollectingTID,
 			Active:        info.Active,
 			Locked:        info.Locked,
 			LockedBy:      info.LockedBy,
 			Blocked:       info.Blocked,
-			IntervalHours: info.IntervalHours,
 			CreatedAt:     info.CreatedAt,
+			AvailableAt:   info.AvailableAt,
 			UpdatedAt:     info.UpdatedAt,
 		})
 	}

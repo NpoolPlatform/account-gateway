@@ -1,5 +1,6 @@
 package constant
 
 const (
-	FieldID = "ID"
+	FieldID      = "ID"
+	DefaultLimit = 100
 )

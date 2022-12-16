@@ -3,6 +3,8 @@ package goodbenefit
 import (
 	"context"
 
+	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/goodbenefit"
 
 	constant "github.com/NpoolPlatform/account-gateway/pkg/message/const"
@@ -31,11 +33,13 @@ func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountReque
 	}()
 
 	if _, err := uuid.Parse(in.GetGoodID()); err != nil {
+		logger.Sugar().Errorw("CreateAccount", "GoodID", in.GetGoodID(), "error", err)
 		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	info, err := gb.CreateAccount(ctx, in.GetGoodID())
 	if err != nil {
+		logger.Sugar().Errorw("CreateAccount", "GoodID", in.GetGoodID(), "error", err)
 		return &npool.CreateAccountResponse{}, status.Error(codes.Internal, err.Error())
 	}
 
