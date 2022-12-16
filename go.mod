@@ -14,7 +14,7 @@ require (
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20221015040432-cd676d323379
 	github.com/NpoolPlatform/good-middleware v0.0.0-20221018100429-fb5a429423c3
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20221109023947-366125b690fb
-	github.com/NpoolPlatform/message v0.0.0-20221213074750-5ab00a04b1e5
+	github.com/NpoolPlatform/message v0.0.0-20221216024225-e7572ae5c761
 	github.com/NpoolPlatform/sphinx-proxy v0.0.0-20220803040820-2b7bd4158e8b
 	github.com/NpoolPlatform/third-middleware v0.0.0-20221009023028-a03f61587619
 	github.com/go-resty/resty/v2 v2.7.0
