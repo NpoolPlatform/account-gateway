@@ -1,4 +1,3 @@
-//nolint:dupl
 package goodbenefit
 
 import (
@@ -35,25 +34,24 @@ func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 	}
 
 	account := &npool.Account{
-		ID:            info.ID,
-		GoodID:        info.GoodID,
-		GoodName:      good.Title,
-		GoodUnit:      good.Unit,
-		CoinTypeID:    info.CoinTypeID,
-		CoinName:      coin.Name,
-		CoinUnit:      coin.Unit,
-		CoinEnv:       coin.ENV,
-		CoinLogo:      coin.Logo,
-		AccountID:     info.AccountID,
-		Backup:        info.Backup,
-		Address:       info.Address,
-		Active:        info.Active,
-		Locked:        info.Locked,
-		LockedBy:      info.LockedBy,
-		Blocked:       info.Blocked,
-		IntervalHours: info.IntervalHours,
-		CreatedAt:     info.CreatedAt,
-		UpdatedAt:     info.UpdatedAt,
+		ID:         info.ID,
+		GoodID:     info.GoodID,
+		GoodName:   good.Title,
+		GoodUnit:   good.Unit,
+		CoinTypeID: info.CoinTypeID,
+		CoinName:   coin.Name,
+		CoinUnit:   coin.Unit,
+		CoinEnv:    coin.ENV,
+		CoinLogo:   coin.Logo,
+		AccountID:  info.AccountID,
+		Backup:     info.Backup,
+		Address:    info.Address,
+		Active:     info.Active,
+		Locked:     info.Locked,
+		LockedBy:   info.LockedBy,
+		Blocked:    info.Blocked,
+		CreatedAt:  info.CreatedAt,
+		UpdatedAt:  info.UpdatedAt,
 	}
 
 	return account, nil
@@ -116,25 +114,24 @@ func GetAccounts(ctx context.Context, offset, limit int32) ([]*npool.Account, ui
 		}
 
 		accs = append(accs, &npool.Account{
-			ID:            info.ID,
-			GoodID:        info.GoodID,
-			GoodName:      good.Title,
-			GoodUnit:      good.Unit,
-			CoinTypeID:    info.CoinTypeID,
-			CoinName:      coin.Name,
-			CoinUnit:      coin.Unit,
-			CoinEnv:       coin.ENV,
-			CoinLogo:      coin.Logo,
-			AccountID:     info.AccountID,
-			Backup:        info.Backup,
-			Address:       info.Address,
-			Active:        info.Active,
-			Locked:        info.Locked,
-			LockedBy:      info.LockedBy,
-			Blocked:       info.Blocked,
-			IntervalHours: info.IntervalHours,
-			CreatedAt:     info.CreatedAt,
-			UpdatedAt:     info.UpdatedAt,
+			ID:         info.ID,
+			GoodID:     info.GoodID,
+			GoodName:   good.Title,
+			GoodUnit:   good.Unit,
+			CoinTypeID: info.CoinTypeID,
+			CoinName:   coin.Name,
+			CoinUnit:   coin.Unit,
+			CoinEnv:    coin.ENV,
+			CoinLogo:   coin.Logo,
+			AccountID:  info.AccountID,
+			Backup:     info.Backup,
+			Address:    info.Address,
+			Active:     info.Active,
+			Locked:     info.Locked,
+			LockedBy:   info.LockedBy,
+			Blocked:    info.Blocked,
+			CreatedAt:  info.CreatedAt,
+			UpdatedAt:  info.UpdatedAt,
 		})
 	}
 

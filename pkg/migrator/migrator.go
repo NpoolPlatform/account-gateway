@@ -239,7 +239,6 @@ func migrateAccount(ctx context.Context, conn *sql.DB) error {
 	return nil
 }
 
-// nolint
 func migrateGoodBenefit(ctx context.Context, conn *sql.DB) error {
 	cli1 := billingent.NewClient(billingent.Driver(entsql.OpenDB(dialect.MySQL, conn)))
 	_, _ = accountUsedFor(ctx, uuid1.InvalidUUIDStr, cli1)
@@ -275,7 +274,6 @@ func migrateGoodBenefit(ctx context.Context, conn *sql.DB) error {
 				Create().
 				SetGoodID(info.GoodID).
 				SetAccountID(info.BenefitAccountID).
-				SetIntervalHours(info.BenefitIntervalHours).
 				SetCreatedAt(info.CreateAt).
 				SetUpdatedAt(info.UpdateAt).
 				Save(_ctx)
@@ -288,7 +286,6 @@ func migrateGoodBenefit(ctx context.Context, conn *sql.DB) error {
 	})
 }
 
-// nolint
 func migrateGoodPayment(ctx context.Context, conn *sql.DB) error {
 	cli1 := billingent.NewClient(billingent.Driver(entsql.OpenDB(dialect.MySQL, conn)))
 	_, _ = accountUsedFor(ctx, uuid1.InvalidUUIDStr, cli1)
