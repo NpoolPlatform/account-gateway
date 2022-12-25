@@ -12,7 +12,6 @@ import (
 	usercli "github.com/NpoolPlatform/appuser-middleware/pkg/client/user"
 
 	appcoininfocli "github.com/NpoolPlatform/chain-middleware/pkg/client/appcoin"
-	coininfocli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
 	sphinxproxycli "github.com/NpoolPlatform/sphinx-proxy/pkg/client"
 
 	appcoinpb "github.com/NpoolPlatform/message/npool/chain/mw/v1/appcoin"
@@ -37,7 +36,16 @@ func GetDepositAccount(ctx context.Context, appID, userID, coinTypeID string) (*
 		return nil, fmt.Errorf("permission denied")
 	}
 
-	coin, err := coininfocli.GetCoin(ctx, coinTypeID)
+	coin, err := appcoininfocli.GetCoinOnly(ctx, &appcoinpb.Conds{
+		AppID: &commonpb.StringVal{
+			Op:    cruder.EQ,
+			Value: appID,
+		},
+		CoinTypeID: &commonpb.StringVal{
+			Op:    cruder.EQ,
+			Value: coinTypeID,
+		},
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -90,17 +98,18 @@ func GetDepositAccount(ctx context.Context, appID, userID, coinTypeID string) (*
 		}
 
 		return &npool.Account{
-			ID:         acc.ID,
-			AppID:      acc.AppID,
-			UserID:     acc.UserID,
-			CoinTypeID: acc.CoinTypeID,
-			CoinName:   coin.Name,
-			CoinUnit:   coin.Unit,
-			CoinEnv:    coin.ENV,
-			CoinLogo:   coin.Logo,
-			AccountID:  acc.AccountID,
-			Address:    acc.Address,
-			CreatedAt:  acc.CreatedAt,
+			ID:               acc.ID,
+			AppID:            acc.AppID,
+			UserID:           acc.UserID,
+			CoinTypeID:       acc.CoinTypeID,
+			CoinName:         coin.Name,
+			CoinDisplayNames: coin.DisplayNames,
+			CoinUnit:         coin.Unit,
+			CoinEnv:          coin.ENV,
+			CoinLogo:         coin.Logo,
+			AccountID:        acc.AccountID,
+			Address:          acc.Address,
+			CreatedAt:        acc.CreatedAt,
 		}, nil
 	}
 
@@ -134,17 +143,18 @@ func GetDepositAccount(ctx context.Context, appID, userID, coinTypeID string) (*
 	}
 
 	return &npool.Account{
-		ID:         acc.ID,
-		AppID:      acc.AppID,
-		UserID:     acc.UserID,
-		CoinTypeID: acc.CoinTypeID,
-		CoinName:   coin.Name,
-		CoinUnit:   coin.Unit,
-		CoinEnv:    coin.ENV,
-		CoinLogo:   coin.Logo,
-		AccountID:  acc.AccountID,
-		Address:    acc.Address,
-		CreatedAt:  acc.CreatedAt,
+		ID:               acc.ID,
+		AppID:            acc.AppID,
+		UserID:           acc.UserID,
+		CoinTypeID:       acc.CoinTypeID,
+		CoinName:         coin.Name,
+		CoinDisplayNames: coin.DisplayNames,
+		CoinUnit:         coin.Unit,
+		CoinEnv:          coin.ENV,
+		CoinLogo:         coin.Logo,
+		AccountID:        acc.AccountID,
+		Address:          acc.Address,
+		CreatedAt:        acc.CreatedAt,
 	}, nil
 }
 
@@ -214,19 +224,20 @@ func GetDepositAccounts(ctx context.Context, appID string, offset, limit int32) 
 			continue
 		}
 		infos = append(infos, &npool.Account{
-			ID:           acc.ID,
-			AppID:        acc.AppID,
-			UserID:       acc.UserID,
-			CoinTypeID:   acc.CoinTypeID,
-			CoinName:     coin.Name,
-			CoinUnit:     coin.Unit,
-			CoinEnv:      coin.ENV,
-			CoinLogo:     coin.Logo,
-			AccountID:    acc.AccountID,
-			Address:      acc.Address,
-			CreatedAt:    acc.CreatedAt,
-			PhoneNO:      user.PhoneNO,
-			EmailAddress: user.EmailAddress,
+			ID:               acc.ID,
+			AppID:            acc.AppID,
+			UserID:           acc.UserID,
+			CoinTypeID:       acc.CoinTypeID,
+			CoinName:         coin.Name,
+			CoinDisplayNames: coin.DisplayNames,
+			CoinUnit:         coin.Unit,
+			CoinEnv:          coin.ENV,
+			CoinLogo:         coin.Logo,
+			AccountID:        acc.AccountID,
+			Address:          acc.Address,
+			CreatedAt:        acc.CreatedAt,
+			PhoneNO:          user.PhoneNO,
+			EmailAddress:     user.EmailAddress,
 		})
 	}
 	return infos, total, nil
@@ -298,19 +309,20 @@ func GetAppDepositAccounts(ctx context.Context, appID string, offset, limit int3
 			continue
 		}
 		infos = append(infos, &npool.Account{
-			ID:           acc.ID,
-			AppID:        acc.AppID,
-			UserID:       acc.UserID,
-			CoinTypeID:   acc.CoinTypeID,
-			CoinName:     coin.Name,
-			CoinUnit:     coin.Unit,
-			CoinEnv:      coin.ENV,
-			CoinLogo:     coin.Logo,
-			AccountID:    acc.AccountID,
-			Address:      acc.Address,
-			CreatedAt:    acc.CreatedAt,
-			PhoneNO:      user.PhoneNO,
-			EmailAddress: user.EmailAddress,
+			ID:               acc.ID,
+			AppID:            acc.AppID,
+			UserID:           acc.UserID,
+			CoinTypeID:       acc.CoinTypeID,
+			CoinName:         coin.Name,
+			CoinDisplayNames: coin.DisplayNames,
+			CoinUnit:         coin.Unit,
+			CoinEnv:          coin.ENV,
+			CoinLogo:         coin.Logo,
+			AccountID:        acc.AccountID,
+			Address:          acc.Address,
+			CreatedAt:        acc.CreatedAt,
+			PhoneNO:          user.PhoneNO,
+			EmailAddress:     user.EmailAddress,
 		})
 	}
 	return infos, total, nil

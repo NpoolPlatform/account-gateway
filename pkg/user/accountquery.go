@@ -13,7 +13,6 @@ import (
 	useraccmwcli "github.com/NpoolPlatform/account-middleware/pkg/client/user"
 	usermwcli "github.com/NpoolPlatform/appuser-middleware/pkg/client/user"
 	appcoininfocli "github.com/NpoolPlatform/chain-middleware/pkg/client/appcoin"
-	coininfocli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
 
 	commonpb "github.com/NpoolPlatform/message/npool"
 	useraccmwpb "github.com/NpoolPlatform/message/npool/account/mw/v1/user"
@@ -39,7 +38,16 @@ func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 		return nil, fmt.Errorf("invalid user")
 	}
 
-	coin, err := coininfocli.GetCoin(ctx, info.CoinTypeID)
+	coin, err := appcoininfocli.GetCoinOnly(ctx, &appcoinpb.Conds{
+		AppID: &commonpb.StringVal{
+			Op:    cruder.EQ,
+			Value: info.AppID,
+		},
+		CoinTypeID: &commonpb.StringVal{
+			Op:    cruder.EQ,
+			Value: info.CoinTypeID,
+		},
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -48,23 +56,24 @@ func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 	}
 
 	acc := &npool.Account{
-		ID:           info.ID,
-		AppID:        info.AppID,
-		UserID:       info.UserID,
-		CoinTypeID:   info.CoinTypeID,
-		CoinName:     coin.Name,
-		CoinUnit:     coin.Unit,
-		CoinEnv:      coin.ENV,
-		CoinLogo:     coin.Logo,
-		AccountID:    info.AccountID,
-		Address:      info.Address,
-		UsedFor:      info.UsedFor,
-		CreatedAt:    info.CreatedAt,
-		PhoneNO:      u.PhoneNO,
-		EmailAddress: u.EmailAddress,
-		Active:       info.Active,
-		Blocked:      info.Blocked,
-		Labels:       info.Labels,
+		ID:               info.ID,
+		AppID:            info.AppID,
+		UserID:           info.UserID,
+		CoinTypeID:       info.CoinTypeID,
+		CoinName:         coin.Name,
+		CoinDisplayNames: coin.DisplayNames,
+		CoinUnit:         coin.Unit,
+		CoinEnv:          coin.ENV,
+		CoinLogo:         coin.Logo,
+		AccountID:        info.AccountID,
+		Address:          info.Address,
+		UsedFor:          info.UsedFor,
+		CreatedAt:        info.CreatedAt,
+		PhoneNO:          u.PhoneNO,
+		EmailAddress:     u.EmailAddress,
+		Active:           info.Active,
+		Blocked:          info.Blocked,
+		Labels:           info.Labels,
 	}
 	return acc, nil
 }
@@ -166,23 +175,24 @@ func getAccounts(ctx context.Context, conds *useraccmwpb.Conds, offset, limit in
 		}
 
 		accs = append(accs, &npool.Account{
-			ID:           info.ID,
-			AppID:        info.AppID,
-			UserID:       info.UserID,
-			CoinTypeID:   info.CoinTypeID,
-			CoinName:     coin.Name,
-			CoinUnit:     coin.Unit,
-			CoinEnv:      coin.ENV,
-			CoinLogo:     coin.Logo,
-			AccountID:    info.AccountID,
-			Address:      info.Address,
-			UsedFor:      info.UsedFor,
-			CreatedAt:    info.CreatedAt,
-			PhoneNO:      u.PhoneNO,
-			EmailAddress: u.EmailAddress,
-			Active:       info.Active,
-			Blocked:      info.Blocked,
-			Labels:       info.Labels,
+			ID:               info.ID,
+			AppID:            info.AppID,
+			UserID:           info.UserID,
+			CoinTypeID:       info.CoinTypeID,
+			CoinName:         coin.Name,
+			CoinDisplayNames: coin.DisplayNames,
+			CoinUnit:         coin.Unit,
+			CoinEnv:          coin.ENV,
+			CoinLogo:         coin.Logo,
+			AccountID:        info.AccountID,
+			Address:          info.Address,
+			UsedFor:          info.UsedFor,
+			CreatedAt:        info.CreatedAt,
+			PhoneNO:          u.PhoneNO,
+			EmailAddress:     u.EmailAddress,
+			Active:           info.Active,
+			Blocked:          info.Blocked,
+			Labels:           info.Labels,
 		})
 	}
 

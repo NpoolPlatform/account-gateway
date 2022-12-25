@@ -9,12 +9,12 @@ require (
 	github.com/NpoolPlatform/api-manager v0.0.0-20220826022307-d72866fe3ec0
 	github.com/NpoolPlatform/appuser-manager v0.0.0-20220829153511-c579ddb3686d
 	github.com/NpoolPlatform/appuser-middleware v0.0.0-20220829153642-da84c07abb79
-	github.com/NpoolPlatform/chain-middleware v0.0.0-20221205095020-eee477e50f35
+	github.com/NpoolPlatform/chain-middleware v0.0.0-20221224132504-1e471ef54443
 	github.com/NpoolPlatform/cloud-hashing-billing v0.0.0-20220930040641-6702672fa399
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20221015040432-cd676d323379
 	github.com/NpoolPlatform/good-middleware v0.0.0-20221217094714-2d1b08fe392a
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20221109023947-366125b690fb
-	github.com/NpoolPlatform/message v0.0.0-20221217094004-9e2115778058
+	github.com/NpoolPlatform/message v0.0.0-20221225053242-065984b345cd
 	github.com/NpoolPlatform/sphinx-proxy v0.0.0-20220803040820-2b7bd4158e8b
 	github.com/NpoolPlatform/third-middleware v0.0.0-20221009023028-a03f61587619
 	github.com/go-resty/resty/v2 v2.7.0
