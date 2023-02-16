@@ -15,6 +15,7 @@ pipeline {
 
     stage('Prepare') {
       steps {
+        sh 'go get github.com/ugorji/go@latest'
         sh 'make deps'
       }
     }

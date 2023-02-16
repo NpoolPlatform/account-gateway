@@ -10,6 +10,7 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
     traefik.ingress.kubernetes.io/router.middlewares:
       kube-system-strip-account-gateway-prefix@kubernetescrd,
+      kube-system-http-redirect-https@kubernetescrd,
       kube-system-common-headers@kubernetescrd,
       kube-system-headers-appid-to-body@kubernetescrd,
       kube-system-headers-userid-to-body@kubernetescrd,
@@ -41,6 +42,8 @@ spec:
       http: *http_rules
     - host: api.jh-testing.npool.top
       http: *http_rules
+    - host: api.japan-procyon-production.npool.top
+      http: *http_rules
 
 ---
 
@@ -56,6 +59,7 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
     traefik.ingress.kubernetes.io/router.middlewares:
       kube-system-strip-account-gateway-prefix@kubernetescrd,
+      kube-system-http-redirect-https@kubernetescrd,
       kube-system-common-headers@kubernetescrd,
       kube-system-headers-appid-to-body@kubernetescrd,
       kube-system-headers-userid-to-body@kubernetescrd,
@@ -86,4 +90,6 @@ spec:
     - host: api.development.npool.top
       http: *http_rules
     - host: api.jh-testing.npool.top
+      http: *http_rules
+    - host: api.japan-procyon-production.npool.top
       http: *http_rules
