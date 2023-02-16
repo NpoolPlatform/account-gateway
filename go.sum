@@ -54,9 +54,9 @@ github.com/NpoolPlatform/appuser-middleware v0.0.0-20230216023722-ef86d576f6ab h
 github.com/NpoolPlatform/appuser-middleware v0.0.0-20230216023722-ef86d576f6ab/go.mod h1:J3ukxPrv82OF/6JoZrUW9k4jbv2oxmjmL8wfRy2mCMk=
 github.com/NpoolPlatform/basal-middleware v0.0.0-20230216050150-a37a157528d1 h1:5h6fHIkds7Rn8T6jyrA0sOcZmg2PB9Cx0goF/fQFdaE=
 github.com/NpoolPlatform/basal-middleware v0.0.0-20230216050150-a37a157528d1/go.mod h1:3NGFZ6vMm07726M41iBBcHSuoBqmOdwUJrQLFRBH5D0=
-github.com/NpoolPlatform/chain-manager v0.0.0-20230111060923-748aaab9e86d h1:yF/xDULAv1UdMToDy9yy2BBXxIGsB0BSwB8JEz6pInQ=
-github.com/NpoolPlatform/chain-middleware v0.0.0-20230112023546-afc372a2351e h1:8H+lcZdpLjAbX9P5hLzvIt85vou6Rih8zYRFhmBYDvw=
-github.com/NpoolPlatform/chain-middleware v0.0.0-20230112023546-afc372a2351e/go.mod h1:Nr3SB0dCJuG7OSExaSgLqf9dghBHjhio2ImW6jm6hOY=
+github.com/NpoolPlatform/chain-manager v0.0.0-20230216025254-fb1b2abdc40d h1:HZm3shfZodgmnf6t8DnJ/okqGuwojZZ+5YFQhJkTJ48=
+github.com/NpoolPlatform/chain-middleware v0.0.0-20230216025740-e05d9f4b4fe0 h1:Ud9dGz4Kts6/i+nLuLv4czgCcVZm1oTK4cdR7G+f1uE=
+github.com/NpoolPlatform/chain-middleware v0.0.0-20230216025740-e05d9f4b4fe0/go.mod h1:CKfO9n6YrZ20Y3xUs1ihM+r7BTT8q1qyw8dgJNcG9do=
 github.com/NpoolPlatform/cloud-hashing-billing v0.0.0-20221108070616-8eb8c81dd6c8 h1:Y9h2vRjzsO5/hKoRE9Edjm23iGjfAVm/RZKUPLGasDs=
 github.com/NpoolPlatform/cloud-hashing-billing v0.0.0-20221108070616-8eb8c81dd6c8/go.mod h1:xsuWIAMqgyYRSt4DFCWPhwsQJGOcJKZYICieDdf0gPg=
 github.com/NpoolPlatform/go-service-framework v0.0.0-20221102072657-7fcc5e6f1012 h1:agWdYMDo1nBXR0w/PQz9Kze5IZsROOwSL8WcQFTMT4Q=
