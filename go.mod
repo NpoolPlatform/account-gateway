@@ -5,8 +5,8 @@ go 1.17
 require (
 	github.com/NpoolPlatform/account-manager v0.0.0-20221217095007-bbe990c46b8b
 	github.com/NpoolPlatform/account-middleware v0.0.0-20221217095132-25c02a708fa1
-	github.com/NpoolPlatform/appuser-manager v0.0.0-20220829153511-c579ddb3686d
-	github.com/NpoolPlatform/appuser-middleware v0.0.0-20220829153642-da84c07abb79
+	github.com/NpoolPlatform/appuser-manager v0.0.0-20230111060622-e3a10cc791c1
+	github.com/NpoolPlatform/appuser-middleware v0.0.0-20230210194000-019f2641c2be
 	github.com/NpoolPlatform/basal-middleware v0.0.0-20221228013048-951da3e0461c
 	github.com/NpoolPlatform/chain-middleware v0.0.0-20221224132504-1e471ef54443
 	github.com/NpoolPlatform/cloud-hashing-billing v0.0.0-20220930040641-6702672fa399
