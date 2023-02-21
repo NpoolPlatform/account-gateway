@@ -3,18 +3,20 @@ package transfer
 import (
 	"context"
 
-	signmethodpb "github.com/NpoolPlatform/message/npool/appuser/mgr/v2/signmethod"
-	"github.com/google/uuid"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 
 	constant "github.com/NpoolPlatform/account-gateway/pkg/message/const"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	"github.com/NpoolPlatform/message/npool/account/gw/v1/transfer"
+
 	"go.opentelemetry.io/otel"
 	scodes "go.opentelemetry.io/otel/codes"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
 	mtransfer "github.com/NpoolPlatform/account-gateway/pkg/transfer"
+
+	"github.com/google/uuid"
 )
 
 func (s *Server) CreateTransfer(
@@ -44,12 +46,12 @@ func (s *Server) CreateTransfer(
 	}
 
 	switch in.GetAccountType() {
-	case signmethodpb.SignMethodType_Email, signmethodpb.SignMethodType_Mobile:
+	case basetypes.SignMethod_Email, basetypes.SignMethod_Mobile:
 		if in.GetAccount() == "" {
 			logger.Sugar().Errorw("CreateTransfer", "Account empty", "Account", in.GetAccount())
 			return &transfer.CreateTransferResponse{}, status.Error(codes.InvalidArgument, "Account id empty")
 		}
-	case signmethodpb.SignMethodType_Google:
+	case basetypes.SignMethod_Google:
 	default:
 		logger.Sugar().Errorw("CreateTransfer", "AccountType empty", "AccountType", in.GetAccountType())
 		return &transfer.CreateTransferResponse{}, status.Error(codes.InvalidArgument, "AccountType id invalid")
@@ -65,8 +67,8 @@ func (s *Server) CreateTransfer(
 	}
 
 	switch in.GetTargetAccountType() {
-	case signmethodpb.SignMethodType_Email:
-	case signmethodpb.SignMethodType_Mobile:
+	case basetypes.SignMethod_Email:
+	case basetypes.SignMethod_Mobile:
 	default:
 		logger.Sugar().Errorw("CreateTransfer", "TargetAccountType empty", "TargetAccountType", in.GetTargetAccountType())
 		return &transfer.CreateTransferResponse{}, status.Error(codes.InvalidArgument, "TargetAccountType id invalid")

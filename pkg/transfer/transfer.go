@@ -4,18 +4,21 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/NpoolPlatform/message/npool/third/mgr/v1/usedfor"
-	thirdmwcli "github.com/NpoolPlatform/third-middleware/pkg/client/verify"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
+
+	usercodemwcli "github.com/NpoolPlatform/basal-middleware/pkg/client/usercode"
+	usercodemwpb "github.com/NpoolPlatform/message/npool/basal/mw/v1/usercode"
+
+	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
+	"github.com/NpoolPlatform/message/npool"
 
 	constant "github.com/NpoolPlatform/account-gateway/pkg/message/const"
 	commontracer "github.com/NpoolPlatform/account-gateway/pkg/tracer"
-	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-	"github.com/NpoolPlatform/message/npool"
+
 	"go.opentelemetry.io/otel"
 	scodes "go.opentelemetry.io/otel/codes"
 
 	"github.com/NpoolPlatform/message/npool/account/gw/v1/transfer"
-	signmethodpb "github.com/NpoolPlatform/message/npool/appuser/mgr/v2/signmethod"
 
 	appusermgrcli "github.com/NpoolPlatform/appuser-manager/pkg/client/appuser"
 	appusermgpb "github.com/NpoolPlatform/message/npool/appuser/mgr/v2/appuser"
@@ -32,10 +35,10 @@ func CreateTransfer(ctx context.Context,
 	appID,
 	userID,
 	account string,
-	accountType signmethodpb.SignMethodType,
+	accountType basetypes.SignMethod,
 	verificationCode,
 	targetAccount string,
-	targetAccountType signmethodpb.SignMethodType,
+	targetAccountType basetypes.SignMethod,
 ) (
 	*transfer.Transfer, error,
 ) {
@@ -62,18 +65,18 @@ func CreateTransfer(ctx context.Context,
 		return nil, fmt.Errorf("user not found")
 	}
 
-	if accountType == signmethodpb.SignMethodType_Google {
+	if accountType == basetypes.SignMethod_Google {
 		account = userInfo.GoogleSecret
 	}
 
-	if err := thirdmwcli.VerifyCode(
-		ctx,
-		appID,
-		account,
-		verificationCode,
-		accountType,
-		usedfor.UsedFor_SetTransferTargetUser,
-	); err != nil {
+	if err := usercodemwcli.VerifyUserCode(ctx, &usercodemwpb.VerifyUserCodeRequest{
+		Prefix:      basetypes.Prefix_PrefixUserCode.String(),
+		AppID:       appID,
+		Account:     account,
+		AccountType: accountType,
+		UsedFor:     basetypes.UsedFor_SetTransferTargetUser,
+		Code:        verificationCode,
+	}); err != nil {
 		return nil, err
 	}
 
@@ -84,12 +87,12 @@ func CreateTransfer(ctx context.Context,
 		},
 	}
 	switch targetAccountType {
-	case signmethodpb.SignMethodType_Email:
+	case basetypes.SignMethod_Email:
 		conds.EmailAddress = &npool.StringVal{
 			Op:    cruder.EQ,
 			Value: targetAccount,
 		}
-	case signmethodpb.SignMethodType_Mobile:
+	case basetypes.SignMethod_Mobile:
 		conds.PhoneNO = &npool.StringVal{
 			Op:    cruder.EQ,
 			Value: targetAccount,

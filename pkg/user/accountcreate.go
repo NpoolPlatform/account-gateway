@@ -5,8 +5,6 @@ import (
 
 	"fmt"
 
-	"github.com/NpoolPlatform/message/npool/appuser/mgr/v2/signmethod"
-
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/user"
 
 	appmwcli "github.com/NpoolPlatform/appuser-middleware/pkg/client/app"
@@ -21,8 +19,10 @@ import (
 
 	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 
-	"github.com/NpoolPlatform/message/npool/third/mgr/v1/usedfor"
-	thirdmwcli "github.com/NpoolPlatform/third-middleware/pkg/client/verify"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
+
+	usercodemwcli "github.com/NpoolPlatform/basal-middleware/pkg/client/usercode"
+	usercodemwpb "github.com/NpoolPlatform/message/npool/basal/mw/v1/usercode"
 )
 
 func CreateAccount(
@@ -32,7 +32,7 @@ func CreateAccount(
 	address string,
 	labels []string,
 	account string,
-	accountType signmethod.SignMethodType,
+	accountType basetypes.SignMethod,
 	verificationCode string,
 ) (
 	*npool.Account, error,
@@ -53,18 +53,18 @@ func CreateAccount(
 		return nil, fmt.Errorf("invalid user")
 	}
 
-	if accountType == signmethod.SignMethodType_Google {
+	if accountType == basetypes.SignMethod_Google {
 		account = u.GoogleSecret
 	}
 
-	if err := thirdmwcli.VerifyCode(
-		ctx,
-		appID,
-		account,
-		verificationCode,
-		accountType,
-		usedfor.UsedFor_SetWithdrawAddress,
-	); err != nil {
+	if err := usercodemwcli.VerifyUserCode(ctx, &usercodemwpb.VerifyUserCodeRequest{
+		Prefix:      basetypes.Prefix_PrefixUserCode.String(),
+		AppID:       appID,
+		Account:     account,
+		AccountType: accountType,
+		UsedFor:     basetypes.UsedFor_SetWithdrawAddress,
+		Code:        verificationCode,
+	}); err != nil {
 		return nil, err
 	}
 

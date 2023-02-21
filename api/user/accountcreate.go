@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 
-	signmethodpb "github.com/NpoolPlatform/message/npool/appuser/mgr/v2/signmethod"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
@@ -51,12 +51,12 @@ func (s *Server) CreateAccount(
 	}
 
 	switch in.GetAccountType() {
-	case signmethodpb.SignMethodType_Email, signmethodpb.SignMethodType_Mobile:
+	case basetypes.SignMethod_Email, basetypes.SignMethod_Mobile:
 		if in.GetAccount() == "" {
 			logger.Sugar().Errorw("CreateAccount", "Account empty", "Account", in.GetAccount())
 			return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, "Account id empty")
 		}
-	case signmethodpb.SignMethodType_Google:
+	case basetypes.SignMethod_Google:
 	default:
 		logger.Sugar().Errorw("CreateAccount", "AccountType empty", "AccountType", in.GetAccountType())
 		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, "AccountType id invalid")
