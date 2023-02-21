@@ -9,7 +9,6 @@ require (
 	github.com/NpoolPlatform/appuser-middleware v0.0.0-20230216023722-ef86d576f6ab
 	github.com/NpoolPlatform/basal-middleware v0.0.0-20230216050150-a37a157528d1
 	github.com/NpoolPlatform/chain-middleware v0.0.0-20230216025740-e05d9f4b4fe0
-	github.com/NpoolPlatform/cloud-hashing-billing v0.0.0-20221108070616-8eb8c81dd6c8
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20221102072657-7fcc5e6f1012
 	github.com/NpoolPlatform/good-middleware v0.0.0-20230208023756-c1f18a48f252
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20221109023947-366125b690fb
