@@ -3,6 +3,7 @@ package goodbenefit
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	commonpb "github.com/NpoolPlatform/message/npool"
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/goodbenefit"
@@ -20,7 +21,7 @@ import (
 )
 
 //nolint
-func CreateAccount(ctx context.Context, goodID string) (*npool.Account, error) {
+func CreateAccount(ctx context.Context, goodID string, accountID *string) (*npool.Account, error) {
 	good, err := goodmwcli.GetGood(ctx, goodID)
 	if err != nil {
 		return nil, err
@@ -65,15 +66,18 @@ func CreateAccount(ctx context.Context, goodID string) (*npool.Account, error) {
 		return nil, fmt.Errorf("fail create address")
 	}
 
-	bal, err := sphinxproxycli.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
-		Name:    coin.Name,
-		Address: sacc.Address,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("get %v | %v balance: %v", coin.Name, sacc.Address, err)
-	}
-	if bal == nil {
-		return nil, fmt.Errorf("invalid address")
+	// Workaround
+	if !strings.Contains(coin.Name, "ironfish") {
+		bal, err := sphinxproxycli.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
+			Name:    coin.Name,
+			Address: sacc.Address,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("get %v | %v balance: %v", coin.Name, sacc.Address, err)
+		}
+		if bal == nil {
+			return nil, fmt.Errorf("invalid address")
+		}
 	}
 
 	acc, err := gbmwcli.CreateAccount(ctx, &gbmwpb.AccountReq{

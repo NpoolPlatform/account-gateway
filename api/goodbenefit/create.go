@@ -36,8 +36,14 @@ func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountReque
 		logger.Sugar().Errorw("CreateAccount", "GoodID", in.GetGoodID(), "error", err)
 		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
+	if in.AccountID != nil {
+		if _, err := uuid.Parse(in.GetAccountID()); err != nil {
+			logger.Sugar().Errorw("CreateAccount", "AccountID", in.GetAccountID(), "error", err)
+			return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
+		}
+	}
 
-	info, err := gb.CreateAccount(ctx, in.GetGoodID())
+	info, err := gb.CreateAccount(ctx, in.GetGoodID(), in.AccountID)
 	if err != nil {
 		logger.Sugar().Errorw("CreateAccount", "GoodID", in.GetGoodID(), "error", err)
 		return &npool.CreateAccountResponse{}, status.Error(codes.Internal, err.Error())
