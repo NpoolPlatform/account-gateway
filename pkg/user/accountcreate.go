@@ -76,15 +76,17 @@ func CreateAccount(
 		return nil, fmt.Errorf("invlaid coin")
 	}
 
-	bal, err := sphinxproxycli.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
-		Name:    coin.Name,
-		Address: address,
-	})
-	if err != nil {
-		return nil, err
-	}
-	if bal == nil {
-		return nil, fmt.Errorf("invalid address")
+	if !strings.Contains(coin.Name, "ironfish") {
+		bal, err := sphinxproxycli.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
+			Name:    coin.Name,
+			Address: address,
+		})
+		if err != nil {
+			return nil, err
+		}
+		if bal == nil {
+			return nil, fmt.Errorf("invalid address")
+		}
 	}
 
 	info, err := useraccmwcli.CreateAccount(ctx, &useraccmwpb.AccountReq{
