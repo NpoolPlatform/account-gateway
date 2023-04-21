@@ -2,8 +2,8 @@ package user
 
 import (
 	"context"
-
 	"fmt"
+	"strings"
 
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/user"
 
