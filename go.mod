@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/NpoolPlatform/account-manager v0.0.0-20230423124304-1863f82b79db
-	github.com/NpoolPlatform/account-middleware v0.0.0-20230423124714-f4134d08fa88
+	github.com/NpoolPlatform/account-middleware v0.0.0-20230423125921-a60e98f91992
 	github.com/NpoolPlatform/appuser-manager v0.0.0-20230221094907-4452d99d9f56
 	github.com/NpoolPlatform/appuser-middleware v0.0.0-20230221095346-3f4e44fb0b41
 	github.com/NpoolPlatform/basal-middleware v0.0.0-20230421085555-165e4722a9ba
