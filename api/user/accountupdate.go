@@ -66,7 +66,7 @@ func (s *Server) UpdateAccount(
 		return &npool.UpdateAccountResponse{}, status.Error(codes.InvalidArgument, "Wrong UserID")
 	}
 
-	info, err := user1.UpdateAccount(ctx, in.GetID(), nil, nil, in.Labels)
+	info, err := user1.UpdateAccount(ctx, in.GetID(), nil, nil, in.Labels, in.Memo)
 	if err != nil {
 		logger.Sugar().Errorw("UpdateAccount", "error", err)
 		return &npool.UpdateAccountResponse{}, status.Error(codes.Internal, err.Error())
@@ -145,7 +145,7 @@ func (s *Server) UpdateAppUserAccount(
 		in.Active = &falseFlag
 	}
 
-	info, err := user1.UpdateAccount(ctx, in.GetID(), in.Active, in.Blocked, nil)
+	info, err := user1.UpdateAccount(ctx, in.GetID(), in.Active, in.Blocked, nil, nil)
 	if err != nil {
 		logger.Sugar().Errorw("UpdateAppUserAccount", "error", err)
 		return &npool.UpdateAppUserAccountResponse{}, status.Error(codes.Internal, err.Error())

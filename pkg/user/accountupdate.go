@@ -9,12 +9,13 @@ import (
 	useraccmwpb "github.com/NpoolPlatform/message/npool/account/mw/v1/user"
 )
 
-func UpdateAccount(ctx context.Context, id string, active, blocked *bool, labels []string) (*npool.Account, error) {
+func UpdateAccount(ctx context.Context, id string, active, blocked *bool, labels []string, memo *string) (*npool.Account, error) {
 	_, err := useraccmwcli.UpdateAccount(ctx, &useraccmwpb.AccountReq{
 		ID:      &id,
 		Active:  active,
 		Blocked: blocked,
 		Labels:  labels,
+		Memo:    memo,
 	})
 	if err != nil {
 		return nil, err

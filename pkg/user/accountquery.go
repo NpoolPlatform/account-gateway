@@ -74,6 +74,7 @@ func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 		Active:           info.Active,
 		Blocked:          info.Blocked,
 		Labels:           info.Labels,
+		Memo:             info.Memo,
 	}
 	return acc, nil
 }
@@ -193,6 +194,7 @@ func getAccounts(ctx context.Context, conds *useraccmwpb.Conds, offset, limit in
 			Active:           info.Active,
 			Blocked:          info.Blocked,
 			Labels:           info.Labels,
+			Memo:             info.Memo,
 		})
 	}
 

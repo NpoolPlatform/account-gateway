@@ -34,6 +34,7 @@ func CreateAccount(
 	account string,
 	accountType basetypes.SignMethod,
 	verificationCode string,
+	memo *string,
 ) (
 	*npool.Account, error,
 ) {
@@ -96,6 +97,7 @@ func CreateAccount(
 		Address:    &address,
 		UsedFor:    &usedFor,
 		Labels:     labels,
+		Memo:       memo,
 	})
 	if err != nil {
 		return nil, err

@@ -94,6 +94,7 @@ func (s *Server) CreateAccount(
 		in.GetAccount(),
 		in.GetAccountType(),
 		in.GetVerificationCode(),
+		in.Memo,
 	)
 	if err != nil {
 		logger.Sugar().Errorw("CreateAccount", "error", err)
