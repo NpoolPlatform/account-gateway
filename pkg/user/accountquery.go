@@ -8,6 +8,7 @@ import (
 	appcoinpb "github.com/NpoolPlatform/message/npool/chain/mw/v1/appcoin"
 
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/user"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 
 	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 
@@ -130,7 +131,9 @@ func getAccounts(ctx context.Context, conds *useraccmwpb.Conds, offset, limit in
 		ids = append(ids, info.UserID)
 	}
 
-	users, _, err := usermwcli.GetManyUsers(ctx, ids)
+	users, _, err := usermwcli.GetUsers(ctx, &usermwpb.Conds{
+		IDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: ids},
+	}, 0, int32(len(ids)))
 	if err != nil {
 		return nil, 0, err
 	}

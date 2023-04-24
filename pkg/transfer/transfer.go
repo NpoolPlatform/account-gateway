@@ -20,11 +20,8 @@ import (
 
 	"github.com/NpoolPlatform/message/npool/account/gw/v1/transfer"
 
-	appusermgrcli "github.com/NpoolPlatform/appuser-manager/pkg/client/appuser"
-	appusermgpb "github.com/NpoolPlatform/message/npool/appuser/mgr/v2/appuser"
-
-	appusermwcli "github.com/NpoolPlatform/appuser-middleware/pkg/client/user"
-	appusermwpb "github.com/NpoolPlatform/message/npool/appuser/mw/v1/user"
+	usermwcli "github.com/NpoolPlatform/appuser-middleware/pkg/client/user"
+	usermwpb "github.com/NpoolPlatform/message/npool/appuser/mw/v1/user"
 
 	mgrcli "github.com/NpoolPlatform/account-manager/pkg/client/transfer"
 	mgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/transfer"
@@ -56,7 +53,7 @@ func CreateTransfer(ctx context.Context,
 
 	span = commontracer.TraceInvoker(span, "transfer", "third-gateway", "VerifyCode")
 
-	userInfo, err := appusermwcli.GetUser(ctx, appID, userID)
+	userInfo, err := usermwcli.GetUser(ctx, appID, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -80,28 +77,17 @@ func CreateTransfer(ctx context.Context,
 		return nil, err
 	}
 
-	conds := &appusermgpb.Conds{
-		AppID: &npool.StringVal{
-			Op:    cruder.EQ,
-			Value: appID,
-		},
+	conds := &usermwpb.Conds{
+		AppID: &basetypes.StringVal{Op: cruder.EQ, Value: appID},
 	}
 	switch targetAccountType {
 	case basetypes.SignMethod_Email:
-		conds.EmailAddress = &npool.StringVal{
-			Op:    cruder.EQ,
-			Value: targetAccount,
-		}
+		conds.EmailAddress = &basetypes.StringVal{Op: cruder.EQ, Value: targetAccount}
 	case basetypes.SignMethod_Mobile:
-		conds.PhoneNO = &npool.StringVal{
-			Op:    cruder.EQ,
-			Value: targetAccount,
-		}
+		conds.PhoneNO = &basetypes.StringVal{Op: cruder.EQ, Value: targetAccount}
 	}
 
-	span = commontracer.TraceInvoker(span, "transfer", "appuser-manager", "GetAppUserOnly")
-
-	targetUser, err := appusermgrcli.GetAppUserOnly(ctx, conds)
+	targetUser, err := usermwcli.GetUserOnly(ctx, conds)
 	if err != nil {
 		return nil, err
 	}
@@ -148,7 +134,7 @@ func CreateTransfer(ctx context.Context,
 		return nil, err
 	}
 
-	targetUserInfo, err := appusermwcli.GetUser(ctx, appID, targetUser.ID)
+	targetUserInfo, err := usermwcli.GetUser(ctx, appID, targetUser.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -208,15 +194,13 @@ func DeleteTransfer(ctx context.Context, id, appID, userID string) (*transfer.Tr
 		return nil, err
 	}
 
-	span = commontracer.TraceInvoker(span, "transfer", "appuser-manager", "GetAppUser")
-
-	targetUser, err := appusermwcli.GetUser(ctx, info.AppID, info.TargetUserID)
+	targetUser, err := usermwcli.GetUser(ctx, info.AppID, info.TargetUserID)
 	if err != nil {
 		return nil, err
 	}
 
 	if targetUser == nil {
-		targetUser = &appusermwpb.User{}
+		targetUser = &usermwpb.User{}
 	}
 	return &transfer.Transfer{
 		ID:                 info.ID,
@@ -323,13 +307,14 @@ func expand(ctx context.Context, infos []*mgrpb.Transfer) ([]*transfer.Transfer,
 	for _, val := range infos {
 		targetUserIDs = append(targetUserIDs, val.TargetUserID)
 	}
-	span = commontracer.TraceInvoker(span, "transfer", "appuser-manager", "GetAppUsers")
 
-	users, _, err := appusermwcli.GetManyUsers(ctx, targetUserIDs)
+	users, _, err := usermwcli.GetUsers(ctx, &usermwpb.Conds{
+		IDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: targetUserIDs},
+	}, 0, int32(len(targetUserIDs)))
 	if err != nil {
 		return nil, err
 	}
-	targetUser := map[string]*appusermwpb.User{}
+	targetUser := map[string]*usermwpb.User{}
 
 	for _, val := range users {
 		targetUser[val.ID] = val
@@ -338,7 +323,7 @@ func expand(ctx context.Context, infos []*mgrpb.Transfer) ([]*transfer.Transfer,
 	transferInfos := []*transfer.Transfer{}
 
 	for _, val := range infos {
-		userInfo := &appusermwpb.User{}
+		userInfo := &usermwpb.User{}
 
 		if _, ok := targetUser[val.TargetUserID]; ok {
 			userInfo = targetUser[val.TargetUserID]
