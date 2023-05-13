@@ -5,11 +5,12 @@ import (
 	"fmt"
 
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/user"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 
 	depositcli "github.com/NpoolPlatform/account-middleware/pkg/client/deposit"
 	depositpb "github.com/NpoolPlatform/message/npool/account/mw/v1/deposit"
 
-	usercli "github.com/NpoolPlatform/appuser-middleware/pkg/client/user"
+	usermwcli "github.com/NpoolPlatform/appuser-middleware/pkg/client/user"
 
 	appcoininfocli "github.com/NpoolPlatform/chain-middleware/pkg/client/appcoin"
 	sphinxproxycli "github.com/NpoolPlatform/sphinx-proxy/pkg/client"
@@ -21,11 +22,11 @@ import (
 
 	cruder "github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 
-	appusermwpb "github.com/NpoolPlatform/message/npool/appuser/mw/v1/user"
+	usermwpb "github.com/NpoolPlatform/message/npool/appuser/mw/v1/user"
 )
 
 func GetDepositAccount(ctx context.Context, appID, userID, coinTypeID string) (*npool.Account, error) { //nolint
-	user, err := usercli.GetUser(ctx, appID, userID)
+	user, err := usermwcli.GetUser(ctx, appID, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -179,12 +180,14 @@ func GetDepositAccounts(ctx context.Context, appID string, offset, limit int32) 
 		userIDs = append(userIDs, info.UserID)
 	}
 
-	users, _, err := usercli.GetManyUsers(ctx, userIDs)
+	users, _, err := usermwcli.GetUsers(ctx, &usermwpb.Conds{
+		IDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: userIDs},
+	}, 0, int32(len(userIDs)))
 	if err != nil {
 		return nil, 0, fmt.Errorf("fail get users: %v", err)
 	}
 
-	userMap := map[string]*appusermwpb.User{}
+	userMap := map[string]*usermwpb.User{}
 	for _, user := range users {
 		userMap[user.ID] = user
 	}
@@ -264,12 +267,14 @@ func GetAppDepositAccounts(ctx context.Context, appID string, offset, limit int3
 		userIDs = append(userIDs, info.UserID)
 	}
 
-	users, _, err := usercli.GetManyUsers(ctx, userIDs)
+	users, _, err := usermwcli.GetUsers(ctx, &usermwpb.Conds{
+		IDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: userIDs},
+	}, 0, int32(len(userIDs)))
 	if err != nil {
 		return nil, 0, fmt.Errorf("fail get users: %v", err)
 	}
 
-	userMap := map[string]*appusermwpb.User{}
+	userMap := map[string]*usermwpb.User{}
 	for _, user := range users {
 		userMap[user.ID] = user
 	}
