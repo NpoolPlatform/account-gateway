@@ -4,25 +4,20 @@ import (
 	"context"
 	"fmt"
 
-	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/user"
-	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
-
 	depositcli "github.com/NpoolPlatform/account-middleware/pkg/client/deposit"
-	depositpb "github.com/NpoolPlatform/message/npool/account/mw/v1/deposit"
-
 	usermwcli "github.com/NpoolPlatform/appuser-middleware/pkg/client/user"
-
-	appcoininfocli "github.com/NpoolPlatform/chain-middleware/pkg/client/appcoin"
+	appcoinmwcli "github.com/NpoolPlatform/chain-middleware/pkg/client/app/coin"
 	sphinxproxycli "github.com/NpoolPlatform/sphinx-proxy/pkg/client"
 
-	appcoinpb "github.com/NpoolPlatform/message/npool/chain/mw/v1/appcoin"
+	commonpb "github.com/NpoolPlatform/message/npool"
+	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/user"
+	depositpb "github.com/NpoolPlatform/message/npool/account/mw/v1/deposit"
+	usermwpb "github.com/NpoolPlatform/message/npool/appuser/mw/v1/user"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
+	appcoinmwpb "github.com/NpoolPlatform/message/npool/chain/mw/v1/app/coin"
 	sphinxproxypb "github.com/NpoolPlatform/message/npool/sphinxproxy"
 
-	commonpb "github.com/NpoolPlatform/message/npool"
-
 	cruder "github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-
-	usermwpb "github.com/NpoolPlatform/message/npool/appuser/mw/v1/user"
 )
 
 func GetDepositAccount(ctx context.Context, appID, userID, coinTypeID string) (*npool.Account, error) { //nolint
@@ -37,12 +32,12 @@ func GetDepositAccount(ctx context.Context, appID, userID, coinTypeID string) (*
 		return nil, fmt.Errorf("permission denied")
 	}
 
-	coin, err := appcoininfocli.GetCoinOnly(ctx, &appcoinpb.Conds{
-		AppID: &commonpb.StringVal{
+	coin, err := appcoinmwcli.GetCoinOnly(ctx, &appcoinmwpb.Conds{
+		AppID: &basetypes.StringVal{
 			Op:    cruder.EQ,
 			Value: appID,
 		},
-		CoinTypeID: &commonpb.StringVal{
+		CoinTypeID: &basetypes.StringVal{
 			Op:    cruder.EQ,
 			Value: coinTypeID,
 		},
@@ -197,12 +192,12 @@ func GetDepositAccounts(ctx context.Context, appID string, offset, limit int32) 
 		coinTypeIDs = append(coinTypeIDs, val.CoinTypeID)
 	}
 
-	coins, _, err := appcoininfocli.GetCoins(ctx, &appcoinpb.Conds{
-		AppID: &commonpb.StringVal{
+	coins, _, err := appcoinmwcli.GetCoins(ctx, &appcoinmwpb.Conds{
+		AppID: &basetypes.StringVal{
 			Op:    cruder.EQ,
 			Value: appID,
 		},
-		CoinTypeIDs: &commonpb.StringSliceVal{
+		CoinTypeIDs: &basetypes.StringSliceVal{
 			Op:    cruder.IN,
 			Value: coinTypeIDs,
 		},
@@ -211,7 +206,7 @@ func GetDepositAccounts(ctx context.Context, appID string, offset, limit int32) 
 		return nil, 0, err
 	}
 
-	coinMap := map[string]*appcoinpb.Coin{}
+	coinMap := map[string]*appcoinmwpb.Coin{}
 	for _, coin := range coins {
 		coinMap[coin.CoinTypeID] = coin
 	}
@@ -284,12 +279,12 @@ func GetAppDepositAccounts(ctx context.Context, appID string, offset, limit int3
 		coinTypeIDs = append(coinTypeIDs, val.CoinTypeID)
 	}
 
-	coins, _, err := appcoininfocli.GetCoins(ctx, &appcoinpb.Conds{
-		AppID: &commonpb.StringVal{
+	coins, _, err := appcoinmwcli.GetCoins(ctx, &appcoinmwpb.Conds{
+		AppID: &basetypes.StringVal{
 			Op:    cruder.EQ,
 			Value: appID,
 		},
-		CoinTypeIDs: &commonpb.StringSliceVal{
+		CoinTypeIDs: &basetypes.StringSliceVal{
 			Op:    cruder.IN,
 			Value: coinTypeIDs,
 		},
@@ -298,7 +293,7 @@ func GetAppDepositAccounts(ctx context.Context, appID string, offset, limit int3
 		return nil, 0, err
 	}
 
-	coinMap := map[string]*appcoinpb.Coin{}
+	coinMap := map[string]*appcoinmwpb.Coin{}
 	for _, coin := range coins {
 		coinMap[coin.CoinTypeID] = coin
 	}

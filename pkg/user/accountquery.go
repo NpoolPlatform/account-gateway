@@ -5,20 +5,17 @@ import (
 	"context"
 	"fmt"
 
-	appcoinpb "github.com/NpoolPlatform/message/npool/chain/mw/v1/appcoin"
-
-	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/user"
-	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
-
-	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
-
 	useraccmwcli "github.com/NpoolPlatform/account-middleware/pkg/client/user"
 	usermwcli "github.com/NpoolPlatform/appuser-middleware/pkg/client/user"
-	appcoininfocli "github.com/NpoolPlatform/chain-middleware/pkg/client/appcoin"
+	appcoinmwcli "github.com/NpoolPlatform/chain-middleware/pkg/client/app/coin"
 
 	commonpb "github.com/NpoolPlatform/message/npool"
+	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/user"
+	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 	useraccmwpb "github.com/NpoolPlatform/message/npool/account/mw/v1/user"
 	usermwpb "github.com/NpoolPlatform/message/npool/appuser/mw/v1/user"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
+	appcoinmwpb "github.com/NpoolPlatform/message/npool/chain/mw/v1/app/coin"
 
 	cruder "github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 )
@@ -40,12 +37,12 @@ func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 		return nil, fmt.Errorf("invalid user")
 	}
 
-	coin, err := appcoininfocli.GetCoinOnly(ctx, &appcoinpb.Conds{
-		AppID: &commonpb.StringVal{
+	coin, err := appcoinmwcli.GetCoinOnly(ctx, &appcoinmwpb.Conds{
+		AppID: &basetypes.StringVal{
 			Op:    cruder.EQ,
 			Value: info.AppID,
 		},
-		CoinTypeID: &commonpb.StringVal{
+		CoinTypeID: &basetypes.StringVal{
 			Op:    cruder.EQ,
 			Value: info.CoinTypeID,
 		},
@@ -148,12 +145,12 @@ func getAccounts(ctx context.Context, conds *useraccmwpb.Conds, offset, limit in
 		coinTypeIDs = append(coinTypeIDs, val.CoinTypeID)
 	}
 
-	coins, _, err := appcoininfocli.GetCoins(ctx, &appcoinpb.Conds{
-		AppID: &commonpb.StringVal{
+	coins, _, err := appcoinmwcli.GetCoins(ctx, &appcoinmwpb.Conds{
+		AppID: &basetypes.StringVal{
 			Op:    cruder.EQ,
 			Value: conds.GetAppID().GetValue(),
 		},
-		CoinTypeIDs: &commonpb.StringSliceVal{
+		CoinTypeIDs: &basetypes.StringSliceVal{
 			Op:    cruder.IN,
 			Value: coinTypeIDs,
 		},
@@ -162,7 +159,7 @@ func getAccounts(ctx context.Context, conds *useraccmwpb.Conds, offset, limit in
 		return nil, 0, err
 	}
 
-	coinMap := map[string]*appcoinpb.Coin{}
+	coinMap := map[string]*appcoinmwpb.Coin{}
 	for _, coin := range coins {
 		coinMap[coin.CoinTypeID] = coin
 	}
