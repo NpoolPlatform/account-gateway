@@ -3,95 +3,150 @@ package goodbenefit
 import (
 	"context"
 	"fmt"
-	"strings"
 
-	commonpb "github.com/NpoolPlatform/message/npool"
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/goodbenefit"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 
 	gbmwcli "github.com/NpoolPlatform/account-middleware/pkg/client/goodbenefit"
 	gbmwpb "github.com/NpoolPlatform/message/npool/account/mw/v1/goodbenefit"
 
+	coinmwcli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
 	goodmwcli "github.com/NpoolPlatform/good-middleware/pkg/client/good"
-
-	coininfocli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
 	sphinxproxypb "github.com/NpoolPlatform/message/npool/sphinxproxy"
 	sphinxproxycli "github.com/NpoolPlatform/sphinx-proxy/pkg/client"
 
 	cruder "github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 )
 
-//nolint
-func CreateAccount(ctx context.Context, goodID string, accountID *string) (*npool.Account, error) {
-	good, err := goodmwcli.GetGood(ctx, goodID)
+type createHandler struct {
+	*Handler
+	goodCoinTypeID      *string
+	goodCoinName        *string
+	checkAddressBalance bool
+	backup              bool
+	address             *string
+}
+
+func (h *createHandler) getCoinTypeID(ctx context.Context) error {
+	if h.GoodID == nil {
+		return fmt.Errorf("invalid goodid")
+	}
+
+	good, err := goodmwcli.GetGood(ctx, *h.GoodID)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if good == nil {
-		return nil, fmt.Errorf("invalid good")
+		return fmt.Errorf("invalid good")
 	}
 
-	coin, err := coininfocli.GetCoin(ctx, good.CoinTypeID)
+	h.goodCoinTypeID = &good.CoinTypeID
+	return nil
+}
+
+func (h *createHandler) getCoinName(ctx context.Context) error {
+	if h.goodCoinTypeID == nil {
+		return fmt.Errorf("invalid goodcointypeid")
+	}
+
+	coin, err := coinmwcli.GetCoin(ctx, *h.goodCoinTypeID)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if coin == nil {
-		return nil, fmt.Errorf("invalid coin")
+		return fmt.Errorf("invalid coin")
 	}
 
-	backup := false
-	const accountNumber = 100
+	h.goodCoinName = &coin.Name
+	h.checkAddressBalance = coin.CheckNewAddressBalance
 
-	accounts, _, err := gbmwcli.GetAccounts(ctx, &gbmwpb.Conds{
-		GoodID: &commonpb.StringVal{
-			Op:    cruder.EQ,
-			Value: goodID,
-		},
-	}, 0, accountNumber)
-	if err != nil {
-		return nil, err
-	}
+	return nil
+}
 
-	for _, acc := range accounts {
-		if acc.Active && !acc.Blocked && !acc.Backup {
-			backup = true
-			break
-		}
-	}
-
-	sacc, err := sphinxproxycli.CreateAddress(ctx, coin.Name)
-	if err != nil {
-		return nil, err
-	}
-	if sacc == nil {
-		return nil, fmt.Errorf("fail create address")
-	}
-
-	// Workaround
-	if !strings.Contains(coin.Name, "ironfish") {
-		bal, err := sphinxproxycli.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
-			Name:    coin.Name,
-			Address: sacc.Address,
-		})
-		if err != nil {
-			return nil, fmt.Errorf("get %v | %v balance: %v", coin.Name, sacc.Address, err)
-		}
-		if bal == nil {
-			return nil, fmt.Errorf("invalid address")
-		}
-	}
-
-	acc, err := gbmwcli.CreateAccount(ctx, &gbmwpb.AccountReq{
-		GoodID:     &goodID,
-		CoinTypeID: &good.CoinTypeID,
-		Address:    &sacc.Address,
-		Backup:     &backup,
+func (h *createHandler) checkBackup(ctx context.Context) error {
+	exist, err := gbmwcli.ExistAccountConds(ctx, &gbmwpb.Conds{
+		GoodID: &basetypes.StringVal{Op: cruder.EQ, Value: *h.GoodID},
+		Backup: &basetypes.BoolVal{Op: cruder.EQ, Value: false},
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
-	if acc == nil {
-		return nil, fmt.Errorf("fail create account")
+	h.backup = exist
+	return nil
+}
+
+func (h *createHandler) createAddress(ctx context.Context) error {
+	if h.goodCoinName == nil {
+		return fmt.Errorf("invalid goodcoinname")
 	}
 
-	return GetAccount(ctx, acc.ID)
+	acc, err := sphinxproxycli.CreateAddress(ctx, *h.goodCoinName)
+	if err != nil {
+		return err
+	}
+	if acc == nil {
+		return fmt.Errorf("fail create address")
+	}
+
+	h.address = &acc.Address
+
+	if !h.checkAddressBalance {
+		return nil
+	}
+
+	bal, err := sphinxproxycli.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
+		Name:    *h.goodCoinName,
+		Address: acc.Address,
+	})
+	if err != nil {
+		return err
+	}
+	if bal == nil {
+		return fmt.Errorf("invalid address")
+	}
+
+	return nil
+}
+
+func (h *createHandler) createAccount(ctx context.Context) error {
+	acc, err := gbmwcli.CreateAccount(ctx, &gbmwpb.AccountReq{
+		GoodID:     h.GoodID,
+		CoinTypeID: h.goodCoinTypeID,
+		Address:    h.address,
+		Backup:     &h.backup,
+	})
+	if err != nil {
+		return err
+	}
+	if acc == nil {
+		return fmt.Errorf("fail create account")
+	}
+
+	h.ID = &acc.ID
+
+	return nil
+}
+
+func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
+	handler := &createHandler{
+		Handler: h,
+	}
+
+	if err := handler.getCoinTypeID(ctx); err != nil {
+		return nil, err
+	}
+	if err := handler.getCoinName(ctx); err != nil {
+		return nil, err
+	}
+	if err := handler.checkBackup(ctx); err != nil {
+		return nil, err
+	}
+	if err := handler.createAddress(ctx); err != nil {
+		return nil, err
+	}
+	if err := handler.createAccount(ctx); err != nil {
+		return nil, err
+	}
+
+	return h.GetAccount(ctx)
 }
