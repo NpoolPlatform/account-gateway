@@ -12,12 +12,6 @@ import (
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 	"github.com/NpoolPlatform/message/npool"
 
-	constant "github.com/NpoolPlatform/account-gateway/pkg/message/const"
-	commontracer "github.com/NpoolPlatform/account-gateway/pkg/tracer"
-
-	"go.opentelemetry.io/otel"
-	scodes "go.opentelemetry.io/otel/codes"
-
 	"github.com/NpoolPlatform/message/npool/account/gw/v1/transfer"
 
 	usermwcli "github.com/NpoolPlatform/appuser-middleware/pkg/client/user"
@@ -40,18 +34,6 @@ func CreateTransfer(ctx context.Context,
 	*transfer.Transfer, error,
 ) {
 	var err error
-
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "CreateTransfer")
-	defer span.End()
-
-	defer func() {
-		if err != nil {
-			span.SetStatus(scodes.Error, err.Error())
-			span.RecordError(err)
-		}
-	}()
-
-	span = commontracer.TraceInvoker(span, "transfer", "third-gateway", "VerifyCode")
 
 	userInfo, err := usermwcli.GetUser(ctx, appID, userID)
 	if err != nil {
@@ -123,8 +105,6 @@ func CreateTransfer(ctx context.Context,
 		return nil, fmt.Errorf("target user already exist")
 	}
 
-	span = commontracer.TraceInvoker(span, "transfer", "manager", "CreateTransfer")
-
 	info, err := mgrcli.CreateTransfer(ctx, &mgrpb.TransferReq{
 		AppID:        &appID,
 		UserID:       &userID,
@@ -155,18 +135,6 @@ func CreateTransfer(ctx context.Context,
 
 func DeleteTransfer(ctx context.Context, id, appID, userID string) (*transfer.Transfer, error) {
 	var err error
-
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetTransfers")
-	defer span.End()
-
-	defer func() {
-		if err != nil {
-			span.SetStatus(scodes.Error, err.Error())
-			span.RecordError(err)
-		}
-	}()
-
-	span = commontracer.TraceInvoker(span, "transfer", "manager", "DeleteTransfer")
 
 	exist, err := mgrcli.ExistTransferConds(ctx, &mgrpb.Conds{
 		ID: &npool.StringVal{
@@ -219,18 +187,6 @@ func DeleteTransfer(ctx context.Context, id, appID, userID string) (*transfer.Tr
 func GetTransfers(ctx context.Context, appID, userID string, offset, limit int32) ([]*transfer.Transfer, uint32, error) {
 	var err error
 
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetTransfers")
-	defer span.End()
-
-	defer func() {
-		if err != nil {
-			span.SetStatus(scodes.Error, err.Error())
-			span.RecordError(err)
-		}
-	}()
-
-	span = commontracer.TraceInvoker(span, "transfer", "manager", "GetTransfers")
-
 	infos, total, err := mgrcli.GetTransfers(ctx, &mgrpb.Conds{
 		AppID: &npool.StringVal{
 			Op:    cruder.EQ,
@@ -258,18 +214,6 @@ func GetTransfers(ctx context.Context, appID, userID string, offset, limit int32
 func GetAppTransfers(ctx context.Context, appID string, offset, limit int32) ([]*transfer.Transfer, uint32, error) {
 	var err error
 
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetTransfers")
-	defer span.End()
-
-	defer func() {
-		if err != nil {
-			span.SetStatus(scodes.Error, err.Error())
-			span.RecordError(err)
-		}
-	}()
-
-	span = commontracer.TraceInvoker(span, "transfer", "manager", "GetTransfers")
-
 	infos, total, err := mgrcli.GetTransfers(ctx, &mgrpb.Conds{
 		AppID: &npool.StringVal{
 			Op:    cruder.EQ,
@@ -293,16 +237,6 @@ func GetAppTransfers(ctx context.Context, appID string, offset, limit int32) ([]
 func expand(ctx context.Context, infos []*mgrpb.Transfer) ([]*transfer.Transfer, error) {
 	var err error
 	targetUserIDs := []string{}
-
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetTransfers")
-	defer span.End()
-
-	defer func() {
-		if err != nil {
-			span.SetStatus(scodes.Error, err.Error())
-			span.RecordError(err)
-		}
-	}()
 
 	for _, val := range infos {
 		targetUserIDs = append(targetUserIDs, val.TargetUserID)

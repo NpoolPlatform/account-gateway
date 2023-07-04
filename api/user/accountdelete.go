@@ -11,14 +11,10 @@ import (
 	useraccmgrcli "github.com/NpoolPlatform/account-manager/pkg/client/user"
 	useraccmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/user"
 
-	constant "github.com/NpoolPlatform/account-gateway/pkg/message/const"
-
 	user1 "github.com/NpoolPlatform/account-gateway/pkg/user"
 
 	cruder "github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 
-	"go.opentelemetry.io/otel"
-	scodes "go.opentelemetry.io/otel/codes"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -33,16 +29,6 @@ func (s *Server) DeleteAccount(
 	error,
 ) {
 	var err error
-
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "DeleteAccount")
-	defer span.End()
-
-	defer func() {
-		if err != nil {
-			span.SetStatus(scodes.Error, err.Error())
-			span.RecordError(err)
-		}
-	}()
 
 	if _, err := uuid.Parse(in.GetID()); err != nil {
 		logger.Sugar().Errorw("DeleteAccount", "ID", in.GetID(), "error", err)

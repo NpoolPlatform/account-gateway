@@ -10,12 +10,8 @@ import (
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/user"
 	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 
-	constant "github.com/NpoolPlatform/account-gateway/pkg/message/const"
-
 	user1 "github.com/NpoolPlatform/account-gateway/pkg/user"
 
-	"go.opentelemetry.io/otel"
-	scodes "go.opentelemetry.io/otel/codes"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -30,16 +26,6 @@ func (s *Server) CreateAccount(
 	error,
 ) {
 	var err error
-
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "CreateAccount")
-	defer span.End()
-
-	defer func() {
-		if err != nil {
-			span.SetStatus(scodes.Error, err.Error())
-			span.RecordError(err)
-		}
-	}()
 
 	if _, err := uuid.Parse(in.GetAppID()); err != nil {
 		logger.Sugar().Errorw("CreateAccount", "AppID", in.GetAppID(), "error", err)

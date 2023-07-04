@@ -7,13 +7,10 @@ import (
 
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/user"
 
-	constant "github.com/NpoolPlatform/account-gateway/pkg/message/const"
 	useraccmwcli "github.com/NpoolPlatform/account-middleware/pkg/client/user"
 
 	user1 "github.com/NpoolPlatform/account-gateway/pkg/user"
 
-	"go.opentelemetry.io/otel"
-	scodes "go.opentelemetry.io/otel/codes"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -28,16 +25,6 @@ func (s *Server) UpdateAccount(
 	error,
 ) {
 	var err error
-
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "UpdateAccount")
-	defer span.End()
-
-	defer func() {
-		if err != nil {
-			span.SetStatus(scodes.Error, err.Error())
-			span.RecordError(err)
-		}
-	}()
 
 	if _, err := uuid.Parse(in.GetID()); err != nil {
 		logger.Sugar().Errorw("UpdateAccount", "ID", in.GetID(), "error", err)
@@ -86,16 +73,6 @@ func (s *Server) UpdateAppUserAccount(
 	error,
 ) {
 	var err error
-
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "UpdateAppUserAccount")
-	defer span.End()
-
-	defer func() {
-		if err != nil {
-			span.SetStatus(scodes.Error, err.Error())
-			span.RecordError(err)
-		}
-	}()
 
 	if _, err := uuid.Parse(in.GetID()); err != nil {
 		logger.Sugar().Errorw("UpdateAppUserAccount", "ID", in.GetID(), "error", err)

@@ -8,12 +8,8 @@ import (
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/platform"
 	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 
-	constant "github.com/NpoolPlatform/account-gateway/pkg/message/const"
-
 	platform1 "github.com/NpoolPlatform/account-gateway/pkg/platform"
 
-	"go.opentelemetry.io/otel"
-	scodes "go.opentelemetry.io/otel/codes"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -22,16 +18,6 @@ import (
 
 func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountRequest) (*npool.CreateAccountResponse, error) {
 	var err error
-
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "CreateAccount")
-	defer span.End()
-
-	defer func() {
-		if err != nil {
-			span.SetStatus(scodes.Error, err.Error())
-			span.RecordError(err)
-		}
-	}()
 
 	if _, err := uuid.Parse(in.GetCoinTypeID()); err != nil {
 		logger.Sugar().Errorw("CreateAccount", "CoinTypeID", in.GetCoinTypeID(), "error", err)
