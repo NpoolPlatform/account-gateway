@@ -45,11 +45,11 @@ func (h *createHandler) getCoinTypeID(ctx context.Context) error {
 }
 
 func (h *createHandler) getCoinName(ctx context.Context) error {
-	if h.goodCoinTypeID == nil {
+	if h.CoinTypeID == nil {
 		return fmt.Errorf("invalid goodcointypeid")
 	}
 
-	coin, err := coinmwcli.GetCoin(ctx, *h.goodCoinTypeID)
+	coin, err := coinmwcli.GetCoin(ctx, *h.CoinTypeID)
 	if err != nil {
 		return err
 	}

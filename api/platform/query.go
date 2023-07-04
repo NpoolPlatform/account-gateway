@@ -3,28 +3,36 @@ package platform
 import (
 	"context"
 
-	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
-
-	constant1 "github.com/NpoolPlatform/account-gateway/pkg/const"
-
-	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/platform"
-
 	platform1 "github.com/NpoolPlatform/account-gateway/pkg/platform"
+	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/platform"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) (*npool.GetAccountsResponse, error) {
-	var err error
-	limit := int32(constant1.DefaultLimit)
-	if in.GetLimit() > 0 {
-		limit = in.GetLimit()
+	handler, err := platform1.NewHandler(
+		ctx,
+		platform1.WithOffset(in.GetOffset()),
+		platform1.WithLimit(in.GetLimit()),
+	)
+	if err != nil {
+		logger.Sugar().Errorw(
+			"GetAccounts",
+			"In", in,
+			"Error", err,
+		)
+		return &npool.GetAccountsResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	infos, total, err := platform1.GetAccounts(ctx, in.GetOffset(), limit)
+	infos, total, err := handler.GetAccounts(ctx)
 	if err != nil {
-		logger.Sugar().Errorw("GetAccounts", "Offset", in.GetOffset(), "Limit", limit, "error", err)
+		logger.Sugar().Errorw(
+			"GetAccounts",
+			"In", in,
+			"Error", err,
+		)
 		return &npool.GetAccountsResponse{}, status.Error(codes.Internal, err.Error())
 	}
 

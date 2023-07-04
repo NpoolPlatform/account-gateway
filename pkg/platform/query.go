@@ -2,87 +2,58 @@ package platform
 
 import (
 	"context"
-
-	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/platform"
+	"fmt"
 
 	pltfmwcli "github.com/NpoolPlatform/account-middleware/pkg/client/platform"
+	coinmwcli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
+	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
+	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/platform"
 	pltfmwpb "github.com/NpoolPlatform/message/npool/account/mw/v1/platform"
-
-	coininfopb "github.com/NpoolPlatform/message/npool/chain/mw/v1/coin"
-
-	coininfocli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
+	coinmwpb "github.com/NpoolPlatform/message/npool/chain/mw/v1/coin"
 )
 
-func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
-	info, err := pltfmwcli.GetAccount(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-
-	coin, err := coininfocli.GetCoin(ctx, info.CoinTypeID)
-	if err != nil {
-		return nil, err
-	}
-
-	account := &npool.Account{
-		ID:         info.ID,
-		CoinTypeID: info.CoinTypeID,
-		CoinName:   coin.Name,
-		CoinUnit:   coin.Unit,
-		CoinEnv:    coin.ENV,
-		CoinLogo:   coin.Logo,
-		UsedFor:    info.UsedFor,
-		AccountID:  info.AccountID,
-		Address:    info.Address,
-		Backup:     info.Backup,
-		Active:     info.Active,
-		Locked:     info.Locked,
-		LockedBy:   info.LockedBy,
-		Blocked:    info.Blocked,
-		CreatedAt:  info.CreatedAt,
-	}
-
-	return account, nil
+type queryHandler struct {
+	*Handler
+	infos []*pltfmwpb.Account
+	accs  []*npool.Account
+	// GoodID -> Coin
+	coins map[string]*coinmwpb.Coin
 }
 
-func GetAccounts(ctx context.Context, offset, limit int32) ([]*npool.Account, uint32, error) {
-	infos, total, err := pltfmwcli.GetAccounts(ctx, &pltfmwpb.Conds{}, offset, limit)
+func (h *queryHandler) getCoins(ctx context.Context) error {
+	coinTypeIDs := []string{}
+
+	for _, info := range h.infos {
+		coinTypeIDs = append(coinTypeIDs, info.CoinTypeID)
+	}
+	coins, _, err := coinmwcli.GetCoins(
+		ctx,
+		&coinmwpb.Conds{
+			IDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: coinTypeIDs},
+		},
+		0,
+		int32(len(coinTypeIDs)),
+	)
 	if err != nil {
-		return nil, 0, err
-	}
-	if len(infos) == 0 {
-		return nil, total, nil
+		return err
 	}
 
-	ofs := 0
-	lim := 1000
-	coins := []*coininfopb.Coin{}
-	for {
-		coinInfos, _, err := coininfocli.GetCoins(ctx, nil, int32(ofs), int32(lim))
-		if err != nil {
-			return nil, 0, err
-		}
-		if len(coinInfos) == 0 {
-			break
-		}
-		coins = append(coins, coinInfos...)
-		ofs += lim
-	}
-
-	coinMap := map[string]*coininfopb.Coin{}
 	for _, coin := range coins {
-		coinMap[coin.ID] = coin
+		h.coins[coin.ID] = coin
 	}
 
-	accs := []*npool.Account{}
+	return nil
+}
 
-	for _, info := range infos {
-		coin, ok := coinMap[info.CoinTypeID]
+func (h *queryHandler) formalize() {
+	for _, info := range h.infos {
+		coin, ok := h.coins[info.CoinTypeID]
 		if !ok {
 			continue
 		}
 
-		accs = append(accs, &npool.Account{
+		h.accs = append(h.accs, &npool.Account{
 			ID:         info.ID,
 			CoinTypeID: info.CoinTypeID,
 			CoinName:   coin.Name,
@@ -91,15 +62,71 @@ func GetAccounts(ctx context.Context, offset, limit int32) ([]*npool.Account, ui
 			CoinLogo:   coin.Logo,
 			UsedFor:    info.UsedFor,
 			AccountID:  info.AccountID,
-			Address:    info.Address,
 			Backup:     info.Backup,
+			Address:    info.Address,
 			Active:     info.Active,
 			Locked:     info.Locked,
 			LockedBy:   info.LockedBy,
 			Blocked:    info.Blocked,
 			CreatedAt:  info.CreatedAt,
+			UpdatedAt:  info.UpdatedAt,
 		})
 	}
+}
 
-	return accs, total, nil
+func (h *Handler) GetAccount(ctx context.Context) (*npool.Account, error) {
+	if h.ID == nil {
+		return nil, fmt.Errorf("invalid id")
+	}
+
+	info, err := pltfmwcli.GetAccount(ctx, *h.ID)
+	if err != nil {
+		return nil, err
+	}
+	if info == nil {
+		return nil, nil
+	}
+
+	handler := &queryHandler{
+		Handler: h,
+		infos:   []*pltfmwpb.Account{info},
+		coins:   map[string]*coinmwpb.Coin{},
+	}
+	if err := handler.getCoins(ctx); err != nil {
+		return nil, err
+	}
+	handler.formalize()
+
+	if len(handler.accs) == 0 {
+		return nil, nil
+	}
+
+	return handler.accs[0], nil
+}
+
+func (h *Handler) GetAccounts(ctx context.Context) ([]*npool.Account, uint32, error) {
+	infos, total, err := pltfmwcli.GetAccounts(
+		ctx,
+		&pltfmwpb.Conds{},
+		h.Offset,
+		h.Limit,
+	)
+	if err != nil {
+		return nil, 0, err
+	}
+	if len(infos) == 0 {
+		return nil, total, nil
+	}
+
+	handler := &queryHandler{
+		Handler: h,
+		infos:   infos,
+		coins:   map[string]*coinmwpb.Coin{},
+	}
+	if err := handler.getCoins(ctx); err != nil {
+		return nil, 0, err
+	}
+	handler.formalize()
+
+	return handler.accs, total, nil
 }
