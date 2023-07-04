@@ -3,35 +3,35 @@ package goodbenefit
 import (
 	"context"
 
+	goodbenefit1 "github.com/NpoolPlatform/account-gateway/pkg/goodbenefit"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
-
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/goodbenefit"
-
-	gb "github.com/NpoolPlatform/account-gateway/pkg/goodbenefit"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-
-	"github.com/google/uuid"
 )
 
 func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountRequest) (*npool.CreateAccountResponse, error) {
-	var err error
-
-	if _, err := uuid.Parse(in.GetGoodID()); err != nil {
-		logger.Sugar().Errorw("CreateAccount", "GoodID", in.GetGoodID(), "error", err)
+	handler, err := goodbenefit1.NewHandler(
+		ctx,
+		goodbenefit1.WithGoodID(&in.GoodID),
+	)
+	if err != nil {
+		logger.Sugar().Errorw(
+			"CreateAccount",
+			"In", in,
+			"Error", err,
+		)
 		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
-	if in.AccountID != nil {
-		if _, err := uuid.Parse(in.GetAccountID()); err != nil {
-			logger.Sugar().Errorw("CreateAccount", "AccountID", in.GetAccountID(), "error", err)
-			return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
-		}
-	}
 
-	info, err := gb.CreateAccount(ctx, in.GetGoodID(), in.AccountID)
+	info, err := handler.CreateAccount(ctx)
 	if err != nil {
-		logger.Sugar().Errorw("CreateAccount", "GoodID", in.GetGoodID(), "error", err)
+		logger.Sugar().Errorw(
+			"CreateAccount",
+			"In", in,
+			"Error", err,
+		)
 		return &npool.CreateAccountResponse{}, status.Error(codes.Internal, err.Error())
 	}
 
