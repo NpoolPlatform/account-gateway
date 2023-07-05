@@ -3,19 +3,14 @@ package user
 import (
 	"context"
 
-	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
-
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/user"
-	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 
 	user1 "github.com/NpoolPlatform/account-gateway/pkg/user"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-
-	"github.com/google/uuid"
 )
 
 func (s *Server) CreateAccount(
@@ -25,65 +20,35 @@ func (s *Server) CreateAccount(
 	*npool.CreateAccountResponse,
 	error,
 ) {
-	var err error
-
-	if _, err := uuid.Parse(in.GetAppID()); err != nil {
-		logger.Sugar().Errorw("CreateAccount", "AppID", in.GetAppID(), "error", err)
-		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
-	}
-	if _, err := uuid.Parse(in.GetUserID()); err != nil {
-		logger.Sugar().Errorw("CreateAccount", "UserID", in.GetUserID(), "error", err)
-		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	switch in.GetAccountType() {
-	case basetypes.SignMethod_Email, basetypes.SignMethod_Mobile:
-		if in.GetAccount() == "" {
-			logger.Sugar().Errorw("CreateAccount", "Account empty", "Account", in.GetAccount())
-			return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, "Account id empty")
-		}
-	case basetypes.SignMethod_Google:
-	default:
-		logger.Sugar().Errorw("CreateAccount", "AccountType empty", "AccountType", in.GetAccountType())
-		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, "AccountType id invalid")
-	}
-
-	if in.GetVerificationCode() == "" {
-		logger.Sugar().Errorw("CreateAccount", "VerificationCode empty", "VerificationCode", in.GetVerificationCode())
-		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, "VerificationCode id empty")
-	}
-
-	if _, err := uuid.Parse(in.GetCoinTypeID()); err != nil {
-		logger.Sugar().Errorw("CreateAccount", "CoinTypeID", in.GetCoinTypeID(), "error", err)
-		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
-	}
-	if in.GetAddress() == "" {
-		logger.Sugar().Errorw("CreateAccount", "Address", in.GetAddress())
-		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, "invalid address")
-	}
-	switch in.GetUsedFor() {
-	case accountmgrpb.AccountUsedFor_UserWithdraw:
-	case accountmgrpb.AccountUsedFor_UserDirectBenefit:
-	default:
-		logger.Sugar().Errorw("CreateAccount", "UsedFor", in.GetUsedFor())
-		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, "invalid used for")
-	}
-
-	info, err := user1.CreateAccount(
+	handler, err := user1.NewHandler(
 		ctx,
-		in.GetAppID(),
-		in.GetUserID(),
-		in.GetCoinTypeID(),
-		in.GetUsedFor(),
-		in.GetAddress(),
-		in.GetLabels(),
-		in.GetAccount(),
-		in.GetAccountType(),
-		in.GetVerificationCode(),
-		in.Memo,
+		user1.WithAppID(&in.AppID),
+		user1.WithUserID(&in.UserID),
+		user1.WithCoinTypeID(&in.CoinTypeID),
+		user1.WithUsedFor(&in.UsedFor),
+		user1.WithAddress(&in.Address),
+		user1.WithLabels(&in.Labels),
+		user1.WithAccount(&in.Account),
+		user1.WithAccountType(&in.AccountType),
+		user1.WithVerificationCode(&in.VerificationCode),
+		user1.WithMemo(in.Memo),
 	)
 	if err != nil {
-		logger.Sugar().Errorw("CreateAccount", "error", err)
+		logger.Sugar().Errorw(
+			"CreateAccount",
+			"In", in,
+			"Error", err,
+		)
+		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	info, err := handler.CreateAccount(ctx)
+	if err != nil {
+		logger.Sugar().Errorw(
+			"CreateAccount",
+			"In", in,
+			"Error", err,
+		)
 		return &npool.CreateAccountResponse{}, status.Error(codes.Internal, err.Error())
 	}
 

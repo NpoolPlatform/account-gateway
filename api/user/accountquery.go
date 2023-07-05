@@ -9,16 +9,10 @@ import (
 
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/user"
 
-	constant1 "github.com/NpoolPlatform/account-gateway/pkg/const"
-
 	user1 "github.com/NpoolPlatform/account-gateway/pkg/user"
-
-	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-
-	"github.com/google/uuid"
 )
 
 func (s *Server) GetAccounts(
@@ -28,31 +22,30 @@ func (s *Server) GetAccounts(
 	*npool.GetAccountsResponse,
 	error,
 ) {
-	var err error
-
-	if _, err := uuid.Parse(in.GetAppID()); err != nil {
-		logger.Sugar().Errorw("GetAccounts", "AppID", in.GetAppID(), "error", err)
-		return &npool.GetAccountsResponse{}, status.Error(codes.InvalidArgument, err.Error())
-	}
-	if _, err := uuid.Parse(in.GetUserID()); err != nil {
-		logger.Sugar().Errorw("GetAccounts", "UserID", in.GetUserID(), "error", err)
-		return &npool.GetAccountsResponse{}, status.Error(codes.InvalidArgument, err.Error())
-	}
-	switch in.GetUsedFor() {
-	case accountmgrpb.AccountUsedFor_UserWithdraw, accountmgrpb.AccountUsedFor_UserDirectBenefit:
-	default:
-		logger.Sugar().Errorw("GetAccounts", "UsedFor", in.GetUsedFor())
-		return &npool.GetAccountsResponse{}, status.Error(codes.InvalidArgument, "invalid usedFor")
-	}
-
-	limit := int32(constant1.DefaultLimit)
-	if in.GetLimit() > 0 {
-		limit = in.GetLimit()
-	}
-
-	infos, total, err := user1.GetAccounts(ctx, in.GetAppID(), in.GetUserID(), in.GetUsedFor(), in.GetOffset(), limit)
+	handler, err := user1.NewHandler(
+		ctx,
+		user1.WithAppID(&in.AppID),
+		user1.WithUserID(&in.UserID),
+		user1.WithUsedFor(&in.UsedFor),
+		user1.WithOffset(in.GetOffset()),
+		user1.WithLimit(in.GetLimit()),
+	)
 	if err != nil {
-		logger.Sugar().Errorw("GetAccounts", "error", err)
+		logger.Sugar().Errorw(
+			"GetAccounts",
+			"In", in,
+			"Error", err,
+		)
+		return &npool.GetAccountsResponse{}, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	infos, total, err := handler.GetAccounts(ctx)
+	if err != nil {
+		logger.Sugar().Errorw(
+			"GetAccounts",
+			"In", in,
+			"Error", err,
+		)
 		return &npool.GetAccountsResponse{}, status.Error(codes.Internal, err.Error())
 	}
 
@@ -69,21 +62,28 @@ func (s *Server) GetAppAccounts(
 	*npool.GetAppAccountsResponse,
 	error,
 ) {
-	var err error
-
-	if _, err := uuid.Parse(in.GetAppID()); err != nil {
-		logger.Sugar().Errorw("GetAppAccounts", "AppID", in.GetAppID(), "error", err)
+	handler, err := user1.NewHandler(
+		ctx,
+		user1.WithAppID(&in.AppID),
+		user1.WithOffset(in.GetOffset()),
+		user1.WithLimit(in.GetLimit()),
+	)
+	if err != nil {
+		logger.Sugar().Errorw(
+			"GetAppAccounts",
+			"In", in,
+			"Error", err,
+		)
 		return &npool.GetAppAccountsResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	limit := int32(constant1.DefaultLimit)
-	if in.GetLimit() > 0 {
-		limit = in.GetLimit()
-	}
-
-	infos, total, err := user1.GetAppAccounts(ctx, in.GetAppID(), in.GetOffset(), limit)
+	infos, total, err := handler.GetAppAccounts(ctx)
 	if err != nil {
-		logger.Sugar().Errorw("GetAppAccounts", "error", err)
+		logger.Sugar().Errorw(
+			"GetAppAccounts",
+			"In", in,
+			"Error", err,
+		)
 		return &npool.GetAppAccountsResponse{}, status.Error(codes.Internal, err.Error())
 	}
 
@@ -100,21 +100,28 @@ func (s *Server) GetNAppAccounts(
 	*npool.GetNAppAccountsResponse,
 	error,
 ) {
-	var err error
-
-	if _, err := uuid.Parse(in.GetTargetAppID()); err != nil {
-		logger.Sugar().Errorw("GetNAppAccounts", "TargetAppID", in.GetTargetAppID(), "error", err)
+	handler, err := user1.NewHandler(
+		ctx,
+		user1.WithAppID(&in.TargetAppID),
+		user1.WithOffset(in.GetOffset()),
+		user1.WithLimit(in.GetLimit()),
+	)
+	if err != nil {
+		logger.Sugar().Errorw(
+			"GetNAppAccounts",
+			"In", in,
+			"Error", err,
+		)
 		return &npool.GetNAppAccountsResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	limit := int32(constant1.DefaultLimit)
-	if in.GetLimit() > 0 {
-		limit = in.GetLimit()
-	}
-
-	infos, total, err := user1.GetAppAccounts(ctx, in.GetTargetAppID(), in.GetOffset(), limit)
+	infos, total, err := handler.GetAppAccounts(ctx)
 	if err != nil {
-		logger.Sugar().Errorw("GetNAppAccounts", "error", err)
+		logger.Sugar().Errorw(
+			"GetNAppAccounts",
+			"In", in,
+			"Error", err,
+		)
 		return &npool.GetNAppAccountsResponse{}, status.Error(codes.Internal, err.Error())
 	}
 
