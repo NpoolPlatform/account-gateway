@@ -6,9 +6,9 @@ import (
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
-	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/user"
-
 	user1 "github.com/NpoolPlatform/account-gateway/pkg/user"
+	useraccmwcli "github.com/NpoolPlatform/account-middleware/pkg/client/user"
+	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/user"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -66,6 +66,7 @@ func (s *Server) UpdateAppUserAccount(
 		user1.WithID(&in.ID),
 		user1.WithAppID(&in.TargetAppID),
 		user1.WithUserID(&in.TargetUserID),
+		user1.WithBlocked(in.Blocked),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(
@@ -76,7 +77,33 @@ func (s *Server) UpdateAppUserAccount(
 		return &npool.UpdateAppUserAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	info, err := handler.UpdateAppUserAccount(ctx)
+	account, err := useraccmwcli.GetAccount(ctx, in.GetID())
+	if err != nil {
+		logger.Sugar().Errorw("UpdateAccount", "ID", in.GetID(), "error", err)
+		return nil, err
+	}
+	if account.Blocked && in.GetActive() {
+		logger.Sugar().Errorw("UpdateAppUserAccount", "Active", in.GetActive(), "error", "Account is blocked")
+		return &npool.UpdateAppUserAccountResponse{}, status.Error(codes.InvalidArgument, "Account is blocked")
+	}
+
+	if account.Blocked && (in.Blocked == nil || in.GetBlocked()) {
+		info, err := handler.GetAccount(ctx)
+		if err != nil {
+			logger.Sugar().Errorw("UpdateAppUserAccount", "error", err)
+			return &npool.UpdateAppUserAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
+		}
+		return &npool.UpdateAppUserAccountResponse{
+			Info: info,
+		}, nil
+	}
+
+	falseFlag := false
+	if in.GetBlocked() {
+		handler.Active = &falseFlag
+	}
+
+	info, err := handler.UpdateAccount(ctx)
 	if err != nil {
 		logger.Sugar().Errorw(
 			"UpdateAppUserAccount",
