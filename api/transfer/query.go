@@ -6,31 +6,42 @@ import (
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	"github.com/NpoolPlatform/message/npool/account/gw/v1/transfer"
-	"github.com/google/uuid"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	mtransfer "github.com/NpoolPlatform/account-gateway/pkg/transfer"
+	transfer1 "github.com/NpoolPlatform/account-gateway/pkg/transfer"
+	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/transfer"
 )
 
 func (s *Server) GetTransfers(ctx context.Context, in *transfer.GetTransfersRequest) (resp *transfer.GetTransfersResponse, err error) {
-	if _, err := uuid.Parse(in.GetAppID()); err != nil {
-		logger.Sugar().Errorw("GetTransfers", "AppID", in.GetAppID(), "error", err)
-		return &transfer.GetTransfersResponse{}, status.Error(codes.InvalidArgument, err.Error())
-	}
-	if _, err := uuid.Parse(in.GetUserID()); err != nil {
-		logger.Sugar().Errorw("GetTransfers", "UserID", in.GetUserID(), "error", err)
-		return &transfer.GetTransfersResponse{}, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	infos, total, err := mtransfer.GetTransfers(ctx, in.GetAppID(), in.GetUserID(), in.GetOffset(), in.GetLimit())
+	handler, err := transfer1.NewHandler(
+		ctx,
+		transfer1.WithAppID(&in.AppID),
+		transfer1.WithUserID(&in.UserID),
+		transfer1.WithOffset(in.GetOffset()),
+		transfer1.WithLimit(in.GetLimit()),
+	)
 	if err != nil {
-		logger.Sugar().Errorw("GetTransfers", "error", err)
-		return &transfer.GetTransfersResponse{}, status.Error(codes.Internal, err.Error())
+		logger.Sugar().Errorw(
+			"GetTransfers",
+			"In", in,
+			"Error", err,
+		)
+		return &npool.GetTransfersResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	return &transfer.GetTransfersResponse{
+	infos, total, err := handler.GetTransfers(ctx)
+	if err != nil {
+		logger.Sugar().Errorw(
+			"GetTransfers",
+			"In", in,
+			"Error", err,
+		)
+		return &npool.GetTransfersResponse{}, status.Error(codes.Internal, err.Error())
+	}
+
+	return &npool.GetTransfersResponse{
 		Infos: infos,
 		Total: total,
 	}, nil
@@ -43,18 +54,32 @@ func (s *Server) GetAppTransfers(
 	resp *transfer.GetAppTransfersResponse,
 	err error,
 ) {
-	if _, err := uuid.Parse(in.GetAppID()); err != nil {
-		logger.Sugar().Errorw("GetTransfers", "AppID", in.GetAppID(), "error", err)
-		return &transfer.GetAppTransfersResponse{}, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	infos, total, err := mtransfer.GetAppTransfers(ctx, in.GetAppID(), in.GetOffset(), in.GetLimit())
+	handler, err := transfer1.NewHandler(
+		ctx,
+		transfer1.WithAppID(&in.AppID),
+		transfer1.WithOffset(in.GetOffset()),
+		transfer1.WithLimit(in.GetLimit()),
+	)
 	if err != nil {
-		logger.Sugar().Errorw("GetTransfers", "error", err)
-		return &transfer.GetAppTransfersResponse{}, status.Error(codes.Internal, err.Error())
+		logger.Sugar().Errorw(
+			"GetAppTransfers",
+			"In", in,
+			"Error", err,
+		)
+		return &npool.GetAppTransfersResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	return &transfer.GetAppTransfersResponse{
+	infos, total, err := handler.GetTransfers(ctx)
+	if err != nil {
+		logger.Sugar().Errorw(
+			"GetAppTransfers",
+			"In", in,
+			"Error", err,
+		)
+		return &npool.GetAppTransfersResponse{}, status.Error(codes.Internal, err.Error())
+	}
+
+	return &npool.GetAppTransfersResponse{
 		Infos: infos,
 		Total: total,
 	}, nil
@@ -67,18 +92,32 @@ func (s *Server) GetNAppTransfers(
 	resp *transfer.GetNAppTransfersResponse,
 	err error,
 ) {
-	if _, err := uuid.Parse(in.GetTargetAppID()); err != nil {
-		logger.Sugar().Errorw("GetNAppTransfers", "TargetAppID", in.GetTargetAppID(), "error", err)
-		return &transfer.GetNAppTransfersResponse{}, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	infos, total, err := mtransfer.GetAppTransfers(ctx, in.GetTargetAppID(), in.GetOffset(), in.GetLimit())
+	handler, err := transfer1.NewHandler(
+		ctx,
+		transfer1.WithAppID(&in.TargetAppID),
+		transfer1.WithOffset(in.GetOffset()),
+		transfer1.WithLimit(in.GetLimit()),
+	)
 	if err != nil {
-		logger.Sugar().Errorw("GetNAppTransfers", "error", err)
-		return &transfer.GetNAppTransfersResponse{}, status.Error(codes.Internal, err.Error())
+		logger.Sugar().Errorw(
+			"GetNAppTransfers",
+			"In", in,
+			"Error", err,
+		)
+		return &npool.GetNAppTransfersResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	return &transfer.GetNAppTransfersResponse{
+	infos, total, err := handler.GetTransfers(ctx)
+	if err != nil {
+		logger.Sugar().Errorw(
+			"GetNAppTransfers",
+			"In", in,
+			"Error", err,
+		)
+		return &npool.GetNAppTransfersResponse{}, status.Error(codes.Internal, err.Error())
+	}
+
+	return &npool.GetNAppTransfersResponse{
 		Infos: infos,
 		Total: total,
 	}, nil
