@@ -5,8 +5,6 @@ import (
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
-	constant1 "github.com/NpoolPlatform/account-gateway/pkg/const"
-
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/payment"
 
 	payment1 "github.com/NpoolPlatform/account-gateway/pkg/payment"
@@ -16,16 +14,27 @@ import (
 )
 
 func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) (*npool.GetAccountsResponse, error) {
-	var err error
-
-	limit := int32(constant1.DefaultLimit)
-	if in.GetLimit() > 0 {
-		limit = in.GetLimit()
+	handler, err := payment1.NewHandler(
+		ctx,
+		payment1.WithOffset(in.GetOffset()),
+		payment1.WithLimit(in.GetLimit()),
+	)
+	if err != nil {
+		logger.Sugar().Errorw(
+			"GetAccounts",
+			"In", in,
+			"Error", err,
+		)
+		return &npool.GetAccountsResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	infos, total, err := payment1.GetAccounts(ctx, in.GetOffset(), limit)
+	infos, total, err := handler.GetAccounts(ctx)
 	if err != nil {
-		logger.Sugar().Errorw("GetAccounts", "Offset", in.GetOffset(), "Limit", limit, "error", err)
+		logger.Sugar().Errorw(
+			"GetAccounts",
+			"In", in,
+			"Error", err,
+		)
 		return &npool.GetAccountsResponse{}, status.Error(codes.Internal, err.Error())
 	}
 
