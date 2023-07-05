@@ -1,3 +1,4 @@
+//nolint:dupl
 package user
 
 import (
@@ -104,7 +105,7 @@ func (h *queryDepositHandler) formalize() {
 	}
 }
 
-func (h *Handler) GetDepositAccount(ctx context.Context) (*npool.Account, error) {
+func (h *Handler) GetDepositAccount(ctx context.Context) (*npool.Account, error) { //nolint
 	if h.AppID == nil {
 		return nil, fmt.Errorf("invaild appid")
 	}

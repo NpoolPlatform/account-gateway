@@ -5,7 +5,6 @@ import (
 	"context"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
-	"github.com/NpoolPlatform/message/npool/account/gw/v1/transfer"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -14,7 +13,7 @@ import (
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/transfer"
 )
 
-func (s *Server) GetTransfers(ctx context.Context, in *transfer.GetTransfersRequest) (resp *transfer.GetTransfersResponse, err error) {
+func (s *Server) GetTransfers(ctx context.Context, in *npool.GetTransfersRequest) (resp *npool.GetTransfersResponse, err error) {
 	handler, err := transfer1.NewHandler(
 		ctx,
 		transfer1.WithAppID(&in.AppID),
@@ -47,13 +46,7 @@ func (s *Server) GetTransfers(ctx context.Context, in *transfer.GetTransfersRequ
 	}, nil
 }
 
-func (s *Server) GetAppTransfers(
-	ctx context.Context,
-	in *transfer.GetAppTransfersRequest,
-) (
-	resp *transfer.GetAppTransfersResponse,
-	err error,
-) {
+func (s *Server) GetAppTransfers(ctx context.Context, in *npool.GetAppTransfersRequest) (resp *npool.GetAppTransfersResponse, err error) {
 	handler, err := transfer1.NewHandler(
 		ctx,
 		transfer1.WithAppID(&in.AppID),
@@ -85,13 +78,7 @@ func (s *Server) GetAppTransfers(
 	}, nil
 }
 
-func (s *Server) GetNAppTransfers(
-	ctx context.Context,
-	in *transfer.GetNAppTransfersRequest,
-) (
-	resp *transfer.GetNAppTransfersResponse,
-	err error,
-) {
+func (s *Server) GetNAppTransfers(ctx context.Context, in *npool.GetNAppTransfersRequest) (resp *npool.GetNAppTransfersResponse, err error) {
 	handler, err := transfer1.NewHandler(
 		ctx,
 		transfer1.WithAppID(&in.TargetAppID),

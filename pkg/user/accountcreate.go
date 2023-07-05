@@ -27,7 +27,7 @@ type createHandler struct {
 	coinName *string
 }
 
-func (h *createHandler) validate(ctx context.Context) error {
+func (h *createHandler) validate(ctx context.Context) error { //nolint
 	if h.AppID == nil {
 		return fmt.Errorf("invalid appID")
 	}
@@ -40,7 +40,7 @@ func (h *createHandler) validate(ctx context.Context) error {
 
 	switch *h.AccountType {
 	case basetypes.SignMethod_Email:
-		fallthrough
+		fallthrough //nolint
 	case basetypes.SignMethod_Mobile:
 		if h.Account == nil || *h.Account == "" {
 			return fmt.Errorf("account is empty")

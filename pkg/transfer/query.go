@@ -9,8 +9,6 @@ import (
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/transfer"
 
-	"github.com/NpoolPlatform/message/npool/account/gw/v1/transfer"
-
 	usermwcli "github.com/NpoolPlatform/appuser-middleware/pkg/client/user"
 	usermwpb "github.com/NpoolPlatform/message/npool/appuser/mw/v1/user"
 
@@ -51,7 +49,7 @@ func (h *queryHandler) formalize() {
 			continue
 		}
 
-		h.accs = append(h.accs, &transfer.Transfer{
+		h.accs = append(h.accs, &npool.Transfer{
 			ID:                 val.ID,
 			AppID:              val.AppID,
 			UserID:             val.UserID,
@@ -66,7 +64,7 @@ func (h *queryHandler) formalize() {
 	}
 }
 
-func (h *Handler) GetTransfers(ctx context.Context) ([]*transfer.Transfer, uint32, error) {
+func (h *Handler) GetTransfers(ctx context.Context) ([]*npool.Transfer, uint32, error) {
 	if h.AppID == nil {
 		return nil, 0, fmt.Errorf("invalid appID")
 	}
@@ -86,7 +84,7 @@ func (h *Handler) GetTransfers(ctx context.Context) ([]*transfer.Transfer, uint3
 		return nil, 0, err
 	}
 	if len(infos) == 0 {
-		return []*transfer.Transfer{}, 0, nil
+		return []*npool.Transfer{}, 0, nil
 	}
 
 	handler := &queryHandler{
@@ -103,7 +101,7 @@ func (h *Handler) GetTransfers(ctx context.Context) ([]*transfer.Transfer, uint3
 	return handler.accs, total, nil
 }
 
-func (h *Handler) GetAppTransfers(ctx context.Context) ([]*transfer.Transfer, uint32, error) {
+func (h *Handler) GetAppTransfers(ctx context.Context) ([]*npool.Transfer, uint32, error) {
 	if h.AppID == nil {
 		return nil, 0, fmt.Errorf("invalid appID")
 	}
@@ -119,7 +117,7 @@ func (h *Handler) GetAppTransfers(ctx context.Context) ([]*transfer.Transfer, ui
 		return nil, 0, err
 	}
 	if len(infos) == 0 {
-		return []*transfer.Transfer{}, 0, nil
+		return []*npool.Transfer{}, 0, nil
 	}
 
 	handler := &queryHandler{

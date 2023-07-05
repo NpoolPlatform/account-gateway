@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
-	"github.com/NpoolPlatform/message/npool/account/gw/v1/transfer"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -13,13 +12,7 @@ import (
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/transfer"
 )
 
-func (s *Server) DeleteTransfer(
-	ctx context.Context,
-	in *transfer.DeleteTransferRequest,
-) (
-	resp *transfer.DeleteTransferResponse,
-	err error,
-) {
+func (s *Server) DeleteTransfer(ctx context.Context, in *npool.DeleteTransferRequest) (resp *npool.DeleteTransferResponse, err error) {
 	handler, err := transfer1.NewHandler(
 		ctx,
 		transfer1.WithID(&in.TransferID),

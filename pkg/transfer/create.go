@@ -12,8 +12,6 @@ import (
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/transfer"
 
-	"github.com/NpoolPlatform/message/npool/account/gw/v1/transfer"
-
 	usermwcli "github.com/NpoolPlatform/appuser-middleware/pkg/client/user"
 	usermwpb "github.com/NpoolPlatform/message/npool/appuser/mw/v1/user"
 
@@ -40,7 +38,7 @@ func (h *createHandler) validate() error {
 	}
 	switch *h.AccountType {
 	case basetypes.SignMethod_Email:
-		fallthrough
+		fallthrough //nolint
 	case basetypes.SignMethod_Mobile:
 		if h.Account == nil || *h.Account == "" {
 			return fmt.Errorf("account is empty")
@@ -72,7 +70,7 @@ func (h *createHandler) formalize() {
 			continue
 		}
 
-		h.accs = append(h.accs, &transfer.Transfer{
+		h.accs = append(h.accs, &npool.Transfer{
 			ID:                 val.ID,
 			AppID:              val.AppID,
 			UserID:             val.UserID,
@@ -139,7 +137,7 @@ func (h *createHandler) getUsers(ctx context.Context) error {
 	return nil
 }
 
-func (h *Handler) CreateTransfer(ctx context.Context) (*transfer.Transfer, error) {
+func (h *Handler) CreateTransfer(ctx context.Context) (*npool.Transfer, error) {
 	handler := &createHandler{
 		Handler: h,
 		infos:   []*transfermwpb.Transfer{},

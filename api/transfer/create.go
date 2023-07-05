@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
-	"github.com/NpoolPlatform/message/npool/account/gw/v1/transfer"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -13,13 +12,7 @@ import (
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/transfer"
 )
 
-func (s *Server) CreateTransfer(
-	ctx context.Context,
-	in *transfer.CreateTransferRequest,
-) (
-	resp *transfer.CreateTransferResponse,
-	err error,
-) {
+func (s *Server) CreateTransfer(ctx context.Context, in *npool.CreateTransferRequest) (resp *npool.CreateTransferResponse, err error) {
 	handler, err := transfer1.NewHandler(
 		ctx,
 		transfer1.WithAppID(&in.AppID),

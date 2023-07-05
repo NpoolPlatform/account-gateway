@@ -44,7 +44,7 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) {
 	return h.GetAccount(ctx)
 }
 
-func (h *Handler) UpdateAppUserAccount(ctx context.Context) (*npool.Account, error) {
+func (h *Handler) UpdateAppUserAccount(ctx context.Context) (*npool.Account, error) { //nolint
 	if h.ID == nil {
 		return nil, fmt.Errorf("invalid id")
 	}
