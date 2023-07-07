@@ -62,7 +62,7 @@ func (s *Server) GetAppTransfers(ctx context.Context, in *npool.GetAppTransfersR
 		return &npool.GetAppTransfersResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	infos, total, err := handler.GetTransfers(ctx)
+	infos, total, err := handler.GetAppTransfers(ctx)
 	if err != nil {
 		logger.Sugar().Errorw(
 			"GetAppTransfers",
@@ -94,7 +94,7 @@ func (s *Server) GetNAppTransfers(ctx context.Context, in *npool.GetNAppTransfer
 		return &npool.GetNAppTransfersResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	infos, total, err := handler.GetTransfers(ctx)
+	infos, total, err := handler.GetAppTransfers(ctx)
 	if err != nil {
 		logger.Sugar().Errorw(
 			"GetNAppTransfers",
