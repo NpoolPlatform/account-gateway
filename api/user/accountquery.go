@@ -1,7 +1,6 @@
 //nolint:dupl
 package user
 
-//nolint
 import (
 	"context"
 
@@ -15,13 +14,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (s *Server) GetAccounts(
-	ctx context.Context,
-	in *npool.GetAccountsRequest,
-) (
-	*npool.GetAccountsResponse,
-	error,
-) {
+func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) (*npool.GetAccountsResponse, error) {
 	handler, err := user1.NewHandler(
 		ctx,
 		user1.WithAppID(&in.AppID),
@@ -55,13 +48,7 @@ func (s *Server) GetAccounts(
 	}, nil
 }
 
-func (s *Server) GetAppAccounts(
-	ctx context.Context,
-	in *npool.GetAppAccountsRequest,
-) (
-	*npool.GetAppAccountsResponse,
-	error,
-) {
+func (s *Server) GetAppAccounts(ctx context.Context, in *npool.GetAppAccountsRequest) (*npool.GetAppAccountsResponse, error) {
 	handler, err := user1.NewHandler(
 		ctx,
 		user1.WithAppID(&in.AppID),
@@ -93,13 +80,7 @@ func (s *Server) GetAppAccounts(
 	}, nil
 }
 
-func (s *Server) GetNAppAccounts(
-	ctx context.Context,
-	in *npool.GetNAppAccountsRequest,
-) (
-	*npool.GetNAppAccountsResponse,
-	error,
-) {
+func (s *Server) GetNAppAccounts(ctx context.Context, in *npool.GetNAppAccountsRequest) (*npool.GetNAppAccountsResponse, error) {
 	handler, err := user1.NewHandler(
 		ctx,
 		user1.WithAppID(&in.TargetAppID),

@@ -53,14 +53,8 @@ func (h *queryHandler) getCoins(ctx context.Context) error {
 	}
 
 	coins, _, err := appcoinmwcli.GetCoins(ctx, &appcoinmwpb.Conds{
-		AppID: &basetypes.StringVal{
-			Op:    cruder.EQ,
-			Value: *h.AppID,
-		},
-		CoinTypeIDs: &basetypes.StringSliceVal{
-			Op:    cruder.IN,
-			Value: coinTypeIDs,
-		},
+		AppID:       &basetypes.StringVal{Op: cruder.EQ, Value: *h.AppID},
+		CoinTypeIDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: coinTypeIDs},
 	}, 0, int32(len(coinTypeIDs)))
 	if err != nil {
 		return err
@@ -163,18 +157,9 @@ func (h *Handler) GetAccounts(ctx context.Context) ([]*npool.Account, uint32, er
 	return handler.getAccounts(
 		ctx,
 		&useraccmwpb.Conds{
-			AppID: &basetypes.StringVal{
-				Op:    cruder.EQ,
-				Value: *h.AppID,
-			},
-			UserID: &basetypes.StringVal{
-				Op:    cruder.EQ,
-				Value: *h.UserID,
-			},
-			UsedFor: &basetypes.Uint32Val{
-				Op:    cruder.EQ,
-				Value: uint32(*h.UsedFor),
-			},
+			AppID:   &basetypes.StringVal{Op: cruder.EQ, Value: *h.AppID},
+			UserID:  &basetypes.StringVal{Op: cruder.EQ, Value: *h.UserID},
+			UsedFor: &basetypes.Uint32Val{Op: cruder.EQ, Value: uint32(*h.UsedFor)},
 		},
 	)
 }
