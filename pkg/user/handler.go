@@ -17,7 +17,7 @@ type Handler struct {
 	CoinTypeID       *string
 	Address          *string
 	UsedFor          *basetypes.AccountUsedFor
-	Labels           *[]string
+	Labels           []string
 	Account          *string
 	AccountType      *basetypes.SignMethod
 	VerificationCode *string
@@ -121,11 +121,8 @@ func WithUsedFor(usedFor *basetypes.AccountUsedFor) func(context.Context, *Handl
 	}
 }
 
-func WithLabels(labels *[]string) func(context.Context, *Handler) error {
+func WithLabels(labels []string) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
-		if labels == nil {
-			return nil
-		}
 		h.Labels = labels
 		return nil
 	}

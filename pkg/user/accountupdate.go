@@ -36,7 +36,7 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) {
 		ID:      h.ID,
 		Active:  h.Active,
 		Blocked: h.Blocked,
-		Labels:  *h.Labels,
+		Labels:  h.Labels,
 		Memo:    h.Memo,
 	})
 	if err != nil {

@@ -147,7 +147,7 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
 		CoinTypeID: h.CoinTypeID,
 		Address:    h.Address,
 		UsedFor:    h.UsedFor,
-		Labels:     *h.Labels,
+		Labels:     h.Labels,
 		Memo:       h.Memo,
 	})
 	if err != nil {

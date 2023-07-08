@@ -26,7 +26,7 @@ func (s *Server) UpdateAccount(
 		user1.WithID(&in.ID),
 		user1.WithAppID(&in.AppID),
 		user1.WithUserID(&in.UserID),
-		user1.WithLabels(&in.Labels),
+		user1.WithLabels(in.Labels),
 		user1.WithMemo(in.Memo),
 	)
 	if err != nil {

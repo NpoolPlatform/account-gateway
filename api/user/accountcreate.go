@@ -13,13 +13,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (s *Server) CreateAccount(
-	ctx context.Context,
-	in *npool.CreateAccountRequest,
-) (
-	*npool.CreateAccountResponse,
-	error,
-) {
+func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountRequest) (*npool.CreateAccountResponse, error) {
 	handler, err := user1.NewHandler(
 		ctx,
 		user1.WithAppID(&in.AppID),
@@ -27,7 +21,7 @@ func (s *Server) CreateAccount(
 		user1.WithCoinTypeID(&in.CoinTypeID),
 		user1.WithUsedFor(&in.UsedFor),
 		user1.WithAddress(&in.Address),
-		user1.WithLabels(&in.Labels),
+		user1.WithLabels(in.Labels),
 		user1.WithAccount(&in.Account),
 		user1.WithAccountType(&in.AccountType),
 		user1.WithVerificationCode(&in.VerificationCode),
