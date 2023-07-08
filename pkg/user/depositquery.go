@@ -128,14 +128,8 @@ func (h *Handler) GetDepositAccount(ctx context.Context) (*npool.Account, error)
 	}
 
 	coin, err := appcoinmwcli.GetCoinOnly(ctx, &appcoinmwpb.Conds{
-		AppID: &basetypes.StringVal{
-			Op:    cruder.EQ,
-			Value: *h.AppID,
-		},
-		CoinTypeID: &basetypes.StringVal{
-			Op:    cruder.EQ,
-			Value: *h.CoinTypeID,
-		},
+		AppID:      &basetypes.StringVal{Op: cruder.EQ, Value: *h.AppID},
+		CoinTypeID: &basetypes.StringVal{Op: cruder.EQ, Value: *h.CoinTypeID},
 	})
 	if err != nil {
 		return nil, err
@@ -154,30 +148,12 @@ func (h *Handler) GetDepositAccount(ctx context.Context) (*npool.Account, error)
 	handler.coins[coin.CoinTypeID] = coin
 
 	accs, _, err := depositcli.GetAccounts(ctx, &depositmwpb.Conds{
-		AppID: &basetypes.StringVal{
-			Op:    cruder.EQ,
-			Value: *h.AppID,
-		},
-		UserID: &basetypes.StringVal{
-			Op:    cruder.EQ,
-			Value: *h.UserID,
-		},
-		CoinTypeID: &basetypes.StringVal{
-			Op:    cruder.EQ,
-			Value: *h.CoinTypeID,
-		},
-		Active: &basetypes.BoolVal{
-			Op:    cruder.EQ,
-			Value: true,
-		},
-		Locked: &basetypes.BoolVal{
-			Op:    cruder.EQ,
-			Value: false,
-		},
-		Blocked: &basetypes.BoolVal{
-			Op:    cruder.EQ,
-			Value: false,
-		},
+		AppID:      &basetypes.StringVal{Op: cruder.EQ, Value: *h.AppID},
+		UserID:     &basetypes.StringVal{Op: cruder.EQ, Value: *h.UserID},
+		CoinTypeID: &basetypes.StringVal{Op: cruder.EQ, Value: *h.CoinTypeID},
+		Active:     &basetypes.BoolVal{Op: cruder.EQ, Value: true},
+		Locked:     &basetypes.BoolVal{Op: cruder.EQ, Value: false},
+		Blocked:    &basetypes.BoolVal{Op: cruder.EQ, Value: false},
 	}, 0, 1)
 	if err != nil {
 		return nil, err
