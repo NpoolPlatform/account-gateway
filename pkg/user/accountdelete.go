@@ -17,10 +17,10 @@ func (h *Handler) DeleteAccount(ctx context.Context) (*npool.Account, error) {
 		return nil, fmt.Errorf("invalid id")
 	}
 	if h.AppID == nil {
-		return nil, fmt.Errorf("invalid appID")
+		return nil, fmt.Errorf("invalid appid")
 	}
 	if h.UserID == nil {
-		return nil, fmt.Errorf("invalid userID")
+		return nil, fmt.Errorf("invalid userid")
 	}
 
 	info, err := useraccmwcli.GetAccount(ctx, *h.ID)
