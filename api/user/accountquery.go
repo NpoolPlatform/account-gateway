@@ -32,6 +32,13 @@ func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) 
 		return &npool.GetAccountsResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
 
+	if handler.UserID == nil {
+		return &npool.GetAccountsResponse{}, status.Error(codes.InvalidArgument, "invalid userID")
+	}
+	if handler.UsedFor == nil {
+		return &npool.GetAccountsResponse{}, status.Error(codes.InvalidArgument, "invalid usedFor")
+	}
+
 	infos, total, err := handler.GetAccounts(ctx)
 	if err != nil {
 		logger.Sugar().Errorw(
@@ -64,7 +71,7 @@ func (s *Server) GetAppAccounts(ctx context.Context, in *npool.GetAppAccountsReq
 		return &npool.GetAppAccountsResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	infos, total, err := handler.GetAppAccounts(ctx)
+	infos, total, err := handler.GetAccounts(ctx)
 	if err != nil {
 		logger.Sugar().Errorw(
 			"GetAppAccounts",
@@ -96,7 +103,7 @@ func (s *Server) GetNAppAccounts(ctx context.Context, in *npool.GetNAppAccountsR
 		return &npool.GetNAppAccountsResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	infos, total, err := handler.GetAppAccounts(ctx)
+	infos, total, err := handler.GetAccounts(ctx)
 	if err != nil {
 		logger.Sugar().Errorw(
 			"GetNAppAccounts",

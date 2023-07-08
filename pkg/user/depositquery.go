@@ -148,7 +148,7 @@ func (h *queryDepositHandler) formalize() {
 	}
 }
 
-func (h *Handler) GetDepositAccount(ctx context.Context) (*npool.Account, error) { //nolint
+func (h *Handler) GetDepositAccount(ctx context.Context) (*npool.Account, error) {
 	if h.AppID == nil {
 		return nil, fmt.Errorf("invaild appid")
 	}
@@ -190,8 +190,7 @@ func (h *Handler) GetDepositAccount(ctx context.Context) (*npool.Account, error)
 	if len(infos) > 0 {
 		handler.infos = append(handler.infos, infos...)
 	} else {
-		handler.createAccount(ctx)
-		if err != nil {
+		if err := handler.createAccount(ctx); err != nil {
 			return nil, err
 		}
 	}

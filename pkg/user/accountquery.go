@@ -1,4 +1,3 @@
-//nolint
 package user
 
 import (
@@ -142,31 +141,14 @@ func (h *Handler) GetAccounts(ctx context.Context) ([]*npool.Account, uint32, er
 	if h.AppID == nil {
 		return nil, 0, fmt.Errorf("invalid appID")
 	}
-	if h.UserID == nil {
-		return nil, 0, fmt.Errorf("invalid userID")
+	conds := &useraccmwpb.Conds{
+		AppID: &basetypes.StringVal{Op: cruder.EQ, Value: *h.AppID},
 	}
-	if h.UsedFor == nil {
-		return nil, 0, fmt.Errorf("invalid usedFor")
+	if h.UserID != nil {
+		conds.UserID = &basetypes.StringVal{Op: cruder.EQ, Value: *h.UserID}
 	}
-	handler := &queryHandler{
-		Handler: h,
-		users:   map[string]*usermwpb.User{},
-		coins:   map[string]*appcoinmwpb.Coin{},
-	}
-
-	return handler.getAccounts(
-		ctx,
-		&useraccmwpb.Conds{
-			AppID:   &basetypes.StringVal{Op: cruder.EQ, Value: *h.AppID},
-			UserID:  &basetypes.StringVal{Op: cruder.EQ, Value: *h.UserID},
-			UsedFor: &basetypes.Uint32Val{Op: cruder.EQ, Value: uint32(*h.UsedFor)},
-		},
-	)
-}
-
-func (h *Handler) GetAppAccounts(ctx context.Context) ([]*npool.Account, uint32, error) {
-	if h.AppID == nil {
-		return nil, 0, fmt.Errorf("invalid appID")
+	if h.UsedFor != nil {
+		conds.UsedFor = &basetypes.Uint32Val{Op: cruder.EQ, Value: uint32(*h.UsedFor)}
 	}
 	handler := &queryHandler{
 		Handler: h,
@@ -176,12 +158,7 @@ func (h *Handler) GetAppAccounts(ctx context.Context) ([]*npool.Account, uint32,
 
 	return handler.getAccounts(
 		ctx,
-		&useraccmwpb.Conds{
-			AppID: &basetypes.StringVal{
-				Op:    cruder.EQ,
-				Value: *h.AppID,
-			},
-		},
+		conds,
 	)
 }
 

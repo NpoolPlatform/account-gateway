@@ -68,48 +68,15 @@ func (h *Handler) GetTransfers(ctx context.Context) ([]*npool.Transfer, uint32, 
 	if h.AppID == nil {
 		return nil, 0, fmt.Errorf("invalid appID")
 	}
-	if h.UserID == nil {
-		return nil, 0, fmt.Errorf("invalid userID")
+	conds := &transfermwpb.Conds{
+		AppID: &basetypes.StringVal{Op: cruder.EQ, Value: *h.AppID},
+	}
+	if h.UserID != nil {
+		conds.UserID = &basetypes.StringVal{Op: cruder.EQ, Value: *h.UserID}
 	}
 	infos, total, err := transfermwcli.GetTransfers(
 		ctx,
-		&transfermwpb.Conds{
-			AppID:  &basetypes.StringVal{Op: cruder.EQ, Value: *h.AppID},
-			UserID: &basetypes.StringVal{Op: cruder.EQ, Value: *h.UserID},
-		},
-		h.Offset,
-		h.Limit,
-	)
-	if err != nil {
-		return nil, 0, err
-	}
-	if len(infos) == 0 {
-		return []*npool.Transfer{}, 0, nil
-	}
-
-	handler := &queryHandler{
-		Handler: h,
-		infos:   infos,
-		users:   map[string]*usermwpb.User{},
-	}
-
-	if err := handler.getUsers(ctx); err != nil {
-		return nil, 0, err
-	}
-
-	handler.formalize()
-	return handler.accs, total, nil
-}
-
-func (h *Handler) GetAppTransfers(ctx context.Context) ([]*npool.Transfer, uint32, error) {
-	if h.AppID == nil {
-		return nil, 0, fmt.Errorf("invalid appID")
-	}
-	infos, total, err := transfermwcli.GetTransfers(
-		ctx,
-		&transfermwpb.Conds{
-			AppID: &basetypes.StringVal{Op: cruder.EQ, Value: *h.AppID},
-		},
+		conds,
 		h.Offset,
 		h.Limit,
 	)
