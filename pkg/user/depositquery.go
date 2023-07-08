@@ -22,23 +22,28 @@ import (
 
 type queryDepositHandler struct {
 	*Handler
-	infos []*depositmwpb.Account
-	coins map[string]*appcoinmwpb.Coin
-	users map[string]*usermwpb.User
-	accs  []*npool.Account
+	infos       []*depositmwpb.Account
+	userIDs     []string
+	coinTypeIDs []string
+	coins       map[string]*appcoinmwpb.Coin
+	users       map[string]*usermwpb.User
+	accs        []*npool.Account
 }
 
 func (h *queryDepositHandler) getUsers(ctx context.Context) error {
-	ids := []string{}
 	for _, info := range h.infos {
-		ids = append(ids, info.UserID)
+		h.userIDs = append(h.userIDs, info.UserID)
 	}
 
 	users, _, err := usermwcli.GetUsers(ctx, &usermwpb.Conds{
-		IDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: ids},
-	}, 0, int32(len(ids)))
+		AppID: &basetypes.StringVal{Op: cruder.EQ, Value: *h.AppID},
+		IDs:   &basetypes.StringSliceVal{Op: cruder.IN, Value: h.userIDs},
+	}, 0, int32(len(h.userIDs)))
 	if err != nil {
 		return err
+	}
+	if len(users) == 0 {
+		return fmt.Errorf("invalid user")
 	}
 
 	for _, u := range users {
@@ -49,9 +54,8 @@ func (h *queryDepositHandler) getUsers(ctx context.Context) error {
 }
 
 func (h *queryDepositHandler) getCoins(ctx context.Context) error {
-	coinTypeIDs := []string{}
 	for _, val := range h.infos {
-		coinTypeIDs = append(coinTypeIDs, val.CoinTypeID)
+		h.coinTypeIDs = append(h.coinTypeIDs, val.CoinTypeID)
 	}
 
 	coins, _, err := appcoinmwcli.GetCoins(ctx, &appcoinmwpb.Conds{
@@ -61,17 +65,57 @@ func (h *queryDepositHandler) getCoins(ctx context.Context) error {
 		},
 		CoinTypeIDs: &basetypes.StringSliceVal{
 			Op:    cruder.IN,
-			Value: coinTypeIDs,
+			Value: h.coinTypeIDs,
 		},
-	}, 0, int32(len(coinTypeIDs)))
+	}, 0, int32(len(h.coinTypeIDs)))
 	if err != nil {
 		return err
+	}
+	if len(coins) == 0 {
+		return fmt.Errorf("invalid coin")
 	}
 
 	for _, coin := range coins {
 		h.coins[coin.CoinTypeID] = coin
 	}
 
+	return nil
+}
+
+func (h *queryDepositHandler) createAccount(ctx context.Context) error {
+	sacc, err := sphinxproxycli.CreateAddress(ctx, h.coins[*h.CoinTypeID].CoinName)
+	if err != nil {
+		return err
+	}
+	if sacc == nil || sacc.Address == "" {
+		return fmt.Errorf("fail create wallet")
+	}
+
+	info, err := depositcli.CreateAccount(ctx, &depositmwpb.AccountReq{
+		AppID:      h.AppID,
+		UserID:     h.UserID,
+		CoinTypeID: h.CoinTypeID,
+		Address:    &sacc.Address,
+	})
+	if err != nil {
+		return err
+	}
+	h.infos = append(h.infos, info)
+
+	return nil
+}
+
+func (h *queryDepositHandler) getBalance(ctx context.Context) error {
+	bal, err := sphinxproxycli.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
+		Name:    h.coins[*h.CoinTypeID].CoinName,
+		Address: h.infos[0].Address,
+	})
+	if err != nil {
+		return err
+	}
+	if bal == nil {
+		return fmt.Errorf("invalid address")
+	}
 	return nil
 }
 
@@ -116,38 +160,24 @@ func (h *Handler) GetDepositAccount(ctx context.Context) (*npool.Account, error)
 		return nil, fmt.Errorf("invaild coinTypeID")
 	}
 
-	user, err := usermwcli.GetUser(ctx, *h.AppID, *h.UserID)
-	if err != nil {
-		return nil, err
-	}
-	if user == nil {
-		return nil, fmt.Errorf("invalid user")
-	}
-	if user.AppID != *h.AppID {
-		return nil, fmt.Errorf("permission denied")
-	}
-
-	coin, err := appcoinmwcli.GetCoinOnly(ctx, &appcoinmwpb.Conds{
-		AppID:      &basetypes.StringVal{Op: cruder.EQ, Value: *h.AppID},
-		CoinTypeID: &basetypes.StringVal{Op: cruder.EQ, Value: *h.CoinTypeID},
-	})
-	if err != nil {
-		return nil, err
-	}
-	if coin == nil {
-		return nil, fmt.Errorf("invalid coin")
-	}
-
 	handler := &queryDepositHandler{
-		Handler: h,
-		infos:   []*depositmwpb.Account{},
-		coins:   map[string]*appcoinmwpb.Coin{},
-		users:   map[string]*usermwpb.User{},
+		Handler:     h,
+		infos:       []*depositmwpb.Account{},
+		userIDs:     []string{*h.UserID},
+		coinTypeIDs: []string{*h.CoinTypeID},
+		coins:       map[string]*appcoinmwpb.Coin{},
+		users:       map[string]*usermwpb.User{},
 	}
-	handler.users[user.ID] = user
-	handler.coins[coin.CoinTypeID] = coin
 
-	accs, _, err := depositcli.GetAccounts(ctx, &depositmwpb.Conds{
+	if err := handler.getUsers(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := handler.getCoins(ctx); err != nil {
+		return nil, err
+	}
+
+	infos, _, err := depositcli.GetAccounts(ctx, &depositmwpb.Conds{
 		AppID:      &basetypes.StringVal{Op: cruder.EQ, Value: *h.AppID},
 		UserID:     &basetypes.StringVal{Op: cruder.EQ, Value: *h.UserID},
 		CoinTypeID: &basetypes.StringVal{Op: cruder.EQ, Value: *h.CoinTypeID},
@@ -158,55 +188,15 @@ func (h *Handler) GetDepositAccount(ctx context.Context) (*npool.Account, error)
 	if err != nil {
 		return nil, err
 	}
-
-	if len(accs) > 0 {
-		acc := accs[0]
-
-		bal, err := sphinxproxycli.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
-			Name:    coin.Name,
-			Address: acc.Address,
-		})
-		if err != nil {
-			return nil, err
-		}
-		if bal == nil {
-			return nil, fmt.Errorf("invalid address")
-		}
-		handler.infos = append(handler.infos, acc)
-		handler.formalize()
-
-		return handler.accs[0], nil
+	if len(infos) > 0 {
+		handler.infos = append(handler.infos, infos...)
+	} else {
+		handler.createAccount(ctx)
 	}
 
-	sacc, err := sphinxproxycli.CreateAddress(ctx, coin.Name)
-	if err != nil {
+	if err := handler.getBalance(ctx); err != nil {
 		return nil, err
 	}
-	if sacc == nil || sacc.Address == "" {
-		return nil, fmt.Errorf("fail create wallet")
-	}
-
-	acc, err := depositcli.CreateAccount(ctx, &depositmwpb.AccountReq{
-		AppID:      h.AppID,
-		UserID:     h.UserID,
-		CoinTypeID: h.CoinTypeID,
-		Address:    &sacc.Address,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	bal, err := sphinxproxycli.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
-		Name:    coin.Name,
-		Address: sacc.Address,
-	})
-	if err != nil {
-		return nil, err
-	}
-	if bal == nil {
-		return nil, fmt.Errorf("invalid address")
-	}
-	handler.infos = append(handler.infos, acc)
 	handler.formalize()
 
 	return handler.accs[0], nil
@@ -232,10 +222,12 @@ func (h *Handler) GetDepositAccounts(ctx context.Context) ([]*npool.Account, uin
 	}
 
 	handler := &queryDepositHandler{
-		Handler: h,
-		infos:   infos,
-		coins:   map[string]*appcoinmwpb.Coin{},
-		users:   map[string]*usermwpb.User{},
+		Handler:     h,
+		infos:       infos,
+		userIDs:     []string{},
+		coinTypeIDs: []string{},
+		coins:       map[string]*appcoinmwpb.Coin{},
+		users:       map[string]*usermwpb.User{},
 	}
 	if err := handler.getUsers(ctx); err != nil {
 		return nil, 0, err
