@@ -152,6 +152,7 @@ func (h *Handler) GetAccounts(ctx context.Context) ([]*npool.Account, uint32, er
 	}
 	handler := &queryHandler{
 		Handler: h,
+		infos:   []*useraccmwpb.Account{},
 		users:   map[string]*usermwpb.User{},
 		coins:   map[string]*appcoinmwpb.Coin{},
 	}
@@ -170,6 +171,7 @@ func (h *queryHandler) getAccounts(ctx context.Context, conds *useraccmwpb.Conds
 	if len(infos) == 0 {
 		return nil, total, nil
 	}
+	h.infos = append(h.infos, infos...)
 
 	if err := h.getUsers(ctx); err != nil {
 		return nil, 0, err
