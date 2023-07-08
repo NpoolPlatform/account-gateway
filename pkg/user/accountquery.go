@@ -138,7 +138,7 @@ func (h *Handler) GetAccount(ctx context.Context) (*npool.Account, error) {
 	return handler.accs[0], nil
 }
 
-func (h *Handler) GetAccounts(ctx context.Context) ([]*npool.Account, uint32, error) { // nolint
+func (h *Handler) GetAccounts(ctx context.Context) ([]*npool.Account, uint32, error) {
 	if h.AppID == nil {
 		return nil, 0, fmt.Errorf("invalid appID")
 	}

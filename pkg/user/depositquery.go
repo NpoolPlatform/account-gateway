@@ -1,4 +1,3 @@
-//nolint:dupl
 package user
 
 import (
@@ -192,6 +191,9 @@ func (h *Handler) GetDepositAccount(ctx context.Context) (*npool.Account, error)
 		handler.infos = append(handler.infos, infos...)
 	} else {
 		handler.createAccount(ctx)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if err := handler.getBalance(ctx); err != nil {
