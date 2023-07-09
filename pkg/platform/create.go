@@ -59,7 +59,7 @@ func (h *createHandler) checkAddress(ctx context.Context) error {
 		return err
 	}
 	if info == nil {
-		return fmt.Errorf("address not exist")
+		return nil
 	}
 	if info.UsedFor != *h.UsedFor {
 		return fmt.Errorf("mismatch account")
