@@ -32,6 +32,17 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) {
 		return nil, fmt.Errorf("permission denied")
 	}
 
+	boolFalse := false
+	boolTrue := true
+
+	if h.Blocked != nil && !*h.Blocked {
+		h.Active = &boolFalse
+		h.Backup = &boolTrue
+	}
+	if h.Active != nil && *h.Active {
+		h.Blocked = &boolFalse
+	}
+
 	_, err = useraccmwcli.UpdateAccount(ctx, &useraccmwpb.AccountReq{
 		ID:      h.ID,
 		Active:  h.Active,

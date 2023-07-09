@@ -23,27 +23,15 @@ func (h *Handler) DeleteAccount(ctx context.Context) (*npool.Account, error) {
 		return nil, fmt.Errorf("invalid userid")
 	}
 
-	info, err := useraccmwcli.GetAccount(ctx, *h.ID)
+	info, err := h.GetAccount(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if info == nil {
-		return nil, fmt.Errorf("invalid account")
-	}
 
 	exist, err := useraccmwcli.ExistAccountConds(ctx, &useraccmwpb.Conds{
-		ID: &basetypes.StringVal{
-			Op:    cruder.EQ,
-			Value: *h.ID,
-		},
-		AppID: &basetypes.StringVal{
-			Op:    cruder.EQ,
-			Value: *h.AppID,
-		},
-		UserID: &basetypes.StringVal{
-			Op:    cruder.EQ,
-			Value: *h.UserID,
-		},
+		ID:     &basetypes.StringVal{Op: cruder.EQ, Value: *h.ID},
+		AppID:  &basetypes.StringVal{Op: cruder.EQ, Value: *h.AppID},
+		UserID: &basetypes.StringVal{Op: cruder.EQ, Value: *h.UserID},
 	})
 	if err != nil {
 		return nil, err
@@ -59,5 +47,5 @@ func (h *Handler) DeleteAccount(ctx context.Context) (*npool.Account, error) {
 		return nil, err
 	}
 
-	return h.GetAccount(ctx)
+	return info, nil
 }
