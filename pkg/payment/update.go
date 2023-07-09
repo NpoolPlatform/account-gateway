@@ -29,7 +29,7 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) {
 
 	boolFalse := false
 
-	if h.Blocked != nil && !*h.Blocked {
+	if h.Blocked != nil && *h.Blocked {
 		h.Active = &boolFalse
 	}
 	if h.Active != nil && *h.Active {
@@ -40,7 +40,6 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) {
 		ID:      h.ID,
 		Active:  h.Active,
 		Blocked: h.Blocked,
-		Locked:  h.Locked,
 	}); err != nil {
 		return nil, err
 	}

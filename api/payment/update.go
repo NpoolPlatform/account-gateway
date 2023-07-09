@@ -18,7 +18,6 @@ func (s *Server) UpdateAccount(ctx context.Context, in *npool.UpdateAccountReque
 		ctx,
 		payment1.WithID(&in.ID),
 		payment1.WithActive(in.Active),
-		payment1.WithLocked(in.Locked),
 		payment1.WithBlocked(in.Blocked),
 	)
 	if err != nil {

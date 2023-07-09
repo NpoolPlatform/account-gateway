@@ -12,7 +12,6 @@ type Handler struct {
 	ID      *string
 	Active  *bool
 	Blocked *bool
-	Locked  *bool
 	Offset  int32
 	Limit   int32
 }
@@ -50,13 +49,6 @@ func WithActive(active *bool) func(context.Context, *Handler) error {
 func WithBlocked(blocked *bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		h.Blocked = blocked
-		return nil
-	}
-}
-
-func WithLocked(locked *bool) func(context.Context, *Handler) error {
-	return func(ctx context.Context, h *Handler) error {
-		h.Locked = locked
 		return nil
 	}
 }
