@@ -29,13 +29,13 @@ type createHandler struct {
 
 func (h *createHandler) validate(ctx context.Context) error { //nolint
 	if h.AppID == nil {
-		return fmt.Errorf("invalid appID")
+		return fmt.Errorf("invalid appid")
 	}
 	if h.UserID == nil {
-		return fmt.Errorf("invalid userID")
+		return fmt.Errorf("invalid userid")
 	}
 	if h.AccountType == nil {
-		return fmt.Errorf("invalid accountType")
+		return fmt.Errorf("invalid accounttype")
 	}
 
 	switch *h.AccountType {
@@ -47,27 +47,27 @@ func (h *createHandler) validate(ctx context.Context) error { //nolint
 		}
 	case basetypes.SignMethod_Google:
 	default:
-		return fmt.Errorf("accountType %v invalid", *h.AccountType)
+		return fmt.Errorf("accounttype %v invalid", *h.AccountType)
 	}
 
 	if h.VerificationCode == nil || *h.VerificationCode == "" {
-		return fmt.Errorf("invalid verificationCode")
+		return fmt.Errorf("invalid verificationcode")
 	}
 	if h.CoinTypeID == nil {
-		return fmt.Errorf("invalid coinTypeID")
+		return fmt.Errorf("invalid cointypeid")
 	}
 	if h.Address == nil || *h.Address == "" {
 		return fmt.Errorf("invalid address")
 	}
 	if h.UsedFor == nil {
-		return fmt.Errorf("invalid usedFor")
+		return fmt.Errorf("invalid usedfor")
 	}
 
 	switch *h.UsedFor {
 	case basetypes.AccountUsedFor_UserWithdraw:
 	case basetypes.AccountUsedFor_UserDirectBenefit:
 	default:
-		return fmt.Errorf("usedFor %v invalid", *h.UsedFor)
+		return fmt.Errorf("usedfor %v invalid", *h.UsedFor)
 	}
 
 	return nil
@@ -132,7 +132,7 @@ func (h *createHandler) checkAddress(ctx context.Context) error {
 
 func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
 	if h.AppID == nil {
-		return nil, fmt.Errorf("invalid appID")
+		return nil, fmt.Errorf("invalid appid")
 	}
 	handler := &createHandler{
 		Handler: h,

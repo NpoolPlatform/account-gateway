@@ -22,7 +22,7 @@ func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountReque
 		user1.WithUsedFor(&in.UsedFor),
 		user1.WithAddress(&in.Address),
 		user1.WithLabels(in.Labels),
-		user1.WithAccount(&in.Account),
+		user1.WithAccount(in.Account),
 		user1.WithAccountType(&in.AccountType),
 		user1.WithVerificationCode(&in.VerificationCode),
 		user1.WithMemo(in.Memo),
