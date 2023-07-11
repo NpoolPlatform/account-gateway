@@ -17,7 +17,7 @@ func (s *Server) CreateTransfer(ctx context.Context, in *npool.CreateTransferReq
 		ctx,
 		transfer1.WithAppID(&in.AppID),
 		transfer1.WithUserID(&in.UserID),
-		transfer1.WithAccount(&in.Account),
+		transfer1.WithAccount(in.Account),
 		transfer1.WithAccountType(&in.AccountType),
 		transfer1.WithVerificationCode(&in.VerificationCode),
 		transfer1.WithTargetAccount(&in.TargetAccount),

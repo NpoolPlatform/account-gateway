@@ -130,6 +130,12 @@ func WithLabels(labels []string) func(context.Context, *Handler) error {
 
 func WithAccount(account *string) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
+		if account == nil {
+			return nil
+		}
+		if *account == "" {
+			return fmt.Errorf("invalid account")
+		}
 		h.Account = account
 		return nil
 	}
