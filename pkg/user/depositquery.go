@@ -191,7 +191,8 @@ func (h *Handler) GetDepositAccount(ctx context.Context) (*npool.Account, error)
 	if len(infos) > 0 {
 		handler.infos = append(handler.infos, infos...)
 	} else {
-		if err := handler.createAccount(ctx); err != nil {
+		err := handler.createAccount(ctx)
+		if err != nil {
 			return nil, err
 		}
 	}
@@ -200,6 +201,10 @@ func (h *Handler) GetDepositAccount(ctx context.Context) (*npool.Account, error)
 		return nil, err
 	}
 	handler.formalize()
+
+	if len(handler.accs) == 0 {
+		return nil, nil
+	}
 
 	return handler.accs[0], nil
 }
