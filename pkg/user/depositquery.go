@@ -1,10 +1,11 @@
-//nolint:dupl
+//nolint:nolintlint,dupl
 package user
 
 import (
 	"context"
 	"fmt"
 
+	addresscheck "github.com/NpoolPlatform/account-gateway/pkg/addresscheck"
 	depositcli "github.com/NpoolPlatform/account-middleware/pkg/client/deposit"
 	usermwcli "github.com/NpoolPlatform/appuser-middleware/pkg/client/user"
 	appcoinmwcli "github.com/NpoolPlatform/chain-middleware/pkg/client/app/coin"
@@ -22,12 +23,14 @@ import (
 
 type queryDepositHandler struct {
 	*Handler
-	infos       []*depositmwpb.Account
-	userIDs     []string
-	coinTypeIDs []string
-	coins       map[string]*appcoinmwpb.Coin
-	users       map[string]*usermwpb.User
-	accs        []*npool.Account
+	infos               []*depositmwpb.Account
+	userIDs             []string
+	coinTypeIDs         []string
+	coins               map[string]*appcoinmwpb.Coin
+	users               map[string]*usermwpb.User
+	accs                []*npool.Account
+	coinName            *string
+	checkAddressBalance bool
 }
 
 func (h *queryDepositHandler) getUsers(ctx context.Context) error {
@@ -77,12 +80,14 @@ func (h *queryDepositHandler) getCoins(ctx context.Context) error {
 
 	for _, coin := range coins {
 		h.coins[coin.CoinTypeID] = coin
+		h.coinName = &coin.CoinName
+		h.checkAddressBalance = coin.CheckNewAddressBalance
 	}
 
 	return nil
 }
 
-func (h *queryDepositHandler) createAccount(ctx context.Context) error {
+func (h *queryDepositHandler) createAddress(ctx context.Context) error {
 	sacc, err := sphinxproxycli.CreateAddress(ctx, h.coins[*h.CoinTypeID].CoinName)
 	if err != nil {
 		return err
@@ -90,12 +95,25 @@ func (h *queryDepositHandler) createAccount(ctx context.Context) error {
 	if sacc == nil || sacc.Address == "" {
 		return fmt.Errorf("fail create wallet")
 	}
+	h.Address = &sacc.Address
 
+	if !h.checkAddressBalance {
+		err := addresscheck.ValidateAddress(*h.coinName, *h.Address)
+		if err != nil {
+			return fmt.Errorf("invalid %v address", *h.coinName)
+		}
+		return nil
+	}
+
+	return nil
+}
+
+func (h *queryDepositHandler) createAccount(ctx context.Context) error {
 	info, err := depositcli.CreateAccount(ctx, &depositmwpb.AccountReq{
 		AppID:      h.AppID,
 		UserID:     h.UserID,
 		CoinTypeID: h.CoinTypeID,
-		Address:    &sacc.Address,
+		Address:    h.Address,
 	})
 	if err != nil {
 		return err
@@ -107,8 +125,8 @@ func (h *queryDepositHandler) createAccount(ctx context.Context) error {
 
 func (h *queryDepositHandler) getBalance(ctx context.Context) error {
 	bal, err := sphinxproxycli.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
-		Name:    h.coins[*h.CoinTypeID].CoinName,
-		Address: h.infos[0].Address,
+		Name:    *h.coinName,
+		Address: *h.Address,
 	})
 	if err != nil {
 		return err
@@ -190,16 +208,24 @@ func (h *Handler) GetDepositAccount(ctx context.Context) (*npool.Account, error)
 	}
 	if len(infos) > 0 {
 		handler.infos = append(handler.infos, infos...)
+		if err := handler.getBalance(ctx); err != nil {
+			return nil, err
+		}
 	} else {
-		err := handler.createAccount(ctx)
+		err := handler.createAddress(ctx)
+		if err != nil {
+			return nil, err
+		}
+		err = handler.getBalance(ctx)
+		if err != nil {
+			return nil, err
+		}
+		err = handler.createAccount(ctx)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	if err := handler.getBalance(ctx); err != nil {
-		return nil, err
-	}
 	handler.formalize()
 
 	if len(handler.accs) == 0 {

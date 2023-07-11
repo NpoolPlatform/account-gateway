@@ -10,6 +10,7 @@ import (
 	gbmwcli "github.com/NpoolPlatform/account-middleware/pkg/client/goodbenefit"
 	gbmwpb "github.com/NpoolPlatform/message/npool/account/mw/v1/goodbenefit"
 
+	addresscheck "github.com/NpoolPlatform/account-gateway/pkg/addresscheck"
 	coinmwcli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
 	goodmwcli "github.com/NpoolPlatform/good-middleware/pkg/client/good"
 	sphinxproxypb "github.com/NpoolPlatform/message/npool/sphinxproxy"
@@ -91,6 +92,10 @@ func (h *createHandler) createAddress(ctx context.Context) error {
 	h.address = &acc.Address
 
 	if !h.checkAddressBalance {
+		err := addresscheck.ValidateAddress(*h.goodCoinName, *h.address)
+		if err != nil {
+			return fmt.Errorf("invalid %v address", *h.goodCoinName)
+		}
 		return nil
 	}
 

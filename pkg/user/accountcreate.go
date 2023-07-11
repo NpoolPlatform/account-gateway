@@ -3,12 +3,13 @@ package user
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/user"
 
 	usermwcli "github.com/NpoolPlatform/appuser-middleware/pkg/client/user"
 	coininfocli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
+
+	addresscheck "github.com/NpoolPlatform/account-gateway/pkg/addresscheck"
 
 	sphinxproxypb "github.com/NpoolPlatform/message/npool/sphinxproxy"
 	sphinxproxycli "github.com/NpoolPlatform/sphinx-proxy/pkg/client"
@@ -24,7 +25,8 @@ import (
 
 type createHandler struct {
 	*Handler
-	coinName *string
+	coinName            *string
+	checkAddressBalance bool
 }
 
 func (h *createHandler) validate(ctx context.Context) error { //nolint
@@ -109,24 +111,67 @@ func (h *createHandler) getCoinName(ctx context.Context) error {
 		return fmt.Errorf("invlaid coin")
 	}
 	h.coinName = &coin.Name
+	h.checkAddressBalance = coin.CheckNewAddressBalance
 
 	return nil
 }
 
-func (h *createHandler) checkAddress(ctx context.Context) error {
-	if !strings.Contains(*h.coinName, "ironfish") {
-		bal, err := sphinxproxycli.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
-			Name:    *h.coinName,
-			Address: *h.Address,
-		})
+func (h *createHandler) createAddress(ctx context.Context) error {
+	if h.coinName == nil {
+		return fmt.Errorf("invalid coinname")
+	}
+
+	if h.Address == nil {
+		acc, err := sphinxproxycli.CreateAddress(ctx, *h.coinName)
 		if err != nil {
 			return err
 		}
-		if bal == nil {
-			return fmt.Errorf("invalid address")
+		if acc == nil {
+			return fmt.Errorf("fail create address")
 		}
+		h.Address = &acc.Address
 	}
 
+	if !h.checkAddressBalance {
+		err := addresscheck.ValidateAddress(*h.coinName, *h.Address)
+		if err != nil {
+			return fmt.Errorf("invalid %v address", *h.coinName)
+		}
+		return nil
+	}
+
+	bal, err := sphinxproxycli.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
+		Name:    *h.coinName,
+		Address: *h.Address,
+	})
+	if err != nil {
+		return err
+	}
+	if bal == nil {
+		return fmt.Errorf("invalid address")
+	}
+
+	return nil
+}
+
+func (h *createHandler) createAccount(ctx context.Context) error {
+	info, err := useraccmwcli.CreateAccount(ctx, &useraccmwpb.AccountReq{
+		AppID:      h.AppID,
+		UserID:     h.UserID,
+		CoinTypeID: h.CoinTypeID,
+		Address:    h.Address,
+		UsedFor:    h.UsedFor,
+		Labels:     h.Labels,
+		Memo:       h.Memo,
+	})
+	if err != nil {
+		return err
+	}
+	if info == nil {
+		return fmt.Errorf("fail create account")
+	}
+
+	h.ID = &info.ID
 	return nil
 }
 
@@ -140,27 +185,16 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
 	if err := handler.validate(ctx); err != nil {
 		return nil, err
 	}
-
-	info, err := useraccmwcli.CreateAccount(ctx, &useraccmwpb.AccountReq{
-		AppID:      h.AppID,
-		UserID:     h.UserID,
-		CoinTypeID: h.CoinTypeID,
-		Address:    h.Address,
-		UsedFor:    h.UsedFor,
-		Labels:     h.Labels,
-		Memo:       h.Memo,
-	})
-	if err != nil {
-		return nil, err
-	}
-	h.ID = &info.ID
 	if err := handler.checkVerifyUserCode(ctx); err != nil {
 		return nil, err
 	}
 	if err := handler.getCoinName(ctx); err != nil {
 		return nil, err
 	}
-	if err := handler.checkAddress(ctx); err != nil {
+	if err := handler.createAddress(ctx); err != nil {
+		return nil, err
+	}
+	if err := handler.createAccount(ctx); err != nil {
 		return nil, err
 	}
 

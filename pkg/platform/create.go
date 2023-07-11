@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	addresscheck "github.com/NpoolPlatform/account-gateway/pkg/addresscheck"
 	pltfmwcli "github.com/NpoolPlatform/account-middleware/pkg/client/platform"
 	coinmwcli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
 	cruder "github.com/NpoolPlatform/libent-cruder/pkg/cruder"
@@ -118,6 +119,10 @@ func (h *createHandler) createAddress(ctx context.Context) error {
 	}
 
 	if !h.checkAddressBalance {
+		err := addresscheck.ValidateAddress(*h.coinName, *h.Address)
+		if err != nil {
+			return fmt.Errorf("invalid %v address", *h.coinName)
+		}
 		return nil
 	}
 
