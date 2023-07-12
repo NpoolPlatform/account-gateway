@@ -2,118 +2,87 @@ package goodbenefit
 
 import (
 	"context"
-
-	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/goodbenefit"
+	"fmt"
 
 	gbmwcli "github.com/NpoolPlatform/account-middleware/pkg/client/goodbenefit"
-
-	gbmwpb "github.com/NpoolPlatform/message/npool/account/mw/v1/goodbenefit"
-
+	coinmwcli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
 	goodmwcli "github.com/NpoolPlatform/good-middleware/pkg/client/good"
+	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
+	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/goodbenefit"
+	gbmwpb "github.com/NpoolPlatform/message/npool/account/mw/v1/goodbenefit"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
+	coinmwpb "github.com/NpoolPlatform/message/npool/chain/mw/v1/coin"
 	goodmwpb "github.com/NpoolPlatform/message/npool/good/mw/v1/good"
-
-	coininfopb "github.com/NpoolPlatform/message/npool/chain/mw/v1/coin"
-
-	coininfocli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
 )
 
-func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
-	info, err := gbmwcli.GetAccount(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-
-	good, err := goodmwcli.GetGood(ctx, info.GoodID)
-	if err != nil {
-		return nil, err
-	}
-
-	coin, err := coininfocli.GetCoin(ctx, info.CoinTypeID)
-	if err != nil {
-		return nil, err
-	}
-
-	account := &npool.Account{
-		ID:         info.ID,
-		GoodID:     info.GoodID,
-		GoodName:   good.Title,
-		GoodUnit:   good.Unit,
-		CoinTypeID: info.CoinTypeID,
-		CoinName:   coin.Name,
-		CoinUnit:   coin.Unit,
-		CoinEnv:    coin.ENV,
-		CoinLogo:   coin.Logo,
-		AccountID:  info.AccountID,
-		Backup:     info.Backup,
-		Address:    info.Address,
-		Active:     info.Active,
-		Locked:     info.Locked,
-		LockedBy:   info.LockedBy,
-		Blocked:    info.Blocked,
-		CreatedAt:  info.CreatedAt,
-		UpdatedAt:  info.UpdatedAt,
-	}
-
-	return account, nil
+type queryHandler struct {
+	*Handler
+	infos []*gbmwpb.Account
+	accs  []*npool.Account
+	// GoodID -> Coin
+	coins map[string]*coinmwpb.Coin
+	goods map[string]*goodmwpb.Good
 }
 
-func GetAccounts(ctx context.Context, offset, limit int32) ([]*npool.Account, uint32, error) {
-	infos, total, err := gbmwcli.GetAccounts(ctx, &gbmwpb.Conds{}, offset, limit)
+func (h *queryHandler) getGoods(ctx context.Context) error {
+	goodIDs := []string{}
+	for _, info := range h.infos {
+		goodIDs = append(goodIDs, info.GoodID)
+	}
+	goods, _, err := goodmwcli.GetManyGoods(ctx, goodIDs, 0, int32(len(goodIDs)))
 	if err != nil {
-		return nil, 0, err
+		return err
 	}
-	if len(infos) == 0 {
-		return nil, total, nil
-	}
-
-	ids := []string{}
-	for _, info := range infos {
-		ids = append(ids, info.GoodID)
-	}
-
-	goods, _, err := goodmwcli.GetManyGoods(ctx, ids, 0, int32(len(ids)))
-	if err != nil {
-		return nil, 0, err
-	}
-
-	goodMap := map[string]*goodmwpb.Good{}
 	for _, good := range goods {
-		goodMap[good.ID] = good
+		h.goods[good.ID] = good
 	}
-	ofs := 0
-	lim := 1000
-	coins := []*coininfopb.Coin{}
-	for {
-		coinInfos, _, err := coininfocli.GetCoins(ctx, nil, int32(ofs), int32(lim))
-		if err != nil {
-			return nil, 0, err
-		}
-		if len(coinInfos) == 0 {
-			break
-		}
-		coins = append(coins, coinInfos...)
-		ofs += lim
+	return nil
+}
+
+func (h *queryHandler) getCoins(ctx context.Context) error {
+	coinTypeIDs := []string{}
+	coinGoodIDs := map[string][]string{}
+
+	for _, good := range h.goods {
+		coinTypeIDs = append(coinTypeIDs, good.CoinTypeID)
+		coinGoodIDs[good.CoinTypeID] = append(coinGoodIDs[good.CoinTypeID], good.ID)
+	}
+	coins, _, err := coinmwcli.GetCoins(
+		ctx,
+		&coinmwpb.Conds{
+			IDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: coinTypeIDs},
+		},
+		0,
+		int32(len(coinTypeIDs)),
+	)
+	if err != nil {
+		return err
 	}
 
-	coinMap := map[string]*coininfopb.Coin{}
 	for _, coin := range coins {
-		coinMap[coin.ID] = coin
+		for _, goodIDs := range coinGoodIDs {
+			for _, goodID := range goodIDs {
+				h.coins[goodID] = coin
+			}
+		}
 	}
 
-	accs := []*npool.Account{}
+	return nil
+}
 
-	for _, info := range infos {
-		good, ok := goodMap[info.GoodID]
+func (h *queryHandler) formalize() {
+	for _, info := range h.infos {
+		good, ok := h.goods[info.GoodID]
 		if !ok {
 			continue
 		}
 
-		coin, ok := coinMap[info.CoinTypeID]
+		coin, ok := h.coins[info.GoodID]
 		if !ok {
 			continue
 		}
 
-		accs = append(accs, &npool.Account{
+		h.accs = append(h.accs, &npool.Account{
 			ID:         info.ID,
 			GoodID:     info.GoodID,
 			GoodName:   good.Title,
@@ -134,6 +103,69 @@ func GetAccounts(ctx context.Context, offset, limit int32) ([]*npool.Account, ui
 			UpdatedAt:  info.UpdatedAt,
 		})
 	}
+}
 
-	return accs, total, nil
+func (h *Handler) GetAccount(ctx context.Context) (*npool.Account, error) {
+	if h.ID == nil {
+		return nil, fmt.Errorf("invalid id")
+	}
+
+	info, err := gbmwcli.GetAccount(ctx, *h.ID)
+	if err != nil {
+		return nil, err
+	}
+	if info == nil {
+		return nil, nil
+	}
+
+	handler := &queryHandler{
+		Handler: h,
+		infos:   []*gbmwpb.Account{info},
+		coins:   map[string]*coinmwpb.Coin{},
+		goods:   map[string]*goodmwpb.Good{},
+	}
+	if err := handler.getGoods(ctx); err != nil {
+		return nil, err
+	}
+	if err := handler.getCoins(ctx); err != nil {
+		return nil, err
+	}
+	handler.formalize()
+
+	if len(handler.accs) == 0 {
+		return nil, nil
+	}
+
+	return handler.accs[0], nil
+}
+
+func (h *Handler) GetAccounts(ctx context.Context) ([]*npool.Account, uint32, error) {
+	infos, total, err := gbmwcli.GetAccounts(
+		ctx,
+		&gbmwpb.Conds{},
+		h.Offset,
+		h.Limit,
+	)
+	if err != nil {
+		return nil, 0, err
+	}
+	if len(infos) == 0 {
+		return nil, total, nil
+	}
+
+	handler := &queryHandler{
+		Handler: h,
+		infos:   infos,
+		coins:   map[string]*coinmwpb.Coin{},
+		goods:   map[string]*goodmwpb.Good{},
+	}
+	if err := handler.getGoods(ctx); err != nil {
+		return nil, 0, err
+	}
+	if err := handler.getCoins(ctx); err != nil {
+		return nil, 0, err
+	}
+	handler.formalize()
+
+	return handler.accs, total, nil
 }

@@ -3,116 +3,184 @@ package platform
 import (
 	"context"
 	"fmt"
-	"strings"
 
-	commonpb "github.com/NpoolPlatform/message/npool"
-	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/platform"
-
-	gbmwcli "github.com/NpoolPlatform/account-middleware/pkg/client/platform"
-	gbmwpb "github.com/NpoolPlatform/message/npool/account/mw/v1/platform"
-
-	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
-
-	sphinxproxypb "github.com/NpoolPlatform/message/npool/sphinxproxy"
-
-	coininfocli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
-	sphinxproxycli "github.com/NpoolPlatform/sphinx-proxy/pkg/client"
-
+	addresscheck "github.com/NpoolPlatform/account-gateway/pkg/addresscheck"
+	pltfmwcli "github.com/NpoolPlatform/account-middleware/pkg/client/platform"
+	coinmwcli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
 	cruder "github.com/NpoolPlatform/libent-cruder/pkg/cruder"
+	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/platform"
+	pltfmwpb "github.com/NpoolPlatform/message/npool/account/mw/v1/platform"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
+	sphinxproxypb "github.com/NpoolPlatform/message/npool/sphinxproxy"
+	sphinxproxycli "github.com/NpoolPlatform/sphinx-proxy/pkg/client"
 )
 
-//nolint
-func CreateAccount(
-	ctx context.Context,
-	coinTypeID string,
-	address *string,
-	usedFor accountmgrpb.AccountUsedFor,
-) (
-	*npool.Account, error,
-) {
-	coin, err := coininfocli.GetCoin(ctx, coinTypeID)
-	if err != nil {
-		return nil, err
+type createHandler struct {
+	*Handler
+	coinName            *string
+	backup              bool
+	checkAddressBalance bool
+}
+
+func (h *createHandler) checkAddress(ctx context.Context) error {
+	if h.UsedFor == nil {
+		return fmt.Errorf("invalid usedfor")
 	}
-	if coin == nil {
-		return nil, fmt.Errorf("invalid coin")
+	switch *h.UsedFor {
+	case basetypes.AccountUsedFor_UserBenefitHot:
+		fallthrough // nolint
+	case basetypes.AccountUsedFor_GasProvider:
+		if h.Address != nil {
+			return fmt.Errorf("invalid address")
+		}
+	case basetypes.AccountUsedFor_PaymentCollector:
+		fallthrough // nolint
+	case basetypes.AccountUsedFor_UserBenefitCold:
+		fallthrough // nolint
+	case basetypes.AccountUsedFor_PlatformBenefitCold:
+		if h.Address == nil {
+			return fmt.Errorf("invalid address")
+		}
+	}
+	if h.Address == nil {
+		return nil
+	}
+	if h.CoinTypeID == nil {
+		return fmt.Errorf("invalid cointypeid")
 	}
 
-	backup := false
-	const accountNumber = 100
-
-	conds := &gbmwpb.Conds{
-		CoinTypeID: &commonpb.StringVal{
-			Op:    cruder.EQ,
-			Value: coinTypeID,
+	info, err := pltfmwcli.GetAccountOnly(
+		ctx,
+		&pltfmwpb.Conds{
+			CoinTypeID: &basetypes.StringVal{Op: cruder.EQ, Value: *h.CoinTypeID},
+			Address:    &basetypes.StringVal{Op: cruder.EQ, Value: *h.Address},
 		},
-		UsedFor: &commonpb.Int32Val{
-			Op:    cruder.EQ,
-			Value: int32(usedFor),
-		},
-	}
-
-	accounts, _, err := gbmwcli.GetAccounts(ctx, conds, 0, accountNumber)
+	)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	if address != nil {
-		for _, acc := range accounts {
-			if acc.Address == *address && acc.UsedFor == usedFor { // 同种用途地址,直接返回
-				return GetAccount(ctx, acc.ID)
-			}
-			if acc.Address == *address && acc.UsedFor != usedFor { // 不同用途途地址, 报错
-				return nil, fmt.Errorf("address have been used for: %s", acc.UsedFor)
-			}
-		}
+	if info == nil {
+		return nil
+	}
+	if info.UsedFor != *h.UsedFor {
+		return fmt.Errorf("mismatch account")
 	}
 
-	for _, acc := range accounts {
-		if acc.Active && !acc.Blocked && !acc.Backup {
-			backup = true
-			break
-		}
-	}
+	h.ID = &info.ID
+	return nil
+}
 
-	targetAddress := ""
-	if address != nil {
-		targetAddress = *address
-	} else {
-		sacc, err := sphinxproxycli.CreateAddress(ctx, coin.Name)
-		if err != nil {
-			return nil, err
-		}
-		if sacc == nil {
-			return nil, fmt.Errorf("fail create address")
-		}
-		targetAddress = sacc.Address
-	}
-
-	if !strings.Contains(coin.Name, "ironfish") {
-		bal, err := sphinxproxycli.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
-			Name:    coin.Name,
-			Address: targetAddress,
-		})
-		if err != nil {
-			return nil, err
-		}
-		if bal == nil {
-			return nil, fmt.Errorf("invalid address")
-		}
-	}
-
-	acc, err := gbmwcli.CreateAccount(ctx, &gbmwpb.AccountReq{
-		CoinTypeID: &coinTypeID,
-		UsedFor:    &usedFor,
-		Address:    &targetAddress,
-		Backup:     &backup,
+func (h *createHandler) checkBackup(ctx context.Context) error {
+	exist, err := pltfmwcli.ExistAccountConds(ctx, &pltfmwpb.Conds{
+		CoinTypeID: &basetypes.StringVal{Op: cruder.EQ, Value: *h.CoinTypeID},
+		UsedFor:    &basetypes.Uint32Val{Op: cruder.EQ, Value: uint32(*h.UsedFor)},
+		Backup:     &basetypes.BoolVal{Op: cruder.EQ, Value: false},
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
-	if acc == nil {
-		return nil, fmt.Errorf("fail create account")
+	h.backup = exist
+	return nil
+}
+
+func (h *createHandler) getCoinName(ctx context.Context) error {
+	if h.CoinTypeID == nil {
+		return fmt.Errorf("invalid cointypeid")
 	}
 
-	return GetAccount(ctx, acc.ID)
+	coin, err := coinmwcli.GetCoin(ctx, *h.CoinTypeID)
+	if err != nil {
+		return err
+	}
+	if coin == nil {
+		return fmt.Errorf("invalid coin")
+	}
+
+	h.coinName = &coin.Name
+	h.checkAddressBalance = coin.CheckNewAddressBalance
+
+	return nil
+}
+
+func (h *createHandler) createAddress(ctx context.Context) error {
+	if h.coinName == nil {
+		return fmt.Errorf("invalid coinname")
+	}
+
+	if h.Address == nil {
+		acc, err := sphinxproxycli.CreateAddress(ctx, *h.coinName)
+		if err != nil {
+			return err
+		}
+		if acc == nil {
+			return fmt.Errorf("fail create address")
+		}
+		h.Address = &acc.Address
+	}
+
+	if !h.checkAddressBalance {
+		err := addresscheck.ValidateAddress(*h.coinName, *h.Address)
+		if err != nil {
+			return fmt.Errorf("invalid %v address", *h.coinName)
+		}
+		return nil
+	}
+
+	bal, err := sphinxproxycli.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
+		Name:    *h.coinName,
+		Address: *h.Address,
+	})
+	if err != nil {
+		return err
+	}
+	if bal == nil {
+		return fmt.Errorf("invalid address")
+	}
+
+	return nil
+}
+
+func (h *createHandler) createAccount(ctx context.Context) error {
+	acc, err := pltfmwcli.CreateAccount(ctx, &pltfmwpb.AccountReq{
+		CoinTypeID: h.CoinTypeID,
+		UsedFor:    h.UsedFor,
+		Address:    h.Address,
+		Backup:     &h.backup,
+	})
+	if err != nil {
+		return err
+	}
+	if acc == nil {
+		return fmt.Errorf("fail create account")
+	}
+
+	h.ID = &acc.ID
+	return nil
+}
+
+func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
+	handler := &createHandler{
+		Handler: h,
+	}
+
+	if err := handler.checkAddress(ctx); err != nil {
+		return nil, err
+	}
+	if h.ID != nil {
+		return h.GetAccount(ctx)
+	}
+	if err := handler.checkBackup(ctx); err != nil {
+		return nil, err
+	}
+	if err := handler.getCoinName(ctx); err != nil {
+		return nil, err
+	}
+	if err := handler.createAddress(ctx); err != nil {
+		return nil, err
+	}
+	if err := handler.createAccount(ctx); err != nil {
+		return nil, err
+	}
+
+	return h.GetAccount(ctx)
 }

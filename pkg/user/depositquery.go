@@ -1,17 +1,18 @@
+//nolint:nolintlint,dupl
 package user
 
 import (
 	"context"
 	"fmt"
 
+	addresscheck "github.com/NpoolPlatform/account-gateway/pkg/addresscheck"
 	depositcli "github.com/NpoolPlatform/account-middleware/pkg/client/deposit"
 	usermwcli "github.com/NpoolPlatform/appuser-middleware/pkg/client/user"
 	appcoinmwcli "github.com/NpoolPlatform/chain-middleware/pkg/client/app/coin"
 	sphinxproxycli "github.com/NpoolPlatform/sphinx-proxy/pkg/client"
 
-	commonpb "github.com/NpoolPlatform/message/npool"
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/user"
-	depositpb "github.com/NpoolPlatform/message/npool/account/mw/v1/deposit"
+	depositmwpb "github.com/NpoolPlatform/message/npool/account/mw/v1/deposit"
 	usermwpb "github.com/NpoolPlatform/message/npool/appuser/mw/v1/user"
 	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 	appcoinmwpb "github.com/NpoolPlatform/message/npool/chain/mw/v1/app/coin"
@@ -20,310 +21,254 @@ import (
 	cruder "github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 )
 
-func GetDepositAccount(ctx context.Context, appID, userID, coinTypeID string) (*npool.Account, error) { //nolint
-	user, err := usermwcli.GetUser(ctx, appID, userID)
-	if err != nil {
-		return nil, err
-	}
-	if user == nil {
-		return nil, fmt.Errorf("invalid user")
-	}
-	if user.AppID != appID {
-		return nil, fmt.Errorf("permission denied")
+type queryDepositHandler struct {
+	*Handler
+	infos               []*depositmwpb.Account
+	userIDs             []string
+	coinTypeIDs         []string
+	coins               map[string]*appcoinmwpb.Coin
+	users               map[string]*usermwpb.User
+	accs                []*npool.Account
+	coinName            *string
+	checkAddressBalance bool
+}
+
+func (h *queryDepositHandler) getUsers(ctx context.Context) error {
+	for _, info := range h.infos {
+		h.userIDs = append(h.userIDs, info.UserID)
 	}
 
-	coin, err := appcoinmwcli.GetCoinOnly(ctx, &appcoinmwpb.Conds{
+	users, _, err := usermwcli.GetUsers(ctx, &usermwpb.Conds{
+		AppID: &basetypes.StringVal{Op: cruder.EQ, Value: *h.AppID},
+		IDs:   &basetypes.StringSliceVal{Op: cruder.IN, Value: h.userIDs},
+	}, 0, int32(len(h.userIDs)))
+	if err != nil {
+		return err
+	}
+	if len(users) == 0 {
+		return fmt.Errorf("invalid user")
+	}
+
+	for _, u := range users {
+		h.users[u.ID] = u
+	}
+
+	return nil
+}
+
+func (h *queryDepositHandler) getCoins(ctx context.Context) error {
+	for _, val := range h.infos {
+		h.coinTypeIDs = append(h.coinTypeIDs, val.CoinTypeID)
+	}
+
+	coins, _, err := appcoinmwcli.GetCoins(ctx, &appcoinmwpb.Conds{
 		AppID: &basetypes.StringVal{
 			Op:    cruder.EQ,
-			Value: appID,
+			Value: *h.AppID,
 		},
-		CoinTypeID: &basetypes.StringVal{
-			Op:    cruder.EQ,
-			Value: coinTypeID,
+		CoinTypeIDs: &basetypes.StringSliceVal{
+			Op:    cruder.IN,
+			Value: h.coinTypeIDs,
 		},
-	})
+	}, 0, int32(len(h.coinTypeIDs)))
 	if err != nil {
-		return nil, err
+		return err
 	}
-	if coin == nil {
-		return nil, fmt.Errorf("invalid coin")
+	if len(coins) == 0 {
+		return fmt.Errorf("invalid coin")
 	}
 
-	accs, _, err := depositcli.GetAccounts(ctx, &depositpb.Conds{
-		AppID: &commonpb.StringVal{
-			Op:    cruder.EQ,
-			Value: appID,
-		},
-		UserID: &commonpb.StringVal{
-			Op:    cruder.EQ,
-			Value: userID,
-		},
-		CoinTypeID: &commonpb.StringVal{
-			Op:    cruder.EQ,
-			Value: coinTypeID,
-		},
-		Active: &commonpb.BoolVal{
-			Op:    cruder.EQ,
-			Value: true,
-		},
-		Locked: &commonpb.BoolVal{
-			Op:    cruder.EQ,
-			Value: false,
-		},
-		Blocked: &commonpb.BoolVal{
-			Op:    cruder.EQ,
-			Value: false,
-		},
+	for _, coin := range coins {
+		h.coins[coin.CoinTypeID] = coin
+		h.coinName = &coin.CoinName
+		h.checkAddressBalance = coin.CheckNewAddressBalance
+	}
+
+	return nil
+}
+
+func (h *queryDepositHandler) createAddress(ctx context.Context) error {
+	sacc, err := sphinxproxycli.CreateAddress(ctx, h.coins[*h.CoinTypeID].CoinName)
+	if err != nil {
+		return err
+	}
+	if sacc == nil || sacc.Address == "" {
+		return fmt.Errorf("fail create wallet")
+	}
+	h.Address = &sacc.Address
+
+	if !h.checkAddressBalance {
+		err := addresscheck.ValidateAddress(*h.coinName, *h.Address)
+		if err != nil {
+			return fmt.Errorf("invalid %v address", *h.coinName)
+		}
+		return nil
+	}
+
+	return nil
+}
+
+func (h *queryDepositHandler) createAccount(ctx context.Context) error {
+	info, err := depositcli.CreateAccount(ctx, &depositmwpb.AccountReq{
+		AppID:      h.AppID,
+		UserID:     h.UserID,
+		CoinTypeID: h.CoinTypeID,
+		Address:    h.Address,
+	})
+	if err != nil {
+		return err
+	}
+	h.infos = append(h.infos, info)
+
+	return nil
+}
+
+func (h *queryDepositHandler) getBalance(ctx context.Context) error {
+	bal, err := sphinxproxycli.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
+		Name:    *h.coinName,
+		Address: *h.Address,
+	})
+	if err != nil {
+		return err
+	}
+	if bal == nil {
+		return fmt.Errorf("invalid address")
+	}
+	return nil
+}
+
+func (h *queryDepositHandler) formalize() {
+	for _, val := range h.infos {
+		userInfo, ok := h.users[val.UserID]
+		if !ok {
+			continue
+		}
+		coin, ok := h.coins[val.CoinTypeID]
+		if !ok {
+			continue
+		}
+
+		h.accs = append(h.accs, &npool.Account{
+			ID:               val.ID,
+			AppID:            val.AppID,
+			UserID:           val.UserID,
+			CoinTypeID:       val.CoinTypeID,
+			CoinName:         coin.Name,
+			CoinDisplayNames: coin.DisplayNames,
+			CoinUnit:         coin.Unit,
+			CoinEnv:          coin.ENV,
+			CoinLogo:         coin.Logo,
+			AccountID:        val.AccountID,
+			Address:          val.Address,
+			CreatedAt:        val.CreatedAt,
+			PhoneNO:          userInfo.PhoneNO,
+			EmailAddress:     userInfo.EmailAddress,
+		})
+	}
+}
+
+func (h *Handler) GetDepositAccount(ctx context.Context) (*npool.Account, error) {
+	if h.AppID == nil {
+		return nil, fmt.Errorf("invaild appid")
+	}
+	if h.UserID == nil {
+		return nil, fmt.Errorf("invaild userID")
+	}
+	if h.CoinTypeID == nil {
+		return nil, fmt.Errorf("invaild coinTypeID")
+	}
+
+	handler := &queryDepositHandler{
+		Handler:     h,
+		infos:       []*depositmwpb.Account{},
+		userIDs:     []string{*h.UserID},
+		coinTypeIDs: []string{*h.CoinTypeID},
+		coins:       map[string]*appcoinmwpb.Coin{},
+		users:       map[string]*usermwpb.User{},
+	}
+
+	if err := handler.getUsers(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := handler.getCoins(ctx); err != nil {
+		return nil, err
+	}
+
+	infos, _, err := depositcli.GetAccounts(ctx, &depositmwpb.Conds{
+		AppID:      &basetypes.StringVal{Op: cruder.EQ, Value: *h.AppID},
+		UserID:     &basetypes.StringVal{Op: cruder.EQ, Value: *h.UserID},
+		CoinTypeID: &basetypes.StringVal{Op: cruder.EQ, Value: *h.CoinTypeID},
+		Active:     &basetypes.BoolVal{Op: cruder.EQ, Value: true},
+		Locked:     &basetypes.BoolVal{Op: cruder.EQ, Value: false},
+		Blocked:    &basetypes.BoolVal{Op: cruder.EQ, Value: false},
 	}, 0, 1)
 	if err != nil {
 		return nil, err
 	}
-
-	if len(accs) > 0 {
-		acc := accs[0]
-
-		bal, err := sphinxproxycli.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
-			Name:    coin.Name,
-			Address: acc.Address,
-		})
+	if len(infos) > 0 {
+		handler.infos = append(handler.infos, infos...)
+		if err := handler.getBalance(ctx); err != nil {
+			return nil, err
+		}
+	} else {
+		err := handler.createAddress(ctx)
 		if err != nil {
 			return nil, err
 		}
-		if bal == nil {
-			return nil, fmt.Errorf("invalid address")
+		err = handler.getBalance(ctx)
+		if err != nil {
+			return nil, err
 		}
-
-		return &npool.Account{
-			ID:               acc.ID,
-			AppID:            acc.AppID,
-			UserID:           acc.UserID,
-			CoinTypeID:       acc.CoinTypeID,
-			CoinName:         coin.Name,
-			CoinDisplayNames: coin.DisplayNames,
-			CoinUnit:         coin.Unit,
-			CoinEnv:          coin.ENV,
-			CoinLogo:         coin.Logo,
-			AccountID:        acc.AccountID,
-			Address:          acc.Address,
-			CreatedAt:        acc.CreatedAt,
-		}, nil
+		err = handler.createAccount(ctx)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	sacc, err := sphinxproxycli.CreateAddress(ctx, coin.Name)
-	if err != nil {
-		return nil, err
-	}
-	if sacc == nil || sacc.Address == "" {
-		return nil, fmt.Errorf("fail create wallet")
+	handler.formalize()
+
+	if len(handler.accs) == 0 {
+		return nil, nil
 	}
 
-	acc, err := depositcli.CreateAccount(ctx, &depositpb.AccountReq{
-		AppID:      &appID,
-		UserID:     &userID,
-		CoinTypeID: &coinTypeID,
-		Address:    &sacc.Address,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	bal, err := sphinxproxycli.GetBalance(ctx, &sphinxproxypb.GetBalanceRequest{
-		Name:    coin.Name,
-		Address: sacc.Address,
-	})
-	if err != nil {
-		return nil, err
-	}
-	if bal == nil {
-		return nil, fmt.Errorf("invalid address")
-	}
-
-	return &npool.Account{
-		ID:               acc.ID,
-		AppID:            acc.AppID,
-		UserID:           acc.UserID,
-		CoinTypeID:       acc.CoinTypeID,
-		CoinName:         coin.Name,
-		CoinDisplayNames: coin.DisplayNames,
-		CoinUnit:         coin.Unit,
-		CoinEnv:          coin.ENV,
-		CoinLogo:         coin.Logo,
-		AccountID:        acc.AccountID,
-		Address:          acc.Address,
-		CreatedAt:        acc.CreatedAt,
-	}, nil
+	return handler.accs[0], nil
 }
 
-//nolint
-func GetDepositAccounts(ctx context.Context, appID string, offset, limit int32) ([]*npool.Account, uint32, error) {
-	accs, total, err := depositcli.GetAccounts(ctx, &depositpb.Conds{
-		AppID: &commonpb.StringVal{
+func (h *Handler) GetDepositAccounts(ctx context.Context) ([]*npool.Account, uint32, error) {
+	if h.AppID == nil {
+		return nil, 0, fmt.Errorf("invaild appid")
+	}
+
+	infos, total, err := depositcli.GetAccounts(ctx, &depositmwpb.Conds{
+		AppID: &basetypes.StringVal{
 			Op:    cruder.EQ,
-			Value: appID,
+			Value: *h.AppID,
 		},
-	}, offset, limit)
+	}, h.Offset, h.Limit)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	if len(accs) == 0 {
+	if len(infos) == 0 {
 		return nil, 0, nil
 	}
 
-	userIDs := []string{}
-	for _, info := range accs {
-		userIDs = append(userIDs, info.UserID)
+	handler := &queryDepositHandler{
+		Handler:     h,
+		infos:       infos,
+		userIDs:     []string{},
+		coinTypeIDs: []string{},
+		coins:       map[string]*appcoinmwpb.Coin{},
+		users:       map[string]*usermwpb.User{},
 	}
-
-	users, _, err := usermwcli.GetUsers(ctx, &usermwpb.Conds{
-		IDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: userIDs},
-	}, 0, int32(len(userIDs)))
-	if err != nil {
-		return nil, 0, fmt.Errorf("fail get users: %v", err)
-	}
-
-	userMap := map[string]*usermwpb.User{}
-	for _, user := range users {
-		userMap[user.ID] = user
-	}
-
-	coinTypeIDs := []string{}
-	for _, val := range accs {
-		coinTypeIDs = append(coinTypeIDs, val.CoinTypeID)
-	}
-
-	coins, _, err := appcoinmwcli.GetCoins(ctx, &appcoinmwpb.Conds{
-		AppID: &basetypes.StringVal{
-			Op:    cruder.EQ,
-			Value: appID,
-		},
-		CoinTypeIDs: &basetypes.StringSliceVal{
-			Op:    cruder.IN,
-			Value: coinTypeIDs,
-		},
-	}, 0, int32(len(coinTypeIDs)))
-	if err != nil {
+	if err := handler.getUsers(ctx); err != nil {
 		return nil, 0, err
 	}
-
-	coinMap := map[string]*appcoinmwpb.Coin{}
-	for _, coin := range coins {
-		coinMap[coin.CoinTypeID] = coin
-	}
-
-	infos := []*npool.Account{}
-	for _, acc := range accs {
-		coin, ok := coinMap[acc.CoinTypeID]
-		if !ok {
-			continue
-		}
-		user, ok := userMap[acc.UserID]
-		if !ok {
-			continue
-		}
-		infos = append(infos, &npool.Account{
-			ID:               acc.ID,
-			AppID:            acc.AppID,
-			UserID:           acc.UserID,
-			CoinTypeID:       acc.CoinTypeID,
-			CoinName:         coin.Name,
-			CoinDisplayNames: coin.DisplayNames,
-			CoinUnit:         coin.Unit,
-			CoinEnv:          coin.ENV,
-			CoinLogo:         coin.Logo,
-			AccountID:        acc.AccountID,
-			Address:          acc.Address,
-			CreatedAt:        acc.CreatedAt,
-			PhoneNO:          user.PhoneNO,
-			EmailAddress:     user.EmailAddress,
-		})
-	}
-	return infos, total, nil
-}
-
-//nolint
-func GetAppDepositAccounts(ctx context.Context, appID string, offset, limit int32) ([]*npool.Account, uint32, error) {
-	accs, total, err := depositcli.GetAccounts(ctx, &depositpb.Conds{
-		AppID: &commonpb.StringVal{
-			Op:    cruder.EQ,
-			Value: appID,
-		},
-	}, offset, limit)
-	if err != nil {
+	if err := handler.getCoins(ctx); err != nil {
 		return nil, 0, err
 	}
+	handler.formalize()
 
-	if len(accs) == 0 {
-		return nil, 0, nil
-	}
-
-	userIDs := []string{}
-	for _, info := range accs {
-		userIDs = append(userIDs, info.UserID)
-	}
-
-	users, _, err := usermwcli.GetUsers(ctx, &usermwpb.Conds{
-		IDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: userIDs},
-	}, 0, int32(len(userIDs)))
-	if err != nil {
-		return nil, 0, fmt.Errorf("fail get users: %v", err)
-	}
-
-	userMap := map[string]*usermwpb.User{}
-	for _, user := range users {
-		userMap[user.ID] = user
-	}
-
-	coinTypeIDs := []string{}
-	for _, val := range accs {
-		coinTypeIDs = append(coinTypeIDs, val.CoinTypeID)
-	}
-
-	coins, _, err := appcoinmwcli.GetCoins(ctx, &appcoinmwpb.Conds{
-		AppID: &basetypes.StringVal{
-			Op:    cruder.EQ,
-			Value: appID,
-		},
-		CoinTypeIDs: &basetypes.StringSliceVal{
-			Op:    cruder.IN,
-			Value: coinTypeIDs,
-		},
-	}, 0, int32(len(coinTypeIDs)))
-	if err != nil {
-		return nil, 0, err
-	}
-
-	coinMap := map[string]*appcoinmwpb.Coin{}
-	for _, coin := range coins {
-		coinMap[coin.CoinTypeID] = coin
-	}
-
-	infos := []*npool.Account{}
-	for _, acc := range accs {
-		coin, ok := coinMap[acc.CoinTypeID]
-		if !ok {
-			continue
-		}
-		user, ok := userMap[acc.UserID]
-		if !ok {
-			continue
-		}
-		infos = append(infos, &npool.Account{
-			ID:               acc.ID,
-			AppID:            acc.AppID,
-			UserID:           acc.UserID,
-			CoinTypeID:       acc.CoinTypeID,
-			CoinName:         coin.Name,
-			CoinDisplayNames: coin.DisplayNames,
-			CoinUnit:         coin.Unit,
-			CoinEnv:          coin.ENV,
-			CoinLogo:         coin.Logo,
-			AccountID:        acc.AccountID,
-			Address:          acc.Address,
-			CreatedAt:        acc.CreatedAt,
-			PhoneNO:          user.PhoneNO,
-			EmailAddress:     user.EmailAddress,
-		})
-	}
-	return infos, total, nil
+	return handler.accs, total, nil
 }
