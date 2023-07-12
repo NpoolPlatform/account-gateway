@@ -1,8 +1,8 @@
 package addresscheck
 
 import (
+	"encoding/hex"
 	"fmt"
-	"regexp"
 	"strings"
 )
 
@@ -12,8 +12,8 @@ var coinCheckMap = map[string]func(string) error{
 		if len(address) != ironfishAddrLen {
 			return fmt.Errorf("invalid address")
 		}
-		if !isHexString(address) {
-			return fmt.Errorf("invalid address")
+		if _, err := hex.DecodeString(address); err != nil {
+			return err
 		}
 		return nil
 	},
@@ -27,11 +27,6 @@ func getCoinName(targetCoinName string) string {
 		}
 	}
 	return ""
-}
-
-func isHexString(str string) bool {
-	match, _ := regexp.MatchString("^[0-9a-fA-F]+$", str)
-	return match
 }
 
 func ValidateAddress(targetCoinName, address string) error {
