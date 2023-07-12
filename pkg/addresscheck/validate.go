@@ -36,5 +36,8 @@ func isHexString(str string) bool {
 
 func ValidateAddress(targetCoinName, address string) error {
 	coinName := getCoinName(targetCoinName)
+	if coinName == "" {
+		return nil
+	}
 	return coinCheckMap[coinName](address)
 }
