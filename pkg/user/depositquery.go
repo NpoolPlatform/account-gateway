@@ -208,6 +208,7 @@ func (h *Handler) GetDepositAccount(ctx context.Context) (*npool.Account, error)
 	}
 	if len(infos) > 0 {
 		handler.infos = append(handler.infos, infos...)
+		h.Address = &infos[0].Address
 		if err := handler.getBalance(ctx); err != nil {
 			return nil, err
 		}
