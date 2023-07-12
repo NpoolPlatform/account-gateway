@@ -51,8 +51,8 @@ github.com/NpoolPlatform/appuser-middleware v0.0.0-20230513100509-b19f356ebd4b h
 github.com/NpoolPlatform/appuser-middleware v0.0.0-20230513100509-b19f356ebd4b/go.mod h1:BzT48sEK4KSO6Gy8VJQa5rOuO5JpXib/cmLGHWt4Aqc=
 github.com/NpoolPlatform/basal-middleware v0.0.0-20230518061816-62bd589c0f63 h1:wQ+crGIMDqv7919i5slVz8liCjBhCZz8xZxHWC3N8uA=
 github.com/NpoolPlatform/basal-middleware v0.0.0-20230518061816-62bd589c0f63/go.mod h1:3sHDVUUQHRkZsCiBFI6CdCL2HWf3cO7/E2DZU3nHMfE=
-github.com/NpoolPlatform/chain-middleware v0.0.0-20230704045924-f3531e96db12 h1:4nUSeBQH3NSGFVlqS8a5IDGXiAFNJGz/X739IifRec4=
-github.com/NpoolPlatform/chain-middleware v0.0.0-20230704045924-f3531e96db12/go.mod h1:lvMaj2M3hmyn8KlURyn1LhXyLxHvcQHyNi2b8xwsKLY=
+github.com/NpoolPlatform/chain-middleware v0.0.0-20230712020539-5eee51d409a6 h1:sH33hGXln86A3f18i18wW5hY11L/sPA7M0+sSd3aswo=
+github.com/NpoolPlatform/chain-middleware v0.0.0-20230712020539-5eee51d409a6/go.mod h1:pVjD3d6RFMIpt/342u8F73v5BEKx5uWclvErI9zgdHM=
 github.com/NpoolPlatform/go-service-framework v0.0.0-20230602083207-1c0e6203556b h1:iAJ9vS2uG8OU2VhKOnfeP3Q77PQaLQlxmxj2Pdyn8zw=
 github.com/NpoolPlatform/go-service-framework v0.0.0-20230602083207-1c0e6203556b/go.mod h1:Kh7DMkWnYOMHxEKq7QfJqbxm1HaUPkhTNN74lfHQxyE=
 github.com/NpoolPlatform/good-manager v0.0.0-20230111060807-370f3d2a0627 h1:y/dKx2k2LVOK5Buu1iFvjZVM/xzDDa5mDBK0Dz+CjmE=

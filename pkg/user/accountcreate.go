@@ -116,20 +116,9 @@ func (h *createHandler) getCoinName(ctx context.Context) error {
 	return nil
 }
 
-func (h *createHandler) createAddress(ctx context.Context) error {
+func (h *createHandler) validateAddress(ctx context.Context) error {
 	if h.coinName == nil {
 		return fmt.Errorf("invalid coinname")
-	}
-
-	if h.Address == nil {
-		acc, err := sphinxproxycli.CreateAddress(ctx, *h.coinName)
-		if err != nil {
-			return err
-		}
-		if acc == nil {
-			return fmt.Errorf("fail create address")
-		}
-		h.Address = &acc.Address
 	}
 
 	if !h.checkAddressBalance {
@@ -191,7 +180,7 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
 	if err := handler.getCoinName(ctx); err != nil {
 		return nil, err
 	}
-	if err := handler.createAddress(ctx); err != nil {
+	if err := handler.validateAddress(ctx); err != nil {
 		return nil, err
 	}
 	if err := handler.createAccount(ctx); err != nil {
