@@ -29,7 +29,9 @@ func (h *queryHandler) getGoods(ctx context.Context) error {
 	for _, info := range h.infos {
 		goodIDs = append(goodIDs, info.GoodID)
 	}
-	goods, _, err := goodmwcli.GetManyGoods(ctx, goodIDs, 0, int32(len(goodIDs)))
+	goods, _, err := goodmwcli.GetGoods(ctx, &goodmwpb.Conds{
+		IDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: goodIDs},
+	}, 0, int32(len(goodIDs)))
 	if err != nil {
 		return err
 	}
