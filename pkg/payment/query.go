@@ -20,7 +20,6 @@ type queryHandler struct {
 	*Handler
 	infos []*paymentmwpb.Account
 	accs  []*npool.Account
-	// GoodID -> Coin
 	coins map[string]*coinmwpb.Coin
 }
 
