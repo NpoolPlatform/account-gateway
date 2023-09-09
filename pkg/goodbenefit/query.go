@@ -64,7 +64,8 @@ func (h *queryHandler) getCoins(ctx context.Context) error {
 	for _, coin := range coins {
 		for _, goodIDs := range coinGoodIDs {
 			for _, goodID := range goodIDs {
-				h.coins[goodID] = coin
+				_goodID := goodID
+				h.coins[_goodID] = coin
 			}
 		}
 	}
