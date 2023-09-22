@@ -16,7 +16,6 @@ func (s *Server) UpdateAccount(ctx context.Context, in *npool.UpdateAccountReque
 		ctx,
 		platform1.WithID(&in.ID),
 		platform1.WithActive(in.Active),
-		platform1.WithLocked(in.Locked),
 		platform1.WithBlocked(in.Blocked),
 		platform1.WithBackup(in.Backup),
 	)

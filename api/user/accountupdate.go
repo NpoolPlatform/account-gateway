@@ -52,6 +52,7 @@ func (s *Server) UpdateAppUserAccount(ctx context.Context, in *npool.UpdateAppUs
 		user1.WithAppID(&in.TargetAppID),
 		user1.WithUserID(&in.TargetUserID),
 		user1.WithBlocked(in.Blocked),
+		user1.WithActive(in.Active),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(
