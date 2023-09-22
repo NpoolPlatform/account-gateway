@@ -160,9 +160,12 @@ func (h *queryDepositHandler) formalize() {
 			CoinLogo:         coin.Logo,
 			AccountID:        val.AccountID,
 			Address:          val.Address,
+			UsedFor:          basetypes.AccountUsedFor_UserDeposit,
 			CreatedAt:        val.CreatedAt,
 			PhoneNO:          userInfo.PhoneNO,
 			EmailAddress:     userInfo.EmailAddress,
+			Active:           val.Active,
+			Blocked:          val.Blocked,
 		})
 	}
 }
