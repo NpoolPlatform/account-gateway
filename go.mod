@@ -3,15 +3,15 @@ module github.com/NpoolPlatform/account-gateway
 go 1.17
 
 require (
-	github.com/NpoolPlatform/account-middleware v0.0.0-20231008060358-167d4fefc927
-	github.com/NpoolPlatform/appuser-middleware v0.0.0-20231008071345-5f5d687710d1
-	github.com/NpoolPlatform/basal-middleware v0.0.0-20231008034340-a1d6a899ef37
-	github.com/NpoolPlatform/chain-middleware v0.0.0-20231008090947-e534ba41d758
+	github.com/NpoolPlatform/account-middleware v0.0.0-20231011065927-9a824b9f1075
+	github.com/NpoolPlatform/appuser-middleware v0.0.0-20231011071633-e14f373f95cb
+	github.com/NpoolPlatform/basal-middleware v0.0.0-20231011062124-7ea6e9549a66
+	github.com/NpoolPlatform/chain-middleware v0.0.0-20231011074145-82189c94cb0c
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20230930023319-e48074d9472e
-	github.com/NpoolPlatform/good-middleware v0.0.0-20231008035243-d786b745cc99
-	github.com/NpoolPlatform/libent-cruder v0.0.0-20231008034140-808c78a650ca
+	github.com/NpoolPlatform/good-middleware v0.0.0-20231011064249-08e0151ee767
+	github.com/NpoolPlatform/libent-cruder v0.0.0-20231008051607-f64457cf6ab6
 	github.com/NpoolPlatform/message v0.0.0-20231008114012-493e7589dda5
-	github.com/NpoolPlatform/sphinx-proxy v0.0.0-20231009011346-53877d61f961
+	github.com/NpoolPlatform/sphinx-proxy v0.0.0-20231011085250-d85cb0fa88d7
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.2
