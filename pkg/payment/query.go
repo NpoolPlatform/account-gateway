@@ -57,6 +57,7 @@ func (h *queryHandler) formalize() {
 
 		h.accs = append(h.accs, &npool.Account{
 			ID:            info.ID,
+			EntID:         info.EntID,
 			CoinTypeID:    info.CoinTypeID,
 			CoinName:      coin.Name,
 			CoinUnit:      coin.Unit,
@@ -77,11 +78,7 @@ func (h *queryHandler) formalize() {
 }
 
 func (h *Handler) GetAccount(ctx context.Context) (*npool.Account, error) {
-	if h.ID == nil {
-		return nil, fmt.Errorf("invalid id")
-	}
-
-	info, err := paymentmwcli.GetAccount(ctx, *h.ID)
+	info, err := paymentmwcli.GetAccount(ctx, *h.EntID)
 	if err != nil {
 		return nil, err
 	}
@@ -119,6 +116,8 @@ func (h *Handler) GetAccounts(ctx context.Context) ([]*npool.Account, uint32, er
 	if len(infos) == 0 {
 		return nil, total, nil
 	}
+
+	fmt.Println("infos: ", infos)
 
 	handler := &queryHandler{
 		Handler: h,
