@@ -24,6 +24,8 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) {
 		return nil, fmt.Errorf("invalid account")
 	}
 
+	fmt.Println("info: ", info)
+
 	if info.Blocked && (h.Blocked == nil || *h.Blocked) {
 		return nil, fmt.Errorf("permission denied")
 	}
