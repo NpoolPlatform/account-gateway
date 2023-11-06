@@ -2,7 +2,6 @@ package goodbenefit
 
 import (
 	"context"
-	"fmt"
 
 	gbmwcli "github.com/NpoolPlatform/account-middleware/pkg/client/goodbenefit"
 	coinmwcli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
@@ -88,6 +87,7 @@ func (h *queryHandler) formalize() {
 
 		h.accs = append(h.accs, &npool.Account{
 			ID:         info.ID,
+			EntID:      info.EntID,
 			GoodID:     info.GoodID,
 			GoodName:   good.Title,
 			GoodUnit:   good.Unit,
@@ -110,11 +110,7 @@ func (h *queryHandler) formalize() {
 }
 
 func (h *Handler) GetAccount(ctx context.Context) (*npool.Account, error) {
-	if h.ID == nil {
-		return nil, fmt.Errorf("invalid id")
-	}
-
-	info, err := gbmwcli.GetAccount(ctx, *h.ID)
+	info, err := gbmwcli.GetAccount(ctx, *h.EntID)
 	if err != nil {
 		return nil, err
 	}
