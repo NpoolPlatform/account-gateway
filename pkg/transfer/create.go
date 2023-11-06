@@ -1,3 +1,4 @@
+//nolint:dupl
 package transfer
 
 import (
@@ -27,15 +28,6 @@ type createHandler struct {
 }
 
 func (h *createHandler) validate() error {
-	if h.AppID == nil {
-		return fmt.Errorf("invalid appID")
-	}
-	if h.UserID == nil {
-		return fmt.Errorf("invalid userID")
-	}
-	if h.AccountType == nil {
-		return fmt.Errorf("invalid accountType")
-	}
 	switch *h.AccountType {
 	case basetypes.SignMethod_Email:
 		fallthrough //nolint
@@ -47,13 +39,7 @@ func (h *createHandler) validate() error {
 	default:
 		return fmt.Errorf("accountType %v invalid", *h.AccountType)
 	}
-	if h.VerificationCode == nil || *h.VerificationCode == "" {
-		return fmt.Errorf("invalid verificationCode")
-	}
 
-	if h.TargetAccountType == nil {
-		return fmt.Errorf("invalid targetAccountType")
-	}
 	switch *h.TargetAccountType {
 	case basetypes.SignMethod_Email:
 	case basetypes.SignMethod_Mobile:
@@ -72,6 +58,7 @@ func (h *createHandler) formalize() {
 
 		h.accs = append(h.accs, &npool.Transfer{
 			ID:                 val.ID,
+			EntID:              val.EntID,
 			AppID:              val.AppID,
 			UserID:             val.UserID,
 			TargetUserID:       val.TargetUserID,

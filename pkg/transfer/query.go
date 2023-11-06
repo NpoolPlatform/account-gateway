@@ -1,3 +1,4 @@
+//nolint:dupl
 package transfer
 
 import (
@@ -51,6 +52,7 @@ func (h *queryHandler) formalize() {
 
 		h.accs = append(h.accs, &npool.Transfer{
 			ID:                 val.ID,
+			EntID:              val.EntID,
 			AppID:              val.AppID,
 			UserID:             val.UserID,
 			TargetUserID:       val.TargetUserID,
@@ -65,9 +67,6 @@ func (h *queryHandler) formalize() {
 }
 
 func (h *Handler) GetTransfers(ctx context.Context) ([]*npool.Transfer, uint32, error) {
-	if h.AppID == nil {
-		return nil, 0, fmt.Errorf("invalid appID")
-	}
 	conds := &transfermwpb.Conds{
 		AppID: &basetypes.StringVal{Op: cruder.EQ, Value: *h.AppID},
 	}
@@ -86,6 +85,8 @@ func (h *Handler) GetTransfers(ctx context.Context) ([]*npool.Transfer, uint32, 
 	if len(infos) == 0 {
 		return []*npool.Transfer{}, 0, nil
 	}
+
+	fmt.Println("infos: ", infos)
 
 	handler := &queryHandler{
 		Handler: h,
