@@ -1,3 +1,4 @@
+//nolint:dupl
 package user
 
 import (
@@ -79,6 +80,7 @@ func (h *queryHandler) formalize() {
 
 		h.accs = append(h.accs, &npool.Account{
 			ID:               val.ID,
+			EntID:            val.EntID,
 			AppID:            val.AppID,
 			UserID:           val.UserID,
 			CoinTypeID:       val.CoinTypeID,
@@ -102,11 +104,39 @@ func (h *queryHandler) formalize() {
 }
 
 func (h *Handler) GetAccount(ctx context.Context) (*npool.Account, error) {
-	if h.ID == nil {
-		return nil, fmt.Errorf("invalid id")
+	info, err := useraccmwcli.GetAccount(ctx, *h.EntID)
+	if err != nil {
+		return nil, err
 	}
+	if info == nil {
+		return nil, fmt.Errorf("invalid account")
+	}
+	handler := &queryHandler{
+		Handler: h,
+		infos:   []*useraccmwpb.Account{info},
+		coins:   map[string]*appcoinmwpb.Coin{},
+		users:   map[string]*usermwpb.User{},
+	}
+	handler.AppID = &info.AppID
+	if err := handler.getUsers(ctx); err != nil {
+		return nil, err
+	}
+	if err := handler.getCoins(ctx); err != nil {
+		return nil, err
+	}
+	if len(handler.users) == 0 {
+		return nil, fmt.Errorf("invalid user")
+	}
+	if len(handler.coins) == 0 {
+		return nil, fmt.Errorf("invalid coin")
+	}
+	handler.formalize()
 
-	info, err := useraccmwcli.GetAccount(ctx, *h.ID)
+	return handler.accs[0], nil
+}
+
+func (h *Handler) GetAccountExt(ctx context.Context) (*npool.Account, error) {
+	info, err := useraccmwcli.GetAccount(ctx, *h.EntID)
 	if err != nil {
 		return nil, err
 	}
@@ -138,9 +168,6 @@ func (h *Handler) GetAccount(ctx context.Context) (*npool.Account, error) {
 }
 
 func (h *Handler) GetAccounts(ctx context.Context) ([]*npool.Account, uint32, error) {
-	if h.AppID == nil {
-		return nil, 0, fmt.Errorf("invalid appID")
-	}
 	conds := &useraccmwpb.Conds{
 		AppID: &basetypes.StringVal{Op: cruder.EQ, Value: *h.AppID},
 	}
@@ -171,6 +198,8 @@ func (h *queryHandler) getAccounts(ctx context.Context, conds *useraccmwpb.Conds
 	if len(infos) == 0 {
 		return nil, total, nil
 	}
+	fmt.Println("infos: ", infos)
+
 	h.infos = append(h.infos, infos...)
 
 	if err := h.getUsers(ctx); err != nil {

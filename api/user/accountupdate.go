@@ -1,4 +1,3 @@
-//nolint:dupl
 package user
 
 import (
@@ -16,11 +15,12 @@ import (
 func (s *Server) UpdateAccount(ctx context.Context, in *npool.UpdateAccountRequest) (*npool.UpdateAccountResponse, error) {
 	handler, err := user1.NewHandler(
 		ctx,
-		user1.WithID(&in.ID),
-		user1.WithAppID(&in.AppID),
-		user1.WithUserID(&in.UserID),
-		user1.WithLabels(in.Labels),
-		user1.WithMemo(in.Memo),
+		user1.WithID(&in.ID, true),
+		user1.WithEntID(&in.EntID, true),
+		user1.WithAppID(&in.AppID, true),
+		user1.WithUserID(&in.UserID, true),
+		user1.WithLabels(in.Labels, false),
+		user1.WithMemo(in.Memo, false),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(
@@ -49,11 +49,11 @@ func (s *Server) UpdateAccount(ctx context.Context, in *npool.UpdateAccountReque
 func (s *Server) UpdateAppUserAccount(ctx context.Context, in *npool.UpdateAppUserAccountRequest) (*npool.UpdateAppUserAccountResponse, error) {
 	handler, err := user1.NewHandler(
 		ctx,
-		user1.WithID(&in.ID),
-		user1.WithAppID(&in.TargetAppID),
-		user1.WithUserID(&in.TargetUserID),
-		user1.WithBlocked(in.Blocked),
-		user1.WithActive(in.Active),
+		user1.WithID(&in.ID, true),
+		user1.WithAppID(&in.TargetAppID, true),
+		user1.WithUserID(&in.TargetUserID, true),
+		user1.WithBlocked(in.Blocked, false),
+		user1.WithActive(in.Active, false),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

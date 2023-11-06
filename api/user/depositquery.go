@@ -16,9 +16,9 @@ import (
 func (s *Server) GetDepositAccount(ctx context.Context, in *npool.GetDepositAccountRequest) (*npool.GetDepositAccountResponse, error) {
 	handler, err := user1.NewHandler(
 		ctx,
-		user1.WithAppID(&in.AppID),
-		user1.WithUserID(&in.UserID),
-		user1.WithCoinTypeID(&in.CoinTypeID),
+		user1.WithAppID(&in.AppID, true),
+		user1.WithUserID(&in.UserID, true),
+		user1.WithCoinTypeID(&in.CoinTypeID, true),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(
@@ -48,7 +48,7 @@ func (s *Server) GetDepositAccount(ctx context.Context, in *npool.GetDepositAcco
 func (s *Server) GetDepositAccounts(ctx context.Context, in *npool.GetDepositAccountsRequest) (*npool.GetDepositAccountsResponse, error) { //nolint
 	handler, err := user1.NewHandler(
 		ctx,
-		user1.WithAppID(&in.AppID),
+		user1.WithAppID(&in.AppID, true),
 		user1.WithOffset(in.GetOffset()),
 		user1.WithLimit(in.GetLimit()),
 	)
@@ -80,7 +80,7 @@ func (s *Server) GetDepositAccounts(ctx context.Context, in *npool.GetDepositAcc
 func (s *Server) GetAppDepositAccounts(ctx context.Context, in *npool.GetAppDepositAccountsRequest) (*npool.GetAppDepositAccountsResponse, error) { //nolint
 	handler, err := user1.NewHandler(
 		ctx,
-		user1.WithAppID(&in.TargetAppID),
+		user1.WithAppID(&in.TargetAppID, true),
 		user1.WithOffset(in.GetOffset()),
 		user1.WithLimit(in.GetLimit()),
 	)
