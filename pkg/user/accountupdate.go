@@ -27,8 +27,6 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) {
 		return nil, fmt.Errorf("permission denied")
 	}
 
-	fmt.Println("info: ", info)
-
 	boolFalse := false
 	boolTrue := true
 

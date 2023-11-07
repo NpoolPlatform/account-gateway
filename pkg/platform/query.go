@@ -2,7 +2,6 @@ package platform
 
 import (
 	"context"
-	"fmt"
 
 	pltfmwcli "github.com/NpoolPlatform/account-middleware/pkg/client/platform"
 	coinmwcli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
@@ -113,8 +112,6 @@ func (h *Handler) GetAccounts(ctx context.Context) ([]*npool.Account, uint32, er
 	if len(infos) == 0 {
 		return nil, total, nil
 	}
-
-	fmt.Println("infos: ", infos)
 
 	handler := &queryHandler{
 		Handler: h,

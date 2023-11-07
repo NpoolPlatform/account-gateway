@@ -245,8 +245,6 @@ func (h *Handler) GetDepositAccounts(ctx context.Context) ([]*npool.Account, uin
 		return nil, 0, nil
 	}
 
-	fmt.Println("infos: ", infos)
-
 	handler := &queryDepositHandler{
 		Handler:     h,
 		infos:       infos,

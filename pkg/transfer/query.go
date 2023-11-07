@@ -3,7 +3,6 @@ package transfer
 
 import (
 	"context"
-	"fmt"
 
 	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 
@@ -85,8 +84,6 @@ func (h *Handler) GetTransfers(ctx context.Context) ([]*npool.Transfer, uint32, 
 	if len(infos) == 0 {
 		return []*npool.Transfer{}, 0, nil
 	}
-
-	fmt.Println("infos: ", infos)
 
 	handler := &queryHandler{
 		Handler: h,

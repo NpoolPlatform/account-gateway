@@ -198,7 +198,6 @@ func (h *queryHandler) getAccounts(ctx context.Context, conds *useraccmwpb.Conds
 	if len(infos) == 0 {
 		return nil, total, nil
 	}
-	fmt.Println("infos: ", infos)
 
 	h.infos = append(h.infos, infos...)
 

@@ -2,7 +2,6 @@ package payment
 
 import (
 	"context"
-	"fmt"
 
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/payment"
 
@@ -116,8 +115,6 @@ func (h *Handler) GetAccounts(ctx context.Context) ([]*npool.Account, uint32, er
 	if len(infos) == 0 {
 		return nil, total, nil
 	}
-
-	fmt.Println("infos: ", infos)
 
 	handler := &queryHandler{
 		Handler: h,
