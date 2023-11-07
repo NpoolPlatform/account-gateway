@@ -107,5 +107,3 @@ replace entgo.io/ent => entgo.io/ent v0.11.2
 replace ariga.io/atlas => ariga.io/atlas v0.5.1-0.20220717122844-8593d7eb1a8e
 
 replace github.com/NpoolPlatform/message v0.0.0-20231020111219-963077006b79 => ../message
-
-replace github.com/NpoolPlatform/account-middleware v0.0.0-20231011065927-9a824b9f1075 => ../account-middleware
