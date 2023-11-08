@@ -1,4 +1,3 @@
-//nolint:dupl
 package user
 
 import (
@@ -135,11 +134,7 @@ func (h *Handler) GetAccount(ctx context.Context) (*npool.Account, error) {
 	return handler.accs[0], nil
 }
 
-func (h *Handler) GetAccountExt(ctx context.Context) (*npool.Account, error) {
-	info, err := useraccmwcli.GetAccount(ctx, *h.EntID)
-	if err != nil {
-		return nil, err
-	}
+func (h *Handler) GetAccountExt(ctx context.Context, info *useraccmwpb.Account) (*npool.Account, error) {
 	if info == nil {
 		return nil, fmt.Errorf("invalid account")
 	}

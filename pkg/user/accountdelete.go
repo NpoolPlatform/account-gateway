@@ -26,12 +26,12 @@ func (h *Handler) DeleteAccount(ctx context.Context) (*npool.Account, error) {
 		return nil, fmt.Errorf("account user not exist")
 	}
 
-	_, err = useraccmwcli.DeleteAccount(ctx, &useraccmwpb.AccountReq{
+	_info, err := useraccmwcli.DeleteAccount(ctx, &useraccmwpb.AccountReq{
 		ID: h.ID,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return h.GetAccount(ctx)
+	return h.GetAccountExt(ctx, _info)
 }
