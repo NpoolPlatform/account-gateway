@@ -115,11 +115,11 @@ func (h *createHandler) getUsers(ctx context.Context) error {
 		return fmt.Errorf("target user not found")
 	}
 
-	if *h.UserID == targetUser.ID {
+	if *h.UserID == targetUser.EntID {
 		return fmt.Errorf("cannot set yourself as the payee")
 	}
-	h.users[targetUser.ID] = targetUser
-	h.TargetUserID = &targetUser.ID
+	h.users[targetUser.EntID] = targetUser
+	h.TargetUserID = &targetUser.EntID
 
 	return nil
 }

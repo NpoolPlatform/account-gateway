@@ -39,8 +39,8 @@ func (h *queryDepositHandler) getUsers(ctx context.Context) error {
 	}
 
 	users, _, err := usermwcli.GetUsers(ctx, &usermwpb.Conds{
-		AppID: &basetypes.StringVal{Op: cruder.EQ, Value: *h.AppID},
-		IDs:   &basetypes.StringSliceVal{Op: cruder.IN, Value: h.userIDs},
+		AppID:  &basetypes.StringVal{Op: cruder.EQ, Value: *h.AppID},
+		EntIDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: h.userIDs},
 	}, 0, int32(len(h.userIDs)))
 	if err != nil {
 		return err
@@ -50,7 +50,7 @@ func (h *queryDepositHandler) getUsers(ctx context.Context) error {
 	}
 
 	for _, u := range users {
-		h.users[u.ID] = u
+		h.users[u.EntID] = u
 	}
 
 	return nil
