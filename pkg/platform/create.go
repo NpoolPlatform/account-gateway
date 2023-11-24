@@ -61,6 +61,7 @@ func (h *createHandler) checkAddress(ctx context.Context) error {
 	}
 
 	h.ID = &info.ID
+	h.EntID = &info.EntID
 	return nil
 }
 
