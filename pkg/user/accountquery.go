@@ -32,14 +32,14 @@ func (h *queryHandler) getUsers(ctx context.Context) error {
 	}
 
 	users, _, err := usermwcli.GetUsers(ctx, &usermwpb.Conds{
-		IDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: ids},
+		EntIDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: ids},
 	}, 0, int32(len(ids)))
 	if err != nil {
 		return err
 	}
 
 	for _, u := range users {
-		h.users[u.ID] = u
+		h.users[u.EntID] = u
 	}
 
 	return nil

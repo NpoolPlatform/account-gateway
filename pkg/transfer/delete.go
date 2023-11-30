@@ -52,14 +52,14 @@ func (h *deleteHandler) getUsers(ctx context.Context) error {
 	}
 
 	users, _, err := usermwcli.GetUsers(ctx, &usermwpb.Conds{
-		IDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: targetUserIDs},
+		EntIDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: targetUserIDs},
 	}, 0, int32(len(targetUserIDs)))
 	if err != nil {
 		return err
 	}
 
 	for _, val := range users {
-		h.users[val.ID] = val
+		h.users[val.EntID] = val
 	}
 	return nil
 }
