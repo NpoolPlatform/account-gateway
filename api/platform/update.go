@@ -14,10 +14,11 @@ import (
 func (s *Server) UpdateAccount(ctx context.Context, in *npool.UpdateAccountRequest) (*npool.UpdateAccountResponse, error) {
 	handler, err := platform1.NewHandler(
 		ctx,
-		platform1.WithID(&in.ID),
-		platform1.WithActive(in.Active),
-		platform1.WithBlocked(in.Blocked),
-		platform1.WithBackup(in.Backup),
+		platform1.WithID(&in.ID, true),
+		platform1.WithEntID(&in.EntID, true),
+		platform1.WithActive(in.Active, false),
+		platform1.WithBlocked(in.Blocked, false),
+		platform1.WithBackup(in.Backup, false),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

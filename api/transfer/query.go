@@ -16,8 +16,8 @@ import (
 func (s *Server) GetTransfers(ctx context.Context, in *npool.GetTransfersRequest) (resp *npool.GetTransfersResponse, err error) {
 	handler, err := transfer1.NewHandler(
 		ctx,
-		transfer1.WithAppID(&in.AppID),
-		transfer1.WithUserID(&in.UserID),
+		transfer1.WithAppID(&in.AppID, true),
+		transfer1.WithUserID(&in.UserID, true),
 		transfer1.WithOffset(in.GetOffset()),
 		transfer1.WithLimit(in.GetLimit()),
 	)
@@ -53,7 +53,7 @@ func (s *Server) GetTransfers(ctx context.Context, in *npool.GetTransfersRequest
 func (s *Server) GetAppTransfers(ctx context.Context, in *npool.GetAppTransfersRequest) (resp *npool.GetAppTransfersResponse, err error) {
 	handler, err := transfer1.NewHandler(
 		ctx,
-		transfer1.WithAppID(&in.AppID),
+		transfer1.WithAppID(&in.AppID, true),
 		transfer1.WithOffset(in.GetOffset()),
 		transfer1.WithLimit(in.GetLimit()),
 	)
@@ -85,7 +85,7 @@ func (s *Server) GetAppTransfers(ctx context.Context, in *npool.GetAppTransfersR
 func (s *Server) GetNAppTransfers(ctx context.Context, in *npool.GetNAppTransfersRequest) (resp *npool.GetNAppTransfersResponse, err error) {
 	handler, err := transfer1.NewHandler(
 		ctx,
-		transfer1.WithAppID(&in.TargetAppID),
+		transfer1.WithAppID(&in.TargetAppID, true),
 		transfer1.WithOffset(in.GetOffset()),
 		transfer1.WithLimit(in.GetLimit()),
 	)

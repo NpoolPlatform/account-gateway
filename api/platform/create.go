@@ -14,9 +14,9 @@ import (
 func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountRequest) (*npool.CreateAccountResponse, error) {
 	handler, err := platform1.NewHandler(
 		ctx,
-		platform1.WithCoinTypeID(&in.CoinTypeID),
-		platform1.WithAddress(in.Address),
-		platform1.WithUsedFor(&in.UsedFor),
+		platform1.WithCoinTypeID(&in.CoinTypeID, true),
+		platform1.WithAddress(in.Address, false),
+		platform1.WithUsedFor(&in.UsedFor, true),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

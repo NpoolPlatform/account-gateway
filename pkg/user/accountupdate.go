@@ -4,24 +4,19 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/user"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 
 	useraccmwcli "github.com/NpoolPlatform/account-middleware/pkg/client/user"
 	useraccmwpb "github.com/NpoolPlatform/message/npool/account/mw/v1/user"
 )
 
 func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) {
-	if h.ID == nil {
-		return nil, fmt.Errorf("invalid id")
-	}
-	if h.AppID == nil {
-		return nil, fmt.Errorf("invalid appID")
-	}
-	if h.UserID == nil {
-		return nil, fmt.Errorf("invalid userID")
-	}
-
-	info, err := useraccmwcli.GetAccount(ctx, *h.ID)
+	info, err := useraccmwcli.GetAccountOnly(ctx, &useraccmwpb.Conds{
+		ID:    &basetypes.Uint32Val{Op: cruder.EQ, Value: *h.ID},
+		EntID: &basetypes.StringVal{Op: cruder.EQ, Value: *h.EntID},
+	})
 	if err != nil {
 		return nil, err
 	}

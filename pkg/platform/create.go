@@ -23,9 +23,6 @@ type createHandler struct {
 }
 
 func (h *createHandler) checkAddress(ctx context.Context) error {
-	if h.UsedFor == nil {
-		return fmt.Errorf("invalid usedfor")
-	}
 	switch *h.UsedFor {
 	case basetypes.AccountUsedFor_UserBenefitHot:
 		fallthrough // nolint
@@ -44,9 +41,6 @@ func (h *createHandler) checkAddress(ctx context.Context) error {
 	}
 	if h.Address == nil {
 		return nil
-	}
-	if h.CoinTypeID == nil {
-		return fmt.Errorf("invalid cointypeid")
 	}
 
 	info, err := pltfmwcli.GetAccountOnly(
@@ -67,6 +61,7 @@ func (h *createHandler) checkAddress(ctx context.Context) error {
 	}
 
 	h.ID = &info.ID
+	h.EntID = &info.EntID
 	return nil
 }
 
@@ -155,6 +150,7 @@ func (h *createHandler) createAccount(ctx context.Context) error {
 	}
 
 	h.ID = &acc.ID
+	h.EntID = &acc.EntID
 	return nil
 }
 
@@ -166,7 +162,7 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
 	if err := handler.checkAddress(ctx); err != nil {
 		return nil, err
 	}
-	if h.ID != nil {
+	if h.EntID != nil {
 		return h.GetAccount(ctx)
 	}
 	if err := handler.checkBackup(ctx); err != nil {

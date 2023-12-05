@@ -13,39 +13,25 @@ import (
 )
 
 func (h *Handler) DeleteAccount(ctx context.Context) (*npool.Account, error) {
-	if h.ID == nil {
-		return nil, fmt.Errorf("invalid id")
-	}
-	if h.AppID == nil {
-		return nil, fmt.Errorf("invalid appid")
-	}
-	if h.UserID == nil {
-		return nil, fmt.Errorf("invalid userid")
-	}
-
-	info, err := h.GetAccount(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	exist, err := useraccmwcli.ExistAccountConds(ctx, &useraccmwpb.Conds{
-		ID:     &basetypes.StringVal{Op: cruder.EQ, Value: *h.ID},
+	info, err := useraccmwcli.GetAccountOnly(ctx, &useraccmwpb.Conds{
+		ID:     &basetypes.Uint32Val{Op: cruder.EQ, Value: *h.ID},
+		EntID:  &basetypes.StringVal{Op: cruder.EQ, Value: *h.EntID},
 		AppID:  &basetypes.StringVal{Op: cruder.EQ, Value: *h.AppID},
 		UserID: &basetypes.StringVal{Op: cruder.EQ, Value: *h.UserID},
 	})
 	if err != nil {
 		return nil, err
 	}
-	if !exist {
-		return nil, fmt.Errorf("invalid account")
+	if info == nil {
+		return nil, fmt.Errorf("account user not exist")
 	}
 
-	_, err = useraccmwcli.DeleteAccount(ctx, &useraccmwpb.AccountReq{
+	_info, err := useraccmwcli.DeleteAccount(ctx, &useraccmwpb.AccountReq{
 		ID: h.ID,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return info, nil
+	return h.GetAccountExt(ctx, _info)
 }

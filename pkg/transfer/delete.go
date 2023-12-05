@@ -1,3 +1,4 @@
+//nolint:dupl
 package transfer
 
 import (
@@ -32,6 +33,7 @@ func (h *deleteHandler) formalize() {
 
 		h.accs = append(h.accs, &npool.Transfer{
 			ID:                 val.ID,
+			EntID:              val.EntID,
 			AppID:              val.AppID,
 			UserID:             val.UserID,
 			TargetUserID:       val.TargetUserID,
@@ -65,17 +67,9 @@ func (h *deleteHandler) getUsers(ctx context.Context) error {
 }
 
 func (h *Handler) DeleteTransfer(ctx context.Context) (*npool.Transfer, error) {
-	if h.ID == nil {
-		return nil, fmt.Errorf("invalid id")
-	}
-	if h.AppID == nil {
-		return nil, fmt.Errorf("invalid appID")
-	}
-	if h.UserID == nil {
-		return nil, fmt.Errorf("invalid userID")
-	}
 	exist, err := transfermwcli.ExistTransferConds(ctx, &transfermwpb.Conds{
-		ID:     &basetypes.StringVal{Op: cruder.EQ, Value: *h.ID},
+		ID:     &basetypes.Uint32Val{Op: cruder.EQ, Value: *h.ID},
+		EntID:  &basetypes.StringVal{Op: cruder.EQ, Value: *h.EntID},
 		AppID:  &basetypes.StringVal{Op: cruder.EQ, Value: *h.AppID},
 		UserID: &basetypes.StringVal{Op: cruder.EQ, Value: *h.UserID},
 	})

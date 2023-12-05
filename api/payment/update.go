@@ -16,9 +16,10 @@ import (
 func (s *Server) UpdateAccount(ctx context.Context, in *npool.UpdateAccountRequest) (*npool.UpdateAccountResponse, error) {
 	handler, err := payment1.NewHandler(
 		ctx,
-		payment1.WithID(&in.ID),
-		payment1.WithActive(in.Active),
-		payment1.WithBlocked(in.Blocked),
+		payment1.WithID(&in.ID, true),
+		payment1.WithEntID(&in.EntID, true),
+		payment1.WithActive(in.Active, false),
+		payment1.WithBlocked(in.Blocked, false),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

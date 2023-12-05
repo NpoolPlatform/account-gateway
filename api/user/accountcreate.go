@@ -16,16 +16,16 @@ import (
 func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountRequest) (*npool.CreateAccountResponse, error) {
 	handler, err := user1.NewHandler(
 		ctx,
-		user1.WithAppID(&in.AppID),
-		user1.WithUserID(&in.UserID),
-		user1.WithCoinTypeID(&in.CoinTypeID),
-		user1.WithUsedFor(&in.UsedFor),
-		user1.WithAddress(&in.Address),
-		user1.WithLabels(in.Labels),
-		user1.WithAccount(in.Account),
-		user1.WithAccountType(&in.AccountType),
-		user1.WithVerificationCode(&in.VerificationCode),
-		user1.WithMemo(in.Memo),
+		user1.WithAppID(&in.AppID, true),
+		user1.WithUserID(&in.UserID, true),
+		user1.WithCoinTypeID(&in.CoinTypeID, true),
+		user1.WithUsedFor(&in.UsedFor, true),
+		user1.WithAddress(&in.Address, true),
+		user1.WithLabels(in.Labels, false),
+		user1.WithAccount(in.Account, false),
+		user1.WithAccountType(&in.AccountType, true),
+		user1.WithVerificationCode(&in.VerificationCode, true),
+		user1.WithMemo(in.Memo, false),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

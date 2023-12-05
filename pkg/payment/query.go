@@ -2,7 +2,6 @@ package payment
 
 import (
 	"context"
-	"fmt"
 
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/payment"
 
@@ -57,6 +56,7 @@ func (h *queryHandler) formalize() {
 
 		h.accs = append(h.accs, &npool.Account{
 			ID:            info.ID,
+			EntID:         info.EntID,
 			CoinTypeID:    info.CoinTypeID,
 			CoinName:      coin.Name,
 			CoinUnit:      coin.Unit,
@@ -77,11 +77,7 @@ func (h *queryHandler) formalize() {
 }
 
 func (h *Handler) GetAccount(ctx context.Context) (*npool.Account, error) {
-	if h.ID == nil {
-		return nil, fmt.Errorf("invalid id")
-	}
-
-	info, err := paymentmwcli.GetAccount(ctx, *h.ID)
+	info, err := paymentmwcli.GetAccount(ctx, *h.EntID)
 	if err != nil {
 		return nil, err
 	}

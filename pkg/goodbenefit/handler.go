@@ -2,6 +2,7 @@ package goodbenefit
 
 import (
 	"context"
+	"fmt"
 
 	constant "github.com/NpoolPlatform/account-gateway/pkg/const"
 
@@ -9,7 +10,8 @@ import (
 )
 
 type Handler struct {
-	ID      *string
+	ID      *uint32
+	EntID   *string
 	GoodID  *string
 	Backup  *bool
 	Active  *bool
@@ -29,22 +31,42 @@ func NewHandler(ctx context.Context, options ...func(context.Context, *Handler) 
 	return handler, nil
 }
 
-func WithID(id *string) func(context.Context, *Handler) error {
+func WithID(id *uint32, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
+			if must {
+				return fmt.Errorf("invalid id")
+			}
 			return nil
-		}
-		if _, err := uuid.Parse(*id); err != nil {
-			return err
 		}
 		h.ID = id
 		return nil
 	}
 }
 
-func WithGoodID(id *string) func(context.Context, *Handler) error {
+func WithEntID(id *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
+			if must {
+				return fmt.Errorf("invalid entid")
+			}
+			return nil
+		}
+		_, err := uuid.Parse(*id)
+		if err != nil {
+			return err
+		}
+		h.EntID = id
+		return nil
+	}
+}
+
+func WithGoodID(id *string, must bool) func(context.Context, *Handler) error {
+	return func(ctx context.Context, h *Handler) error {
+		if id == nil {
+			if must {
+				return fmt.Errorf("invalid goodid")
+			}
 			return nil
 		}
 		// TODO: check good exist
@@ -56,28 +78,28 @@ func WithGoodID(id *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithBackup(backup *bool) func(context.Context, *Handler) error {
+func WithBackup(backup *bool, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		h.Backup = backup
 		return nil
 	}
 }
 
-func WithActive(active *bool) func(context.Context, *Handler) error {
+func WithActive(active *bool, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		h.Active = active
 		return nil
 	}
 }
 
-func WithBlocked(blocked *bool) func(context.Context, *Handler) error {
+func WithBlocked(blocked *bool, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		h.Blocked = blocked
 		return nil
 	}
 }
 
-func WithLocked(locked *bool) func(context.Context, *Handler) error {
+func WithLocked(locked *bool, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		h.Locked = locked
 		return nil

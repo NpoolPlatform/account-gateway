@@ -1,4 +1,3 @@
-//nolint:dupl
 package user
 
 import (
@@ -23,9 +22,10 @@ func (s *Server) DeleteAccount(
 ) {
 	handler, err := user1.NewHandler(
 		ctx,
-		user1.WithID(&in.ID),
-		user1.WithAppID(&in.AppID),
-		user1.WithUserID(&in.UserID),
+		user1.WithID(&in.ID, true),
+		user1.WithEntID(&in.EntID, true),
+		user1.WithAppID(&in.AppID, true),
+		user1.WithUserID(&in.UserID, true),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(
