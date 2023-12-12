@@ -29,13 +29,13 @@ func (h *queryHandler) getGoods(ctx context.Context) error {
 		goodIDs = append(goodIDs, info.GoodID)
 	}
 	goods, _, err := goodmwcli.GetGoods(ctx, &goodmwpb.Conds{
-		IDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: goodIDs},
+		EntIDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: goodIDs},
 	}, 0, int32(len(goodIDs)))
 	if err != nil {
 		return err
 	}
 	for _, good := range goods {
-		h.goods[good.ID] = good
+		h.goods[good.EntID] = good
 	}
 	return nil
 }
@@ -46,7 +46,7 @@ func (h *queryHandler) getCoins(ctx context.Context) error {
 
 	for _, good := range h.goods {
 		coinTypeIDs = append(coinTypeIDs, good.CoinTypeID)
-		coinGoodIDs[good.CoinTypeID] = append(coinGoodIDs[good.CoinTypeID], good.ID)
+		coinGoodIDs[good.CoinTypeID] = append(coinGoodIDs[good.CoinTypeID], good.EntID)
 	}
 	coins, _, err := coinmwcli.GetCoins(
 		ctx,
