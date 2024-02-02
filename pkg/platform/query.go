@@ -2,7 +2,6 @@ package platform
 
 import (
 	"context"
-	"fmt"
 
 	pltfmwcli "github.com/NpoolPlatform/account-middleware/pkg/client/platform"
 	coinmwcli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
@@ -29,7 +28,7 @@ func (h *queryHandler) getCoins(ctx context.Context) error {
 	coins, _, err := coinmwcli.GetCoins(
 		ctx,
 		&coinmwpb.Conds{
-			IDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: coinTypeIDs},
+			EntIDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: coinTypeIDs},
 		},
 		0,
 		int32(len(coinTypeIDs)),
@@ -39,7 +38,7 @@ func (h *queryHandler) getCoins(ctx context.Context) error {
 	}
 
 	for _, coin := range coins {
-		h.coins[coin.ID] = coin
+		h.coins[coin.EntID] = coin
 	}
 
 	return nil
@@ -54,6 +53,7 @@ func (h *queryHandler) formalize() {
 
 		h.accs = append(h.accs, &npool.Account{
 			ID:         info.ID,
+			EntID:      info.EntID,
 			CoinTypeID: info.CoinTypeID,
 			CoinName:   coin.Name,
 			CoinUnit:   coin.Unit,
@@ -74,11 +74,7 @@ func (h *queryHandler) formalize() {
 }
 
 func (h *Handler) GetAccount(ctx context.Context) (*npool.Account, error) {
-	if h.ID == nil {
-		return nil, fmt.Errorf("invalid id")
-	}
-
-	info, err := pltfmwcli.GetAccount(ctx, *h.ID)
+	info, err := pltfmwcli.GetAccount(ctx, *h.EntID)
 	if err != nil {
 		return nil, err
 	}

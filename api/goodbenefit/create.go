@@ -14,7 +14,7 @@ import (
 func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountRequest) (*npool.CreateAccountResponse, error) {
 	handler, err := goodbenefit1.NewHandler(
 		ctx,
-		goodbenefit1.WithGoodID(&in.GoodID),
+		goodbenefit1.WithGoodID(&in.GoodID, true),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

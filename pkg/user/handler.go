@@ -11,7 +11,8 @@ import (
 )
 
 type Handler struct {
-	ID               *string
+	ID               *uint32
+	EntID            *string
 	AppID            *string
 	UserID           *string
 	CoinTypeID       *string
@@ -39,22 +40,42 @@ func NewHandler(ctx context.Context, options ...func(context.Context, *Handler) 
 	return handler, nil
 }
 
-func WithID(id *string) func(context.Context, *Handler) error {
+func WithID(id *uint32, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
+			if must {
+				return fmt.Errorf("invalid id")
+			}
 			return nil
-		}
-		if _, err := uuid.Parse(*id); err != nil {
-			return err
 		}
 		h.ID = id
 		return nil
 	}
 }
 
-func WithAppID(id *string) func(context.Context, *Handler) error {
+func WithEntID(id *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
+			if must {
+				return fmt.Errorf("invalid entid")
+			}
+			return nil
+		}
+		_, err := uuid.Parse(*id)
+		if err != nil {
+			return err
+		}
+		h.EntID = id
+		return nil
+	}
+}
+
+func WithAppID(id *string, must bool) func(context.Context, *Handler) error {
+	return func(ctx context.Context, h *Handler) error {
+		if id == nil {
+			if must {
+				return fmt.Errorf("invalid appid")
+			}
 			return nil
 		}
 		if _, err := uuid.Parse(*id); err != nil {
@@ -65,9 +86,12 @@ func WithAppID(id *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithUserID(id *string) func(context.Context, *Handler) error {
+func WithUserID(id *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
+			if must {
+				return fmt.Errorf("invalid userid")
+			}
 			return nil
 		}
 		if _, err := uuid.Parse(*id); err != nil {
@@ -78,9 +102,12 @@ func WithUserID(id *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithCoinTypeID(id *string) func(context.Context, *Handler) error {
+func WithCoinTypeID(id *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
+			if must {
+				return fmt.Errorf("invalid cointypeid")
+			}
 			return nil
 		}
 		if _, err := uuid.Parse(*id); err != nil {
@@ -92,9 +119,12 @@ func WithCoinTypeID(id *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithAddress(addr *string) func(context.Context, *Handler) error {
+func WithAddress(addr *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if addr == nil {
+			if must {
+				return fmt.Errorf("invalid address")
+			}
 			return nil
 		}
 		if *addr == "" {
@@ -105,9 +135,12 @@ func WithAddress(addr *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithUsedFor(usedFor *basetypes.AccountUsedFor) func(context.Context, *Handler) error {
+func WithUsedFor(usedFor *basetypes.AccountUsedFor, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if usedFor == nil {
+			if must {
+				return fmt.Errorf("invalid usedfor")
+			}
 			return nil
 		}
 		switch *usedFor {
@@ -121,16 +154,19 @@ func WithUsedFor(usedFor *basetypes.AccountUsedFor) func(context.Context, *Handl
 	}
 }
 
-func WithLabels(labels []string) func(context.Context, *Handler) error {
+func WithLabels(labels []string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		h.Labels = labels
 		return nil
 	}
 }
 
-func WithAccount(account *string) func(context.Context, *Handler) error {
+func WithAccount(account *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if account == nil {
+			if must {
+				return fmt.Errorf("invalid account")
+			}
 			return nil
 		}
 		if *account == "" {
@@ -141,9 +177,12 @@ func WithAccount(account *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithAccountType(accountType *basetypes.SignMethod) func(context.Context, *Handler) error {
+func WithAccountType(accountType *basetypes.SignMethod, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if accountType == nil {
+			if must {
+				return fmt.Errorf("invalid accounttype")
+			}
 			return nil
 		}
 		switch *accountType {
@@ -158,9 +197,12 @@ func WithAccountType(accountType *basetypes.SignMethod) func(context.Context, *H
 	}
 }
 
-func WithVerificationCode(verifCode *string) func(context.Context, *Handler) error {
+func WithVerificationCode(verifCode *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if verifCode == nil {
+			if must {
+				return fmt.Errorf("invalid verificationcode")
+			}
 			return nil
 		}
 		if *verifCode == "" {
@@ -171,9 +213,12 @@ func WithVerificationCode(verifCode *string) func(context.Context, *Handler) err
 	}
 }
 
-func WithMemo(memo *string) func(context.Context, *Handler) error {
+func WithMemo(memo *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if memo == nil {
+			if must {
+				return fmt.Errorf("invalid memo")
+			}
 			return nil
 		}
 		if *memo == "" {
@@ -184,21 +229,21 @@ func WithMemo(memo *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithBackup(backup *bool) func(context.Context, *Handler) error {
+func WithBackup(backup *bool, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		h.Backup = backup
 		return nil
 	}
 }
 
-func WithBlocked(blocked *bool) func(context.Context, *Handler) error {
+func WithBlocked(blocked *bool, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		h.Blocked = blocked
 		return nil
 	}
 }
 
-func WithActive(active *bool) func(context.Context, *Handler) error {
+func WithActive(active *bool, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		h.Active = active
 		return nil

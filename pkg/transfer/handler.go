@@ -11,7 +11,8 @@ import (
 )
 
 type Handler struct {
-	ID                *string
+	ID                *uint32
+	EntID             *string
 	AppID             *string
 	UserID            *string
 	Account           *string
@@ -34,22 +35,42 @@ func NewHandler(ctx context.Context, options ...func(context.Context, *Handler) 
 	return handler, nil
 }
 
-func WithID(id *string) func(context.Context, *Handler) error {
+func WithID(id *uint32, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
+			if must {
+				return fmt.Errorf("invalid id")
+			}
 			return nil
-		}
-		if _, err := uuid.Parse(*id); err != nil {
-			return err
 		}
 		h.ID = id
 		return nil
 	}
 }
 
-func WithAppID(id *string) func(context.Context, *Handler) error {
+func WithEntID(id *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
+			if must {
+				return fmt.Errorf("invalid entid")
+			}
+			return nil
+		}
+		_, err := uuid.Parse(*id)
+		if err != nil {
+			return err
+		}
+		h.EntID = id
+		return nil
+	}
+}
+
+func WithAppID(id *string, must bool) func(context.Context, *Handler) error {
+	return func(ctx context.Context, h *Handler) error {
+		if id == nil {
+			if must {
+				return fmt.Errorf("invalid appid")
+			}
 			return nil
 		}
 		if _, err := uuid.Parse(*id); err != nil {
@@ -60,9 +81,12 @@ func WithAppID(id *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithUserID(id *string) func(context.Context, *Handler) error {
+func WithUserID(id *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
+			if must {
+				return fmt.Errorf("invalid userid")
+			}
 			return nil
 		}
 		if _, err := uuid.Parse(*id); err != nil {
@@ -73,9 +97,12 @@ func WithUserID(id *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithAccount(account *string) func(context.Context, *Handler) error {
+func WithAccount(account *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if account == nil {
+			if must {
+				return fmt.Errorf("invalid account")
+			}
 			return nil
 		}
 		if *account == "" {
@@ -86,9 +113,12 @@ func WithAccount(account *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithAccountType(accountType *basetypes.SignMethod) func(context.Context, *Handler) error {
+func WithAccountType(accountType *basetypes.SignMethod, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if accountType == nil {
+			if must {
+				return fmt.Errorf("invalid accounttype")
+			}
 			return nil
 		}
 		switch *accountType {
@@ -103,9 +133,12 @@ func WithAccountType(accountType *basetypes.SignMethod) func(context.Context, *H
 	}
 }
 
-func WithVerificationCode(verifCode *string) func(context.Context, *Handler) error {
+func WithVerificationCode(verifCode *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if verifCode == nil {
+			if must {
+				return fmt.Errorf("invalid verificationcode")
+			}
 			return nil
 		}
 		if *verifCode == "" {
@@ -116,9 +149,12 @@ func WithVerificationCode(verifCode *string) func(context.Context, *Handler) err
 	}
 }
 
-func WithTargetUserID(id *string) func(context.Context, *Handler) error {
+func WithTargetUserID(id *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
+			if must {
+				return fmt.Errorf("invalid targetuserid")
+			}
 			return nil
 		}
 		if _, err := uuid.Parse(*id); err != nil {
@@ -129,9 +165,12 @@ func WithTargetUserID(id *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithTargetAccount(account *string) func(context.Context, *Handler) error {
+func WithTargetAccount(account *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if account == nil {
+			if must {
+				return fmt.Errorf("invalid targetaccount")
+			}
 			return nil
 		}
 		if *account == "" {
@@ -142,9 +181,12 @@ func WithTargetAccount(account *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithTargetAccountType(accountType *basetypes.SignMethod) func(context.Context, *Handler) error {
+func WithTargetAccountType(accountType *basetypes.SignMethod, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if accountType == nil {
+			if must {
+				return fmt.Errorf("invalid targetaccounttype")
+			}
 			return nil
 		}
 		switch *accountType {

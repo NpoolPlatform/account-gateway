@@ -15,13 +15,13 @@ import (
 func (s *Server) CreateTransfer(ctx context.Context, in *npool.CreateTransferRequest) (resp *npool.CreateTransferResponse, err error) {
 	handler, err := transfer1.NewHandler(
 		ctx,
-		transfer1.WithAppID(&in.AppID),
-		transfer1.WithUserID(&in.UserID),
-		transfer1.WithAccount(in.Account),
-		transfer1.WithAccountType(&in.AccountType),
-		transfer1.WithVerificationCode(&in.VerificationCode),
-		transfer1.WithTargetAccount(&in.TargetAccount),
-		transfer1.WithTargetAccountType(&in.TargetAccountType),
+		transfer1.WithAppID(&in.AppID, true),
+		transfer1.WithUserID(&in.UserID, true),
+		transfer1.WithAccount(in.Account, false),
+		transfer1.WithAccountType(&in.AccountType, true),
+		transfer1.WithVerificationCode(&in.VerificationCode, true),
+		transfer1.WithTargetAccount(&in.TargetAccount, true),
+		transfer1.WithTargetAccountType(&in.TargetAccountType, true),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

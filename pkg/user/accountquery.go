@@ -32,14 +32,14 @@ func (h *queryHandler) getUsers(ctx context.Context) error {
 	}
 
 	users, _, err := usermwcli.GetUsers(ctx, &usermwpb.Conds{
-		IDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: ids},
+		EntIDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: ids},
 	}, 0, int32(len(ids)))
 	if err != nil {
 		return err
 	}
 
 	for _, u := range users {
-		h.users[u.ID] = u
+		h.users[u.EntID] = u
 	}
 
 	return nil
@@ -79,6 +79,7 @@ func (h *queryHandler) formalize() {
 
 		h.accs = append(h.accs, &npool.Account{
 			ID:               val.ID,
+			EntID:            val.EntID,
 			AppID:            val.AppID,
 			UserID:           val.UserID,
 			CoinTypeID:       val.CoinTypeID,
@@ -102,11 +103,7 @@ func (h *queryHandler) formalize() {
 }
 
 func (h *Handler) GetAccount(ctx context.Context) (*npool.Account, error) {
-	if h.ID == nil {
-		return nil, fmt.Errorf("invalid id")
-	}
-
-	info, err := useraccmwcli.GetAccount(ctx, *h.ID)
+	info, err := useraccmwcli.GetAccount(ctx, *h.EntID)
 	if err != nil {
 		return nil, err
 	}
@@ -137,10 +134,35 @@ func (h *Handler) GetAccount(ctx context.Context) (*npool.Account, error) {
 	return handler.accs[0], nil
 }
 
-func (h *Handler) GetAccounts(ctx context.Context) ([]*npool.Account, uint32, error) {
-	if h.AppID == nil {
-		return nil, 0, fmt.Errorf("invalid appID")
+func (h *Handler) GetAccountExt(ctx context.Context, info *useraccmwpb.Account) (*npool.Account, error) {
+	if info == nil {
+		return nil, fmt.Errorf("invalid account")
 	}
+	handler := &queryHandler{
+		Handler: h,
+		infos:   []*useraccmwpb.Account{info},
+		coins:   map[string]*appcoinmwpb.Coin{},
+		users:   map[string]*usermwpb.User{},
+	}
+	handler.AppID = &info.AppID
+	if err := handler.getUsers(ctx); err != nil {
+		return nil, err
+	}
+	if err := handler.getCoins(ctx); err != nil {
+		return nil, err
+	}
+	if len(handler.users) == 0 {
+		return nil, fmt.Errorf("invalid user")
+	}
+	if len(handler.coins) == 0 {
+		return nil, fmt.Errorf("invalid coin")
+	}
+	handler.formalize()
+
+	return handler.accs[0], nil
+}
+
+func (h *Handler) GetAccounts(ctx context.Context) ([]*npool.Account, uint32, error) {
 	conds := &useraccmwpb.Conds{
 		AppID: &basetypes.StringVal{Op: cruder.EQ, Value: *h.AppID},
 	}
@@ -171,6 +193,7 @@ func (h *queryHandler) getAccounts(ctx context.Context, conds *useraccmwpb.Conds
 	if len(infos) == 0 {
 		return nil, total, nil
 	}
+
 	h.infos = append(h.infos, infos...)
 
 	if err := h.getUsers(ctx); err != nil {

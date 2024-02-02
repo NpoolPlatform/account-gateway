@@ -29,10 +29,6 @@ type createHandler struct {
 }
 
 func (h *createHandler) getCoinTypeID(ctx context.Context) error {
-	if h.GoodID == nil {
-		return fmt.Errorf("invalid goodid")
-	}
-
 	good, err := goodmwcli.GetGood(ctx, *h.GoodID)
 	if err != nil {
 		return err
@@ -128,6 +124,7 @@ func (h *createHandler) createAccount(ctx context.Context) error {
 	}
 
 	h.ID = &acc.ID
+	h.EntID = &acc.EntID
 
 	return nil
 }

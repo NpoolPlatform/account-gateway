@@ -39,8 +39,8 @@ func (h *queryDepositHandler) getUsers(ctx context.Context) error {
 	}
 
 	users, _, err := usermwcli.GetUsers(ctx, &usermwpb.Conds{
-		AppID: &basetypes.StringVal{Op: cruder.EQ, Value: *h.AppID},
-		IDs:   &basetypes.StringSliceVal{Op: cruder.IN, Value: h.userIDs},
+		AppID:  &basetypes.StringVal{Op: cruder.EQ, Value: *h.AppID},
+		EntIDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: h.userIDs},
 	}, 0, int32(len(h.userIDs)))
 	if err != nil {
 		return err
@@ -50,7 +50,7 @@ func (h *queryDepositHandler) getUsers(ctx context.Context) error {
 	}
 
 	for _, u := range users {
-		h.users[u.ID] = u
+		h.users[u.EntID] = u
 	}
 
 	return nil
@@ -150,6 +150,7 @@ func (h *queryDepositHandler) formalize() {
 
 		h.accs = append(h.accs, &npool.Account{
 			ID:               val.ID,
+			EntID:            val.EntID,
 			AppID:            val.AppID,
 			UserID:           val.UserID,
 			CoinTypeID:       val.CoinTypeID,
@@ -171,16 +172,6 @@ func (h *queryDepositHandler) formalize() {
 }
 
 func (h *Handler) GetDepositAccount(ctx context.Context) (*npool.Account, error) {
-	if h.AppID == nil {
-		return nil, fmt.Errorf("invaild appid")
-	}
-	if h.UserID == nil {
-		return nil, fmt.Errorf("invaild userID")
-	}
-	if h.CoinTypeID == nil {
-		return nil, fmt.Errorf("invaild coinTypeID")
-	}
-
 	handler := &queryDepositHandler{
 		Handler:     h,
 		infos:       []*depositmwpb.Account{},
@@ -240,10 +231,6 @@ func (h *Handler) GetDepositAccount(ctx context.Context) (*npool.Account, error)
 }
 
 func (h *Handler) GetDepositAccounts(ctx context.Context) ([]*npool.Account, uint32, error) {
-	if h.AppID == nil {
-		return nil, 0, fmt.Errorf("invaild appid")
-	}
-
 	infos, total, err := depositcli.GetAccounts(ctx, &depositmwpb.Conds{
 		AppID: &basetypes.StringVal{
 			Op:    cruder.EQ,

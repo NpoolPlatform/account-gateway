@@ -14,11 +14,12 @@ import (
 func (s *Server) UpdateAccount(ctx context.Context, in *npool.UpdateAccountRequest) (*npool.UpdateAccountResponse, error) {
 	handler, err := goodbenefit1.NewHandler(
 		ctx,
-		goodbenefit1.WithID(&in.ID),
-		goodbenefit1.WithActive(in.Active),
-		goodbenefit1.WithLocked(in.Locked),
-		goodbenefit1.WithBlocked(in.Blocked),
-		goodbenefit1.WithBackup(in.Backup),
+		goodbenefit1.WithID(&in.ID, true),
+		goodbenefit1.WithEntID(&in.EntID, true),
+		goodbenefit1.WithActive(in.Active, false),
+		goodbenefit1.WithLocked(in.Locked, false),
+		goodbenefit1.WithBlocked(in.Blocked, false),
+		goodbenefit1.WithBackup(in.Backup, false),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

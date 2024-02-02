@@ -3,15 +3,15 @@ module github.com/NpoolPlatform/account-gateway
 go 1.17
 
 require (
-	github.com/NpoolPlatform/account-middleware v0.0.0-20230920091440-9356f68938c5
-	github.com/NpoolPlatform/appuser-middleware v0.0.0-20230917082029-230c1954e222
-	github.com/NpoolPlatform/basal-middleware v0.0.0-20230913134752-d45f93a3a60c
-	github.com/NpoolPlatform/chain-middleware v0.0.0-20230920090952-2c765cbfac9c
-	github.com/NpoolPlatform/go-service-framework v0.0.0-20230918130418-eabd9770f9a7
-	github.com/NpoolPlatform/good-middleware v0.0.0-20230919031918-f7856e3c0b68
-	github.com/NpoolPlatform/libent-cruder v0.0.0-20230825073905-d23e4d838f99
-	github.com/NpoolPlatform/message v0.0.0-20230922025200-093694e50098
-	github.com/NpoolPlatform/sphinx-proxy v0.0.0-20230921040847-49f8ef7f861f
+	github.com/NpoolPlatform/account-middleware v0.0.0-20231205074056-0cc5ad44fac5
+	github.com/NpoolPlatform/appuser-middleware v0.0.0-20231130084704-4550aabac9c7
+	github.com/NpoolPlatform/basal-middleware v0.0.0-20231015112137-254853c60eec
+	github.com/NpoolPlatform/chain-middleware v0.0.0-20231026064324-fbe769a1455e
+	github.com/NpoolPlatform/go-service-framework v0.0.0-20230930023319-e48074d9472e
+	github.com/NpoolPlatform/good-middleware v0.0.0-20231221030302-2e4c9171b07b
+	github.com/NpoolPlatform/libent-cruder v0.0.0-20231008051607-f64457cf6ab6
+	github.com/NpoolPlatform/message v0.0.0-20231221025842-bc160e20ab33
+	github.com/NpoolPlatform/sphinx-proxy v0.0.0-20231020115438-bd66d3d334af
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.2
@@ -79,6 +79,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.12.0 // indirect
 	github.com/subosito/gotenv v1.3.0 // indirect
+	github.com/ugorji/go/codec v1.2.12 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.31.0 // indirect
 	go.opentelemetry.io/otel v1.10.0 // indirect

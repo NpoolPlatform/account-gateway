@@ -2,7 +2,6 @@ package goodbenefit
 
 import (
 	"context"
-	"fmt"
 
 	gbmwcli "github.com/NpoolPlatform/account-middleware/pkg/client/goodbenefit"
 	coinmwcli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
@@ -30,13 +29,13 @@ func (h *queryHandler) getGoods(ctx context.Context) error {
 		goodIDs = append(goodIDs, info.GoodID)
 	}
 	goods, _, err := goodmwcli.GetGoods(ctx, &goodmwpb.Conds{
-		IDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: goodIDs},
+		EntIDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: goodIDs},
 	}, 0, int32(len(goodIDs)))
 	if err != nil {
 		return err
 	}
 	for _, good := range goods {
-		h.goods[good.ID] = good
+		h.goods[good.EntID] = good
 	}
 	return nil
 }
@@ -47,12 +46,12 @@ func (h *queryHandler) getCoins(ctx context.Context) error {
 
 	for _, good := range h.goods {
 		coinTypeIDs = append(coinTypeIDs, good.CoinTypeID)
-		coinGoodIDs[good.CoinTypeID] = append(coinGoodIDs[good.CoinTypeID], good.ID)
+		coinGoodIDs[good.CoinTypeID] = append(coinGoodIDs[good.CoinTypeID], good.EntID)
 	}
 	coins, _, err := coinmwcli.GetCoins(
 		ctx,
 		&coinmwpb.Conds{
-			IDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: coinTypeIDs},
+			EntIDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: coinTypeIDs},
 		},
 		0,
 		int32(len(coinTypeIDs)),
@@ -62,7 +61,7 @@ func (h *queryHandler) getCoins(ctx context.Context) error {
 	}
 
 	for _, coin := range coins {
-		goodIDs, ok := coinGoodIDs[coin.ID]
+		goodIDs, ok := coinGoodIDs[coin.EntID]
 		if !ok {
 			continue
 		}
@@ -88,6 +87,7 @@ func (h *queryHandler) formalize() {
 
 		h.accs = append(h.accs, &npool.Account{
 			ID:         info.ID,
+			EntID:      info.EntID,
 			GoodID:     info.GoodID,
 			GoodName:   good.Title,
 			GoodUnit:   good.Unit,
@@ -110,11 +110,7 @@ func (h *queryHandler) formalize() {
 }
 
 func (h *Handler) GetAccount(ctx context.Context) (*npool.Account, error) {
-	if h.ID == nil {
-		return nil, fmt.Errorf("invalid id")
-	}
-
-	info, err := gbmwcli.GetAccount(ctx, *h.ID)
+	info, err := gbmwcli.GetAccount(ctx, *h.EntID)
 	if err != nil {
 		return nil, err
 	}

@@ -30,16 +30,6 @@ type createHandler struct {
 }
 
 func (h *createHandler) validate(ctx context.Context) error { //nolint
-	if h.AppID == nil {
-		return fmt.Errorf("invalid appid")
-	}
-	if h.UserID == nil {
-		return fmt.Errorf("invalid userid")
-	}
-	if h.AccountType == nil {
-		return fmt.Errorf("invalid accounttype")
-	}
-
 	switch *h.AccountType {
 	case basetypes.SignMethod_Email:
 		fallthrough //nolint
@@ -52,17 +42,11 @@ func (h *createHandler) validate(ctx context.Context) error { //nolint
 		return fmt.Errorf("accounttype %v invalid", *h.AccountType)
 	}
 
-	if h.VerificationCode == nil || *h.VerificationCode == "" {
+	if *h.VerificationCode == "" {
 		return fmt.Errorf("invalid verificationcode")
 	}
-	if h.CoinTypeID == nil {
-		return fmt.Errorf("invalid cointypeid")
-	}
-	if h.Address == nil || *h.Address == "" {
+	if *h.Address == "" {
 		return fmt.Errorf("invalid address")
-	}
-	if h.UsedFor == nil {
-		return fmt.Errorf("invalid usedfor")
 	}
 
 	switch *h.UsedFor {
@@ -161,13 +145,11 @@ func (h *createHandler) createAccount(ctx context.Context) error {
 	}
 
 	h.ID = &info.ID
+	h.EntID = &info.EntID
 	return nil
 }
 
 func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
-	if h.AppID == nil {
-		return nil, fmt.Errorf("invalid appid")
-	}
 	handler := &createHandler{
 		Handler: h,
 	}

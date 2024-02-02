@@ -1,8 +1,8 @@
+//nolint:dupl
 package transfer
 
 import (
 	"context"
-	"fmt"
 
 	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 
@@ -30,14 +30,14 @@ func (h *queryHandler) getUsers(ctx context.Context) error {
 	}
 
 	users, _, err := usermwcli.GetUsers(ctx, &usermwpb.Conds{
-		IDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: targetUserIDs},
+		EntIDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: targetUserIDs},
 	}, 0, int32(len(targetUserIDs)))
 	if err != nil {
 		return err
 	}
 
 	for _, val := range users {
-		h.users[val.ID] = val
+		h.users[val.EntID] = val
 	}
 	return nil
 }
@@ -51,6 +51,7 @@ func (h *queryHandler) formalize() {
 
 		h.accs = append(h.accs, &npool.Transfer{
 			ID:                 val.ID,
+			EntID:              val.EntID,
 			AppID:              val.AppID,
 			UserID:             val.UserID,
 			TargetUserID:       val.TargetUserID,
@@ -65,9 +66,6 @@ func (h *queryHandler) formalize() {
 }
 
 func (h *Handler) GetTransfers(ctx context.Context) ([]*npool.Transfer, uint32, error) {
-	if h.AppID == nil {
-		return nil, 0, fmt.Errorf("invalid appID")
-	}
 	conds := &transfermwpb.Conds{
 		AppID: &basetypes.StringVal{Op: cruder.EQ, Value: *h.AppID},
 	}

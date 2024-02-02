@@ -15,9 +15,10 @@ import (
 func (s *Server) DeleteTransfer(ctx context.Context, in *npool.DeleteTransferRequest) (resp *npool.DeleteTransferResponse, err error) {
 	handler, err := transfer1.NewHandler(
 		ctx,
-		transfer1.WithID(&in.TransferID),
-		transfer1.WithAppID(&in.AppID),
-		transfer1.WithUserID(&in.UserID),
+		transfer1.WithID(&in.TransferID, true),
+		transfer1.WithEntID(&in.EntID, true),
+		transfer1.WithAppID(&in.AppID, true),
+		transfer1.WithUserID(&in.UserID, true),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

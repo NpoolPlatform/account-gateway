@@ -17,9 +17,9 @@ import (
 func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) (*npool.GetAccountsResponse, error) {
 	handler, err := user1.NewHandler(
 		ctx,
-		user1.WithAppID(&in.AppID),
-		user1.WithUserID(&in.UserID),
-		user1.WithUsedFor(&in.UsedFor),
+		user1.WithAppID(&in.AppID, true),
+		user1.WithUserID(&in.UserID, true),
+		user1.WithUsedFor(&in.UsedFor, true),
 		user1.WithOffset(in.GetOffset()),
 		user1.WithLimit(in.GetLimit()),
 	)
@@ -58,7 +58,7 @@ func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) 
 func (s *Server) GetAppAccounts(ctx context.Context, in *npool.GetAppAccountsRequest) (*npool.GetAppAccountsResponse, error) {
 	handler, err := user1.NewHandler(
 		ctx,
-		user1.WithAppID(&in.AppID),
+		user1.WithAppID(&in.AppID, true),
 		user1.WithOffset(in.GetOffset()),
 		user1.WithLimit(in.GetLimit()),
 	)
@@ -90,7 +90,7 @@ func (s *Server) GetAppAccounts(ctx context.Context, in *npool.GetAppAccountsReq
 func (s *Server) GetNAppAccounts(ctx context.Context, in *npool.GetNAppAccountsRequest) (*npool.GetNAppAccountsResponse, error) {
 	handler, err := user1.NewHandler(
 		ctx,
-		user1.WithAppID(&in.TargetAppID),
+		user1.WithAppID(&in.TargetAppID, true),
 		user1.WithOffset(in.GetOffset()),
 		user1.WithLimit(in.GetLimit()),
 	)
