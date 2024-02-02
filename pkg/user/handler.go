@@ -171,15 +171,15 @@ func WithVerificationCode(verifCode *string) func(context.Context, *Handler) err
 	}
 }
 
-func WithMemo(meno *string) func(context.Context, *Handler) error {
+func WithMemo(memo *string) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
-		if meno == nil {
+		if memo == nil {
 			return nil
 		}
-		if *meno == "" {
-			return fmt.Errorf("invalid meno")
+		if *memo == "" {
+			return fmt.Errorf("invalid memo")
 		}
-		h.Memo = meno
+		h.Memo = memo
 		return nil
 	}
 }
