@@ -213,18 +213,18 @@ func WithVerificationCode(verifCode *string, must bool) func(context.Context, *H
 	}
 }
 
-func WithMemo(meno *string, must bool) func(context.Context, *Handler) error {
+func WithMemo(memo *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
-		if meno == nil {
+		if memo == nil {
 			if must {
-				return fmt.Errorf("invalid meno")
+				return fmt.Errorf("invalid memo")
 			}
 			return nil
 		}
-		if *meno == "" {
-			return fmt.Errorf("invalid meno")
+		if *memo == "" {
+			return fmt.Errorf("invalid memo")
 		}
-		h.Memo = meno
+		h.Memo = memo
 		return nil
 	}
 }
