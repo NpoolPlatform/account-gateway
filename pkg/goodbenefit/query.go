@@ -90,7 +90,7 @@ func (h *queryHandler) formalize() {
 			EntID:      info.EntID,
 			GoodID:     info.GoodID,
 			GoodName:   good.Title,
-			GoodUnit:   good.Unit,
+			GoodUnit:   good.QuantityUnit,
 			CoinTypeID: info.CoinTypeID,
 			CoinName:   coin.Name,
 			CoinUnit:   coin.Unit,
