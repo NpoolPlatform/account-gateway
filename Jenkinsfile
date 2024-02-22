@@ -327,7 +327,7 @@ pipeline {
           if [ "x$BRANCH_NAME" != "xmaster" ]; then
             branch=`echo $BRANCH_NAME | awk -F '/' '{ print $2 }'`
           fi
-          sed -i "s/account-middleware:latest/account-middleware:$branch/g" cmd/account-gateway/k8s/02-account-gateway.yaml
+          sed -i "s/account-gateway:latest/account-gateway:$branch/g" cmd/account-gateway/k8s/02-account-gateway.yaml
           sed -i "s/uhub.service.ucloud.cn/$DOCKER_REGISTRY/g" cmd/account-gateway/k8s/02-account-gateway.yaml
           if [ "x$REPLICAS_COUNT" == "x" ];then
             REPLICAS_COUNT=2
