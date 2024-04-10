@@ -4,15 +4,14 @@ import (
 	"context"
 	"fmt"
 
-	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/goodbenefit"
-	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
-
-	gbmwcli "github.com/NpoolPlatform/account-middleware/pkg/client/goodbenefit"
-	gbmwpb "github.com/NpoolPlatform/message/npool/account/mw/v1/goodbenefit"
-
 	addresscheck "github.com/NpoolPlatform/account-gateway/pkg/addresscheck"
+	gbmwcli "github.com/NpoolPlatform/account-middleware/pkg/client/goodbenefit"
 	coinmwcli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
-	goodmwcli "github.com/NpoolPlatform/good-middleware/pkg/client/good"
+	goodcoinmwcli "github.com/NpoolPlatform/good-middleware/pkg/client/good/coin"
+	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/goodbenefit"
+	gbmwpb "github.com/NpoolPlatform/message/npool/account/mw/v1/goodbenefit"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
+	goodcoinmwpb "github.com/NpoolPlatform/message/npool/good/mw/v1/good/coin"
 	sphinxproxypb "github.com/NpoolPlatform/message/npool/sphinxproxy"
 	sphinxproxycli "github.com/NpoolPlatform/sphinx-proxy/pkg/client"
 
@@ -21,32 +20,28 @@ import (
 
 type createHandler struct {
 	*Handler
-	goodCoinTypeID      *string
 	goodCoinName        *string
 	checkAddressBalance bool
 	backup              bool
 	address             *string
 }
 
-func (h *createHandler) getCoinTypeID(ctx context.Context) error {
-	good, err := goodmwcli.GetGood(ctx, *h.GoodID)
+func (h *createHandler) getGoodCoin(ctx context.Context) error {
+	exist, err := goodcoinmwcli.ExistGoodCoinConds(ctx, &goodcoinmwpb.Conds{
+		GoodID:     &basetypes.StringVal{Op: cruder.EQ, Value: *h.GoodID},
+		CoinTypeID: &basetypes.StringVal{Op: cruder.EQ, Value: *h.CoinTypeID},
+	})
 	if err != nil {
 		return err
 	}
-	if good == nil {
-		return fmt.Errorf("invalid good")
+	if !exist {
+		return fmt.Errorf("invalid goodcoin")
 	}
-
-	h.goodCoinTypeID = &good.CoinTypeID
 	return nil
 }
 
-func (h *createHandler) getCoinName(ctx context.Context) error {
-	if h.goodCoinTypeID == nil {
-		return fmt.Errorf("invalid goodcointypeid")
-	}
-
-	coin, err := coinmwcli.GetCoin(ctx, *h.goodCoinTypeID)
+func (h *createHandler) getCoin(ctx context.Context) error {
+	coin, err := coinmwcli.GetCoin(ctx, *h.CoinTypeID)
 	if err != nil {
 		return err
 	}
@@ -112,7 +107,7 @@ func (h *createHandler) createAddress(ctx context.Context) error {
 func (h *createHandler) createAccount(ctx context.Context) error {
 	acc, err := gbmwcli.CreateAccount(ctx, &gbmwpb.AccountReq{
 		GoodID:     h.GoodID,
-		CoinTypeID: h.goodCoinTypeID,
+		CoinTypeID: h.CoinTypeID,
 		Address:    h.address,
 		Backup:     &h.backup,
 	})
@@ -134,10 +129,10 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
 		Handler: h,
 	}
 
-	if err := handler.getCoinTypeID(ctx); err != nil {
+	if err := handler.getGoodCoin(ctx); err != nil {
 		return nil, err
 	}
-	if err := handler.getCoinName(ctx); err != nil {
+	if err := handler.getCoin(ctx); err != nil {
 		return nil, err
 	}
 	if err := handler.checkBackup(ctx); err != nil {

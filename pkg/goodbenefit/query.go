@@ -1,3 +1,4 @@
+//nolint:dupl
 package goodbenefit
 
 import (
@@ -18,16 +19,17 @@ type queryHandler struct {
 	*Handler
 	infos []*gbmwpb.Account
 	accs  []*npool.Account
-	// GoodID -> Coin
-	coins map[string]*coinmwpb.Coin
 	goods map[string]*goodmwpb.Good
+	coins map[string]*coinmwpb.Coin
 }
 
 func (h *queryHandler) getGoods(ctx context.Context) error {
-	goodIDs := []string{}
-	for _, info := range h.infos {
-		goodIDs = append(goodIDs, info.GoodID)
-	}
+	goodIDs := func() (_goodIDs []string) {
+		for _, info := range h.infos {
+			_goodIDs = append(_goodIDs, info.GoodID)
+		}
+		return
+	}()
 	goods, _, err := goodmwcli.GetGoods(ctx, &goodmwpb.Conds{
 		EntIDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: goodIDs},
 	}, 0, int32(len(goodIDs)))
@@ -41,33 +43,21 @@ func (h *queryHandler) getGoods(ctx context.Context) error {
 }
 
 func (h *queryHandler) getCoins(ctx context.Context) error {
-	coinTypeIDs := []string{}
-	coinGoodIDs := map[string][]string{}
-
-	for _, good := range h.goods {
-		coinTypeIDs = append(coinTypeIDs, good.CoinTypeID)
-		coinGoodIDs[good.CoinTypeID] = append(coinGoodIDs[good.CoinTypeID], good.EntID)
-	}
-	coins, _, err := coinmwcli.GetCoins(
-		ctx,
-		&coinmwpb.Conds{
-			EntIDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: coinTypeIDs},
-		},
-		0,
-		int32(len(coinTypeIDs)),
-	)
+	coinTypeIDs := func() (_coinTypeIDs []string) {
+		for _, info := range h.infos {
+			_coinTypeIDs = append(_coinTypeIDs, info.CoinTypeID)
+		}
+		return
+	}()
+	coins, _, err := coinmwcli.GetCoins(ctx, &coinmwpb.Conds{
+		EntIDs: &basetypes.StringSliceVal{Op: cruder.IN, Value: coinTypeIDs},
+	}, 0, int32(len(coinTypeIDs)))
 	if err != nil {
 		return err
 	}
 
 	for _, coin := range coins {
-		goodIDs, ok := coinGoodIDs[coin.EntID]
-		if !ok {
-			continue
-		}
-		for _, goodID := range goodIDs {
-			h.coins[goodID] = coin
-		}
+		h.coins[coin.EntID] = coin
 	}
 
 	return nil
@@ -79,18 +69,15 @@ func (h *queryHandler) formalize() {
 		if !ok {
 			continue
 		}
-
-		coin, ok := h.coins[info.GoodID]
+		coin, ok := h.coins[info.CoinTypeID]
 		if !ok {
 			continue
 		}
-
 		h.accs = append(h.accs, &npool.Account{
 			ID:         info.ID,
 			EntID:      info.EntID,
 			GoodID:     info.GoodID,
-			GoodName:   good.Title,
-			GoodUnit:   good.QuantityUnit,
+			GoodName:   good.Name,
 			CoinTypeID: info.CoinTypeID,
 			CoinName:   coin.Name,
 			CoinUnit:   coin.Unit,
