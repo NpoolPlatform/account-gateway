@@ -72,8 +72,9 @@ func (h *createHandler) getCoin(ctx context.Context) error {
 
 func (h *createHandler) checkBackup(ctx context.Context) error {
 	exist, err := gbmwcli.ExistAccountConds(ctx, &gbmwpb.Conds{
-		GoodID: &basetypes.StringVal{Op: cruder.EQ, Value: *h.GoodID},
-		Backup: &basetypes.BoolVal{Op: cruder.EQ, Value: false},
+		GoodID:     &basetypes.StringVal{Op: cruder.EQ, Value: *h.GoodID},
+		CoinTypeID: &basetypes.StringVal{Op: cruder.EQ, Value: *h.CoinTypeID},
+		Backup:     &basetypes.BoolVal{Op: cruder.EQ, Value: false},
 	})
 	if err != nil {
 		return err
