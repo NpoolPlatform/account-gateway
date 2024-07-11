@@ -3,14 +3,14 @@ module github.com/NpoolPlatform/account-gateway
 go 1.17
 
 require (
-	github.com/NpoolPlatform/account-middleware v0.0.0-20231205074056-0cc5ad44fac5
+	github.com/NpoolPlatform/account-middleware v0.0.0-20240711084532-91d043378264
 	github.com/NpoolPlatform/appuser-middleware v0.0.0-20231130084704-4550aabac9c7
 	github.com/NpoolPlatform/basal-middleware v0.0.0-20231015112137-254853c60eec
-	github.com/NpoolPlatform/chain-middleware v0.0.0-20240206054529-d5a31563da6c
-	github.com/NpoolPlatform/go-service-framework v0.0.0-20230930023319-e48074d9472e
-	github.com/NpoolPlatform/good-middleware v0.0.0-20240206054338-ba6163372165
-	github.com/NpoolPlatform/libent-cruder v0.0.0-20231008051607-f64457cf6ab6
-	github.com/NpoolPlatform/message v0.0.0-20240206051841-08231b88783a
+	github.com/NpoolPlatform/chain-middleware v0.0.0-20240711085642-93249f191575
+	github.com/NpoolPlatform/go-service-framework v0.0.0-20240507084859-362174af9b92
+	github.com/NpoolPlatform/good-middleware v0.0.0-20240711084810-89bd6b946526
+	github.com/NpoolPlatform/libent-cruder v0.0.0-20240323085036-7679b4818ce7
+	github.com/NpoolPlatform/message v0.0.0-20240711072021-f19e78dccbfb
 	github.com/NpoolPlatform/sphinx-proxy v0.0.0-20231020115438-bd66d3d334af
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/google/uuid v1.3.0
@@ -79,7 +79,6 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.12.0 // indirect
 	github.com/subosito/gotenv v1.3.0 // indirect
-	github.com/ugorji/go/codec v1.2.12 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.31.0 // indirect
 	go.opentelemetry.io/otel v1.10.0 // indirect

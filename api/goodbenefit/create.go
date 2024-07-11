@@ -15,6 +15,7 @@ func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountReque
 	handler, err := goodbenefit1.NewHandler(
 		ctx,
 		goodbenefit1.WithGoodID(&in.GoodID, true),
+		goodbenefit1.WithCoinTypeID(&in.CoinTypeID, true),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

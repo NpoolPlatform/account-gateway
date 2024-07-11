@@ -10,15 +10,16 @@ import (
 )
 
 type Handler struct {
-	ID      *uint32
-	EntID   *string
-	GoodID  *string
-	Backup  *bool
-	Active  *bool
-	Blocked *bool
-	Locked  *bool
-	Offset  int32
-	Limit   int32
+	ID         *uint32
+	EntID      *string
+	GoodID     *string
+	CoinTypeID *string
+	Backup     *bool
+	Active     *bool
+	Blocked    *bool
+	Locked     *bool
+	Offset     int32
+	Limit      int32
 }
 
 func NewHandler(ctx context.Context, options ...func(context.Context, *Handler) error) (*Handler, error) {
@@ -69,11 +70,26 @@ func WithGoodID(id *string, must bool) func(context.Context, *Handler) error {
 			}
 			return nil
 		}
-		// TODO: check good exist
 		if _, err := uuid.Parse(*id); err != nil {
 			return err
 		}
 		h.GoodID = id
+		return nil
+	}
+}
+
+func WithCoinTypeID(id *string, must bool) func(context.Context, *Handler) error {
+	return func(ctx context.Context, h *Handler) error {
+		if id == nil {
+			if must {
+				return fmt.Errorf("invalid cointypeid")
+			}
+			return nil
+		}
+		if _, err := uuid.Parse(*id); err != nil {
+			return err
+		}
+		h.CoinTypeID = id
 		return nil
 	}
 }
