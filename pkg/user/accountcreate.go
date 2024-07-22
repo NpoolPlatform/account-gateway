@@ -4,7 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+	"github.com/NpoolPlatform/go-service-framework/pkg/pubsub"
 	npool "github.com/NpoolPlatform/message/npool/account/gw/v1/user"
+	eventmwpb "github.com/NpoolPlatform/message/npool/inspire/mw/v1/event"
 
 	usermwcli "github.com/NpoolPlatform/appuser-middleware/pkg/client/user"
 	coininfocli "github.com/NpoolPlatform/chain-middleware/pkg/client/coin"
@@ -27,6 +30,31 @@ type createHandler struct {
 	*Handler
 	coinName            *string
 	checkAddressBalance bool
+}
+
+func (h *createHandler) rewardSetAddress() {
+	if err := pubsub.WithPublisher(func(publisher *pubsub.Publisher) error {
+		req := &eventmwpb.CalcluateEventRewardsRequest{
+			AppID:       *h.AppID,
+			UserID:      *h.UserID,
+			EventType:   basetypes.UsedFor_SetAddress,
+			Consecutive: 1,
+		}
+		return publisher.Update(
+			basetypes.MsgID_CalculateEventRewardReq.String(),
+			nil,
+			nil,
+			nil,
+			req,
+		)
+	}); err != nil {
+		logger.Sugar().Errorw(
+			"rewardSetAddress",
+			"AppID", *h.AppID,
+			"UserID", h.UserID,
+			"Error", err,
+		)
+	}
 }
 
 func (h *createHandler) validate(ctx context.Context) error { //nolint
@@ -168,6 +196,8 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
 	if err := handler.createAccount(ctx); err != nil {
 		return nil, err
 	}
+
+	handler.rewardSetAddress()
 
 	return h.GetAccount(ctx)
 }
