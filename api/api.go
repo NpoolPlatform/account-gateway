@@ -6,6 +6,7 @@ import (
 	account "github.com/NpoolPlatform/message/npool/account/gw/v1"
 
 	"github.com/NpoolPlatform/account-gateway/api/goodbenefit"
+	"github.com/NpoolPlatform/account-gateway/api/orderbenefit"
 	"github.com/NpoolPlatform/account-gateway/api/payment"
 	"github.com/NpoolPlatform/account-gateway/api/platform"
 	"github.com/NpoolPlatform/account-gateway/api/transfer"
@@ -22,6 +23,7 @@ type Server struct {
 func Register(server grpc.ServiceRegistrar) {
 	account.RegisterGatewayServer(server, &Server{})
 	user.Register(server)
+	orderbenefit.Register(server)
 	transfer.Register(server)
 	platform.Register(server)
 	payment.Register(server)
@@ -33,6 +35,9 @@ func RegisterGateway(mux *runtime.ServeMux, endpoint string, opts []grpc.DialOpt
 		return err
 	}
 	if err := user.RegisterGateway(mux, endpoint, opts); err != nil {
+		return err
+	}
+	if err := orderbenefit.RegisterGateway(mux, endpoint, opts); err != nil {
 		return err
 	}
 	if err := transfer.RegisterGateway(mux, endpoint, opts); err != nil {
