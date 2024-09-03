@@ -3,7 +3,7 @@ module github.com/NpoolPlatform/account-gateway
 go 1.17
 
 require (
-	github.com/NpoolPlatform/account-middleware v0.0.0-20240729111609-437e1e0fe844
+	github.com/NpoolPlatform/account-middleware v0.0.0-20240903101120-9c0ff1bda5e8
 	github.com/NpoolPlatform/appuser-middleware v0.0.0-20231130084704-4550aabac9c7
 	github.com/NpoolPlatform/basal-middleware v0.0.0-20231015112137-254853c60eec
 	github.com/NpoolPlatform/chain-middleware v0.0.0-20240711085642-93249f191575

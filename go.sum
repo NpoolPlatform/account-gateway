@@ -45,8 +45,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/BurntSushi/toml v1.1.0 h1:ksErzDEI1khOiGPgpwuI7x2ebx/uXQNw7xJpn9Eq1+I=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
-github.com/NpoolPlatform/account-middleware v0.0.0-20240729111609-437e1e0fe844 h1:J61lwOe9w+CBWQMIqIv6pR5bmlQC9TxrGQ/1E2L2c5c=
-github.com/NpoolPlatform/account-middleware v0.0.0-20240729111609-437e1e0fe844/go.mod h1:lIB97lSnNmkYuIKAOCGmD4yZv36g039YfyAKDfy13mE=
+github.com/NpoolPlatform/account-middleware v0.0.0-20240903101120-9c0ff1bda5e8 h1:fAQD3+y2p/1Vtp+IHm7LSFqw8XmLt+G9xMA4WQUX7I8=
+github.com/NpoolPlatform/account-middleware v0.0.0-20240903101120-9c0ff1bda5e8/go.mod h1:lIB97lSnNmkYuIKAOCGmD4yZv36g039YfyAKDfy13mE=
 github.com/NpoolPlatform/appuser-middleware v0.0.0-20231130084704-4550aabac9c7 h1:+4onUtHHReTc0Nz2uDRulQ/O21m/mSV9kRqzErEs4Bs=
 github.com/NpoolPlatform/appuser-middleware v0.0.0-20231130084704-4550aabac9c7/go.mod h1:Bo68/bdsZPmfxMlGWu8K8u+OlhiJ+BWEBvSsqiVgyhQ=
 github.com/NpoolPlatform/basal-middleware v0.0.0-20231015112137-254853c60eec h1:YftnEsNtCsUz3iAKsI2bwt7+AuA7Ygx3GfYV6h38s9U=
@@ -428,6 +428,7 @@ github.com/stretchr/testify v1.8.3/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXl
 github.com/subosito/gotenv v1.3.0 h1:mjC+YW8QpAdXibNi+vNWgzmgBH4+5l5dCXv8cNysBLI=
 github.com/subosito/gotenv v1.3.0/go.mod h1:YzJjq/33h7nrwdY+iHMhEOEEbW0ovIz0tB6t6PwAXzs=
 github.com/tv42/httpunix v0.0.0-20150427012821-b75d8614f926/go.mod h1:9ESjWnEqriFuLhtthL60Sar/7RFoluCcXsuvEwTV5KM=
+github.com/ugorji/go v1.1.4 h1:j4s+tAvLfL3bZyefP2SEWmhBzmuIlH/eqNuPdFPgngw=
 github.com/ugorji/go v1.1.4/go.mod h1:uQMGLiO92mf5W77hV/PUCpI3pbzQx3CRekS0kk+RGrc=
 github.com/ugorji/go/codec v1.2.12 h1:9LC83zGrHhuUA9l16C9AHXAqEV/2wBQ4nkvumAE65EE=
 github.com/urfave/cli/v2 v2.17.2-0.20221006022127-8f469abc00aa h1:5SqCsI/2Qya2bCzK15ozrqo2sZxkh0FHynJZOTVoV6Q=
