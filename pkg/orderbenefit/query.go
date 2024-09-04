@@ -107,31 +107,10 @@ func (h *Handler) GetAccount(ctx context.Context) (*npool.Account, error) {
 	if info == nil {
 		return nil, fmt.Errorf("invalid account")
 	}
-	handler := &queryHandler{
-		Handler: h,
-		infos:   []*orderbenefitmwpb.Account{info},
-		coins:   map[string]*appcoinmwpb.Coin{},
-		users:   map[string]*usermwpb.User{},
-	}
-	handler.AppID = &info.AppID
-	if err := handler.getUsers(ctx); err != nil {
-		return nil, err
-	}
-	if err := handler.getCoins(ctx); err != nil {
-		return nil, err
-	}
-	if len(handler.users) == 0 {
-		return nil, fmt.Errorf("invalid user")
-	}
-	if len(handler.coins) == 0 {
-		return nil, fmt.Errorf("invalid coin")
-	}
-	handler.formalize()
-
-	return handler.accs[0], nil
+	return h.getAccountExt(ctx, info)
 }
 
-func (h *Handler) GetAccountExt(ctx context.Context, info *orderbenefitmwpb.Account) (*npool.Account, error) {
+func (h *Handler) getAccountExt(ctx context.Context, info *orderbenefitmwpb.Account) (*npool.Account, error) {
 	if info == nil {
 		return nil, fmt.Errorf("invalid account")
 	}
