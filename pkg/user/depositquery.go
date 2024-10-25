@@ -74,9 +74,6 @@ func (h *queryDepositHandler) getCoins(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	if len(coins) == 0 {
-		return fmt.Errorf("invalid coin")
-	}
 
 	for _, coin := range coins {
 		h.coins[coin.CoinTypeID] = coin
