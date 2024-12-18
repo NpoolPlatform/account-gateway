@@ -45,8 +45,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/BurntSushi/toml v1.1.0 h1:ksErzDEI1khOiGPgpwuI7x2ebx/uXQNw7xJpn9Eq1+I=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
-github.com/NpoolPlatform/account-middleware v0.0.0-20241106020243-b37649c21ac8 h1:/h5UdPpXS884AJ0xJbH6X28JReVVsHbnFZh2dMjJ75Y=
-github.com/NpoolPlatform/account-middleware v0.0.0-20241106020243-b37649c21ac8/go.mod h1:rt/TQkO1BRlmEJdKmELxljDIGTkQVTUVrUyOUXZLIbo=
+github.com/NpoolPlatform/account-middleware v0.0.0-20241218031857-4e36204ffa9f h1:FIDI/XzEOMG8WSsAVQcwlJSpxmpFQLkVfK5SiaDzfuU=
+github.com/NpoolPlatform/account-middleware v0.0.0-20241218031857-4e36204ffa9f/go.mod h1:P/o8dgeyHlOIUimsrjNH0NELxHiPr6AXxpwbUYi5t8Q=
 github.com/NpoolPlatform/appuser-middleware v0.0.0-20231130084704-4550aabac9c7 h1:+4onUtHHReTc0Nz2uDRulQ/O21m/mSV9kRqzErEs4Bs=
 github.com/NpoolPlatform/appuser-middleware v0.0.0-20231130084704-4550aabac9c7/go.mod h1:Bo68/bdsZPmfxMlGWu8K8u+OlhiJ+BWEBvSsqiVgyhQ=
 github.com/NpoolPlatform/basal-middleware v0.0.0-20231015112137-254853c60eec h1:YftnEsNtCsUz3iAKsI2bwt7+AuA7Ygx3GfYV6h38s9U=
@@ -59,8 +59,8 @@ github.com/NpoolPlatform/good-middleware v0.0.0-20241106020322-e0263589a08c h1:J
 github.com/NpoolPlatform/good-middleware v0.0.0-20241106020322-e0263589a08c/go.mod h1:ht/BYQQZEFNm+23LuKUtf+zTNyHCd4mQET1NJVShAos=
 github.com/NpoolPlatform/libent-cruder v0.0.0-20240323085036-7679b4818ce7 h1:MFVwhO6TBiPw8t9u/oe5WzRgoPbH1XjSWF8ZuEnVN5M=
 github.com/NpoolPlatform/libent-cruder v0.0.0-20240323085036-7679b4818ce7/go.mod h1:EXCihQpRNNyWaPu1IphiZFLTyyUK/CJMZdW4My7y48Q=
-github.com/NpoolPlatform/message v0.0.0-20241104010148-4dc1b1efd9d1 h1:xxa2B9XMYlQrMOmeg8OyQf83oC0YW2YKjLp4yfMDmvs=
-github.com/NpoolPlatform/message v0.0.0-20241104010148-4dc1b1efd9d1/go.mod h1:PxJpF0vSSOke+NJskbRBRQ2fK2K3SRe8zaEja+GxSHk=
+github.com/NpoolPlatform/message v0.0.0-20241218072400-e99ff42ae361 h1:Q3c/yos6tUVRD282JeieMqHYO+PN7O1kls7GVVHwVAc=
+github.com/NpoolPlatform/message v0.0.0-20241218072400-e99ff42ae361/go.mod h1:PxJpF0vSSOke+NJskbRBRQ2fK2K3SRe8zaEja+GxSHk=
 github.com/NpoolPlatform/sphinx-proxy v0.0.0-20231020115438-bd66d3d334af h1:FzsoK7YIfXlpWLqBH8XB5zdBIjlVEG542VC1YL//gpw=
 github.com/NpoolPlatform/sphinx-proxy v0.0.0-20231020115438-bd66d3d334af/go.mod h1:z8RP+jWb1ehnRsidAKv3CfSB5pxuf4QiVSJg3P1Inm8=
 github.com/OneOfOne/xxhash v1.2.2 h1:KMrpdQIwFcEqXDklaen+P1axHaj9BSKzvpUUfnHldSE=
